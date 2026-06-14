@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab Accounts — Login</title>
+  <meta name="description" content="Lab Accounts Management System — Secure login for Admin and Students." />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .version { text-align: center; font-size: 0.72rem; color: var(--text-muted); margin-top: 1.5rem; }
+
+    /* ── Admin toggle — hidden by default ── */
+    #admin-section {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
+      margin-bottom: 0;
+    }
+    #admin-section.visible {
+      max-height: 80px;
+      opacity: 1;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Logo clickable hint ── */
+    .logo-icon {
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      user-select: none;
+    }
+    .logo-icon:hover {
+      transform: scale(1.08) rotate(-4deg);
+      box-shadow: 0 0 40px rgba(108,99,255,0.6);
+    }
+    .logo-icon.unlocked {
+      box-shadow: 0 0 30px rgba(167,139,250,0.5);
+      animation: pulse-glow 1.5s ease infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(108,99,255,0.4); }
+      50%       { box-shadow: 0 0 40px rgba(167,139,250,0.7); }
+    }
+
+    /* ── Register link ── */
+    .register-link {
+      display: block;
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    .register-link a {
+      color: var(--accent-2);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .register-link a:hover { color: #fff; text-decoration: underline; }
+
+    /* ── Admin badge that appears on toggle ── */
+    .admin-hint {
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: -0.75rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body class="auth-page">
+  <div id="toast-container" class="toast-container"></div>
+
+  <div class="auth-card">
+    <div class="auth-logo">
+      <!-- Click 5 times to reveal Admin toggle -->
+      <div class="logo-icon" id="logo-icon" title="Lab Accounts">🧪</div>
+      <h1>Lab Accounts</h1>
+      <p>Student Portal</p>
+    </div>
+
+    <!-- Hidden by default — revealed by logo click -->
+    <div id="admin-section">
+      <div class="role-tabs">
+        <button class="role-tab" id="tab-student" onclick="switchRole('student')">🎓 Student</button>
+        <button class="role-tab" id="tab-admin" onclick="switchRole('admin')">🛡️ Admin</button>
+      </div>
+    </div>
+
+    <div id="alert-box"></div>
+
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="username" id="id-label">Student ID</label>
+        <input id="username" class="form-control" type="text" placeholder="Enter your Student ID"
+               required autocomplete="username" value="" />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input id="password" class="form-control" type="password" placeholder="Enter your password"
+                 required autocomplete="current-password" value="" />
+          <button type="button" class="eye-btn" onclick="toggleEye('password','eye-login')" id="eye-login" title="Show/Hide password">👁️</button>
+        </div>
+      </div>
+
+      <button id="login-btn" class="btn btn-primary btn-full" type="submit">
+        <span id="btn-text">Sign In</span>
+      </button>
+    </form>
+
+    <div class="register-link">
+      New student? <a href="register.html" id="register-link-el">Create an Account →</a>
+    </div>
+
+    <p class="version">Lab Accounts v1.0</p>
+  </div>
+
+  <script type="module">
+    import { seedDefaults, loginUser, getCurrentUser } from './js/storage.service.js';
+
+    seedDefaults();
+
+    // Redirect if already logged in
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      window.location.href = currentUser.role === 'admin' ? 'admin.html' : 'student.html';
+    }
+
+    // ── State ────────────────────────────────────────────
+    let selectedRole = 'student';  // default is student
+    let logoClickCount = 0;
+    let adminUnlocked = false;
+
+    const logoIcon      = document.getElementById('logo-icon');
+    const adminSection  = document.getElementById('admin-section');
+    const tabAdmin      = document.getElementById('tab-admin');
+    const tabStudent    = document.getElementById('tab-student');
+
+    // Set initial active tab style
+    tabStudent.classList.add('active');
+
+    // ── Logo click — secret trigger (5 clicks) ───────────
+    logoIcon.addEventListener('click', () => {
+      logoClickCount++;
+      if (!adminUnlocked && logoClickCount >= 5) {
+        adminUnlocked = true;
+        adminSection.classList.add('visible');
+        logoIcon.classList.add('unlocked');
+        logoIcon.title = 'Admin access unlocked';
+        showToast('🛡️ Admin access unlocked', 'info');
+      } else if (adminUnlocked) {
+        // Toggle visibility on subsequent clicks
+        adminSection.classList.toggle('visible');
+      }
+    });
+
+    // ── Role switch ───────────────────────────────────────
+    window.switchRole = function(role) {
+      selectedRole = role;
+      tabAdmin.classList.toggle('active', role === 'admin');
+      tabStudent.classList.toggle('active', role === 'student');
+      document.getElementById('alert-box').innerHTML = '';
+
+      // Swap label and subtitle based on role
+      const isAdmin = role === 'admin';
+      document.getElementById('id-label').textContent = isAdmin ? 'Username' : 'Student ID';
+      document.getElementById('username').placeholder = isAdmin ? 'Enter admin username' : 'Enter your Student ID';
+      document.querySelector('.auth-logo p').textContent =
+        isAdmin ? 'Administrator Portal' : 'Student Portal';
+
+      // Hide registration link for admin
+      document.getElementById('register-link-el').parentElement.style.display =
+        isAdmin ? 'none' : '';
+    };
+
+    // ── Login handler ─────────────────────────────────────
+    window.handleLogin = async function(e) {
+      e.preventDefault();
+      const btn      = document.getElementById('login-btn');
+      const btnText  = document.getElementById('btn-text');
+      const alertBox = document.getElementById('alert-box');
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      btn.disabled = true;
+      btnText.textContent = 'Signing in…';
+      alertBox.innerHTML = '';
+
+      const { data, error } = await loginUser(username, password);
+
+      if (error) {
+        alertBox.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`;
+        btn.disabled = false;
+        btnText.textContent = 'Sign In';
+        return;
+      }
+
+      if (data.role !== selectedRole) {
+        const label = selectedRole === 'admin' ? 'an Admin' : 'a Student';
+        alertBox.innerHTML = `<div class="alert alert-error">⚠️ This account is not registered as ${label}.</div>`;
+        btn.disabled = false;
+        btnText.textContent = 'Sign In';
+        return;
+      }
+
+      btnText.textContent = 'Redirecting…';
+      window.location.href = data.role === 'admin' ? 'admin.html' : 'student.html';
+    };
+
+    // ── Toast helper ──────────────────────────────────────
+    function showToast(msg, type = 'info') {
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+    // ── Eye toggle ────────────────────────────────────────
+    window.toggleEye = function(inputId, btnId) {
+      const input = document.getElementById(inputId);
+      const btn   = document.getElementById(btnId);
+      const show  = input.type === 'password';
+      input.type  = show ? 'text' : 'password';
+      btn.textContent = show ? '🙈' : '👁️';
+    };
+  </script>
+</body>
+</html>

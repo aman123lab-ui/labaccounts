@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard — Lab Accounts</title>
+  <meta name="description" content="Lab Accounts Student Dashboard — View your account summary and balance." />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="toast-container" class="toast-container"></div>
+
+<div class="dashboard">
+  <!-- ── Sidebar ─────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon-sm">🧪</div>
+        <div class="logo-text">Lab Accounts <span>Student Portal</span></div>
+      </div>
+    </div>
+
+    <nav class="nav-section">
+      <div class="nav-label">My Account</div>
+      <div class="nav-item active" data-section="overview" onclick="navigate('overview')">
+        <span class="nav-icon">📊</span> Account Overview
+      </div>
+      <div class="nav-item" data-section="debits" onclick="navigate('debits')">
+        <span class="nav-icon">📒</span> My Debits
+      </div>
+      <div class="nav-item" data-section="statement" onclick="navigate('statement')">
+        <span class="nav-icon">📄</span> Account Statement
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebar-avatar">S</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name">Student</div>
+          <div class="user-role">Student Account</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-full btn-sm" onclick="handleLogout()">🚪 Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- ── Main ───────────────────────── -->
+  <main class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Account Overview</div>
+        <div class="topbar-subtitle" id="topbar-subtitle">Your financial summary</div>
+      </div>
+      <span class="badge badge-purple" id="student-id-badge">—</span>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ── OVERVIEW ─────────────────── -->
+      <div class="section active" id="section-overview">
+
+        <div class="balance-hero">
+          <div class="balance-label">Outstanding Balance</div>
+          <div class="balance-amount" id="balance-amount">₹0</div>
+          <div class="balance-due" id="balance-due-msg"></div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card green"><span class="stat-icon">💰</span><div class="stat-label">Total Fee</div><div class="stat-value" id="st-totalfee">₹0</div></div>
+          <div class="stat-card purple"><span class="stat-icon">✅</span><div class="stat-label">Amount Paid</div><div class="stat-value" id="st-paid">₹0</div></div>
+          <div class="stat-card red"><span class="stat-icon">⏳</span><div class="stat-label">Fee Due</div><div class="stat-value" id="st-due">₹0</div></div>
+          <div class="stat-card orange"><span class="stat-icon">📒</span><div class="stat-label">Pending Debits</div><div class="stat-value" id="st-debits">₹0</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">👤 My Profile</div></div>
+          <div class="panel-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem" id="profile-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DEBITS ────────────────────── -->
+      <div class="section" id="section-debits">
+        <div class="table-wrapper">
+          <div class="table-header">
+            <div class="table-title">📒 My Debits & Dues</div>
+            <span id="debit-total-badge" class="badge badge-warning">Total: ₹0</span>
+          </div>
+          <div style="overflow-x:auto"><table>
+            <thead><tr><th>Description</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Date Added</th></tr></thead>
+            <tbody id="my-debits-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ── STATEMENT ─────────────────── -->
+      <div class="section" id="section-statement">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">📄 Account Statement</div>
+            <button class="btn btn-primary btn-sm" onclick="downloadMyStatement()">⬇ Download</button>
+          </div>
+          <div class="panel-body">
+            <div id="statement-info" style="margin-bottom:1.5rem"></div>
+            <div style="overflow-x:auto"><table>
+              <thead><tr><th>#</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody id="statement-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script type="module" src="js/student.js"></script>
+</body>
+</html>

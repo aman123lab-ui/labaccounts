@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Lab Accounts</title>
+  <meta name="description" content="Lab Accounts Admin Dashboard — Manage students, finances, and reports." />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ── Fixed floating action buttons ───────────────── */
+    .debit-fab-container {
+      position: fixed;
+      bottom: 1.75rem;
+      right: 1.75rem;
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      gap: .65rem;
+      align-items: flex-end;
+      /* Only visible on the debits section */
+    }
+    .debit-fab {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .55rem 1.1rem;
+      border-radius: 50px;
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+      user-select: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+      white-space: nowrap;
+    }
+    .debit-fab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.55);
+    }
+    .debit-fab:active { transform: translateY(0); }
+    .debit-fab.fab-debit {
+      background: linear-gradient(135deg, rgba(239,68,68,0.9), rgba(220,38,38,0.85));
+      border-color: rgba(239,68,68,0.6);
+      color: #fff;
+    }
+    .debit-fab.fab-credit {
+      background: linear-gradient(135deg, rgba(16,185,129,0.9), rgba(5,150,105,0.85));
+      border-color: rgba(16,185,129,0.6);
+      color: #fff;
+    }
+
+    /* ── Searchable student dropdown ──────────────── */
+    .student-search-wrap { position: relative; }
+    .student-search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.25s;
+    }
+    .student-search-input:focus {
+      border-color: var(--accent);
+      background: rgba(108,99,255,0.08);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+    }
+    .student-search-input::placeholder { color: var(--text-muted); }
+    .student-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: #1a2540;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      z-index: 600;
+      max-height: 220px;
+      overflow-y: auto;
+      display: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .student-dropdown.open { display: block; }
+    .student-opt {
+      padding: 0.65rem 1rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.15s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .student-opt:last-child { border-bottom: none; }
+    .student-opt:hover { background: rgba(108,99,255,0.15); }
+    .student-opt .opt-id { font-size: 0.72rem; color: var(--text-muted); }
+    .selected-student-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.82rem;
+      margin-top: 0.5rem;
+      color: var(--accent-2);
+    }
+    .selected-student-tag button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0;
+      line-height: 1;
+    }
+    .selected-student-tag button:hover { color: var(--danger); }
+
+    /* ── Debit/Credit type badge in table ─────────── */
+    .type-debit  { background: rgba(239,68,68,0.15);  color:#f87171; border-radius:5px; padding:2px 8px; font-size:.72rem; font-weight:700; }
+    .type-credit { background: rgba(16,185,129,0.15); color:#34d399; border-radius:5px; padding:2px 8px; font-size:.72rem; font-weight:700; }
+
+    /* ── Debtor Management Page ────────────────────── */
+    .balance-pill {
+      display: inline-block;
+      padding: .25rem .75rem;
+      border-radius: 50px;
+      font-size: .8rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .balance-pill.due     { background:rgba(239,68,68,0.15);  color:#f87171; border:1px solid rgba(239,68,68,0.25); }
+    .balance-pill.advance { background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.25); }
+    .balance-pill.cleared { background:rgba(148,163,184,0.1); color:var(--text-muted); border:1px solid rgba(148,163,184,0.15); }
+
+    .quick-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
+      padding: .3rem .7rem;
+      border-radius: 50px;
+      font-size: .72rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: all .18s;
+      white-space: nowrap;
+    }
+    .quick-btn.qb-charge  { background:rgba(239,68,68,0.12);  border-color:rgba(239,68,68,0.3);  color:#f87171; }
+    .quick-btn.qb-charge:hover  { background:rgba(239,68,68,0.22);  border-color:#ef4444; transform:translateY(-1px); }
+    .quick-btn.qb-collect { background:rgba(16,185,129,0.12); border-color:rgba(16,185,129,0.3); color:#34d399; }
+    .quick-btn.qb-collect:hover { background:rgba(16,185,129,0.22); border-color:#10b981; transform:translateY(-1px); }
+    .quick-btn.qb-history { background:rgba(108,99,255,0.1);  border-color:rgba(108,99,255,0.25); color:var(--accent-2); }
+    .quick-btn.qb-history:hover { background:rgba(108,99,255,0.18); transform:translateY(-1px); }
+    .quick-btn.qb-del     { background:rgba(239,68,68,0.06);  border-color:rgba(239,68,68,0.12);  color:#f87171; opacity:.65; }
+    .quick-btn.qb-del:hover { opacity:1; }
+
+    .ledger-toggle-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: .38rem .9rem;
+      border-radius: var(--radius-sm);
+      font-size: .8rem;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+    }
+    .ledger-toggle-btn:hover { background:rgba(255,255,255,0.05); color:var(--text-primary); }
+    .ledger-panel { margin-top:1.25rem; }
+
+    .debtor-name { font-weight:700; font-size:.9rem; }
+    .debtor-meta { font-size:.72rem; color:var(--text-muted); margin-top:1px; }
+
+    .qm-student-tag {
+      background: rgba(108,99,255,0.1);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-radius: 8px;
+      padding: .6rem 1rem;
+      margin-bottom: 1rem;
+      font-size: .88rem;
+    }
+    .qm-student-tag strong { color: var(--accent-2); }
+    .qm-student-tag .qm-meta { color:var(--text-muted); font-size:.75rem; display:block; margin-top:2px; }
+    .balance-preview {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .6rem 1rem;
+      font-size: .82rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .balance-preview .bp-label { color: var(--text-muted); }
+    .balance-preview .bp-value { font-weight: 700; }
+    .debtor-name-clickable {
+      cursor: pointer;
+      color: var(--accent-2);
+      transition: color 0.15s ease, text-decoration 0.15s ease;
+    }
+    .debtor-name-clickable:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container" class="toast-container"></div>
+
+<div class="dashboard">
+  <!-- ── Sidebar ─────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon-sm">🧪</div>
+        <div class="logo-text">Lab Accounts <span>Admin Panel</span></div>
+      </div>
+    </div>
+
+    <nav class="nav-section">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" data-section="dashboard" onclick="navigate('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+
+      <div class="nav-label">Students</div>
+      <div class="nav-item" data-section="students" onclick="navigate('students')">
+        <span class="nav-icon">🎓</span> All Students
+      </div>
+      <div class="nav-item" data-section="register" onclick="navigate('register')">
+        <span class="nav-icon">➕</span> Register Student
+      </div>
+      <div class="nav-item" data-section="bulk" onclick="navigate('bulk')">
+        <span class="nav-icon">📋</span> Bulk Register
+      </div>
+
+      <div class="nav-label">Finance</div>
+      <div class="nav-item" data-section="revenue" onclick="navigate('revenue')">
+        <span class="nav-icon">💰</span> Revenue
+      </div>
+      <div class="nav-item" data-section="expenses" onclick="navigate('expenses')">
+        <span class="nav-icon">💸</span> Expenses
+      </div>
+      <div class="nav-item" data-section="debits" onclick="navigate('debits')">
+        <span class="nav-icon">📒</span> Debit Book
+      </div>
+
+      <div class="nav-label">Reports</div>
+      <div class="nav-item" data-section="reports" onclick="navigate('reports')">
+        <span class="nav-icon">📈</span> Reports
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebar-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-full btn-sm" onclick="handleLogout()">🚪 Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- ── Main ───────────────────────── -->
+  <main class="main-content">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-subtitle" id="topbar-subtitle">Welcome back</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="loadSection()">🔄 Refresh</button>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ── DASHBOARD ────────────────── -->
+      <div class="section active" id="section-dashboard">
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card green"><span class="stat-icon">💰</span><div class="stat-label">Total Revenue</div><div class="stat-value" id="s-revenue">—</div></div>
+          <div class="stat-card red"><span class="stat-icon">💸</span><div class="stat-label">Total Expenses</div><div class="stat-value" id="s-expenses">—</div></div>
+          <div class="stat-card blue"><span class="stat-icon">📊</span><div class="stat-label">Net Balance</div><div class="stat-value" id="s-net">—</div></div>
+          <div class="stat-card red"><span class="stat-icon">📒</span><div class="stat-label">Pending Debits</div><div class="stat-value" id="s-debits">—</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">📋 Recent Revenue</div></div>
+            <div class="panel-body" id="recent-revenue-list"><div class="text-muted">Loading…</div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">📋 Recent Expenses</div></div>
+            <div class="panel-body" id="recent-expense-list"><div class="text-muted">Loading…</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STUDENTS ─────────────────── -->
+      <div class="section" id="section-students">
+        <div class="table-wrapper">
+          <div class="table-header">
+            <div class="table-title">🎓 All Students</div>
+            <div class="table-actions">
+              <input class="search-input" id="student-search" placeholder="🔍 Search students…" oninput="filterStudents()" />
+              <button class="btn btn-primary btn-sm" onclick="navigate('register')">➕ Add Student</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr>
+                <th>Student ID</th><th>Name</th><th>Batch</th><th>Password</th><th>Balance</th><th style="text-align:right">Actions</th>
+              </tr></thead>
+              <tbody id="students-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── REGISTER ─────────────────── -->
+      <div class="section" id="section-register">
+        <div class="panel" style="max-width:680px">
+          <div class="panel-header"><div class="panel-title">➕ Register New Student</div></div>
+          <div class="panel-body">
+            <form id="register-form" onsubmit="handleRegister(event)">
+              <div class="form-row">
+                <div class="form-group"><label>Full Name *</label><input class="form-control" name="name" required placeholder="e.g. Anfaz Ahamed" /></div>
+                <div class="form-group"><label>Student ID * <small style="color:var(--text-muted)">(used to login)</small></label><input class="form-control" name="studentId" required placeholder="e.g. 2024CS001" /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Batch</label><input class="form-control" name="batch" placeholder="e.g. Batch A" /></div>
+                <div class="form-group"><label>Phone</label><input class="form-control" name="phone" placeholder="+91 9876543210" /></div>
+                <div class="form-group"><label>Password *</label><input class="form-control" name="password" type="password" required placeholder="Student login password" /></div>
+              </div>
+              <div id="reg-alert"></div>
+              <button class="btn btn-primary" type="submit">✅ Register Student</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BULK REGISTER ─────────────── -->
+      <div class="section" id="section-bulk">
+        <div class="panel" style="max-width:760px">
+          <div class="panel-header">
+            <div class="panel-title">📋 Bulk Student Registration</div>
+            <button class="btn btn-outline btn-sm" onclick="downloadCSVTemplate()">⬇ Download Template</button>
+          </div>
+          <div class="panel-body">
+            <p class="text-muted mb-2" style="font-size:.85rem">Upload a CSV file or paste data below. Format: <code style="color:var(--accent-2)">name,studentId,batch,phone,password,openingBalance</code><br><span style="font-size:.78rem;opacity:.7">Leave <code>openingBalance</code> as <code>0</code> if the student has no existing due.</span></p>
+            <div class="form-group">
+              <label>Upload CSV File</label>
+              <input class="form-control" type="file" id="csv-file" accept=".csv" onchange="handleCSVUpload(event)" />
+            </div>
+            <div class="form-group">
+              <label>Or Paste CSV Data</label>
+              <textarea class="form-control" id="bulk-text" rows="8" placeholder="name,studentId,batch,phone,password,openingBalance&#10;John Doe,STU-001,Batch A,9876543210,pass123,150&#10;Jane Smith,STU-002,Batch B,9123456780,pass456,0"></textarea>
+            </div>
+            <div id="bulk-alert"></div>
+            <div id="bulk-preview" class="mt-2"></div>
+            <button class="btn btn-primary mt-2" onclick="handleBulkRegister()">📥 Import Students</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── REVENUE ──────────────────── -->
+      <div class="section" id="section-revenue">
+        <div style="display:grid;grid-template-columns:340px 1fr;gap:1.5rem;align-items:start">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">➕ Add Revenue</div></div>
+            <div class="panel-body">
+              <form id="revenue-form" onsubmit="handleAddRevenue(event)">
+                <div class="form-group">
+                  <label>Transaction Type *</label>
+                  <select class="form-control" name="revType" id="revType" onchange="toggleRevenueType()" required>
+                    <option value="Cash" selected>Cash</option>
+                    <option value="Credit">Credit</option>
+                  </select>
+                </div>
+                <div class="form-group" id="revStudentGroup" style="display: none;">
+                  <label>Student Name *</label>
+                  <select class="form-control" name="revStudentId" id="revStudentId">
+                    <option value="" disabled selected>Select registered student...</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>Title *</label><input class="form-control" name="title" required placeholder="Revenue title" /></div>
+                <div class="form-group"><label>Amount (₹) *</label><input class="form-control" name="amount" type="number" required min="0" placeholder="0" /></div>
+                <div class="form-group"><label>Date</label><input class="form-control" name="date" type="date" /></div>
+                <div class="form-group"><label>Notes</label><textarea class="form-control" name="notes" rows="2" placeholder="Optional notes…"></textarea></div>
+                <div id="rev-alert"></div>
+                <button class="btn btn-success btn-full" type="submit">💰 Add Revenue</button>
+              </form>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <div class="table-header">
+              <div class="table-title">💰 Revenue Entries</div>
+              <div id="total-revenue-badge" class="badge badge-success">Total: ₹0</div>
+            </div>
+            <div style="overflow-x:auto"><table><thead><tr>
+              <th>Title</th><th>Source</th><th style="text-align:right">Amount</th><th>Date</th>
+            </tr></thead>
+            <tbody id="revenue-tbody"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── EXPENSES ─────────────────── -->
+      <div class="section" id="section-expenses">
+        <div style="display:grid;grid-template-columns:340px 1fr;gap:1.5rem;align-items:start">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">➕ Add Expense</div></div>
+            <div class="panel-body">
+              <form id="expense-form" onsubmit="handleAddExpense(event)">
+                <div class="form-group"><label>Date *</label><input class="form-control" name="date" type="date" required id="expense-date-input" /></div>
+                <div class="form-group"><label>Title *</label><input class="form-control" name="title" required placeholder="Expense title" /></div>
+                <div class="form-group"><label>Amount (₹) *</label><input class="form-control" name="amount" type="number" required min="0" placeholder="0" /></div>
+                <div class="form-group"><label>Notes</label><textarea class="form-control" name="notes" rows="2" placeholder="Optional notes…"></textarea></div>
+                <div id="exp-alert"></div>
+                <button class="btn btn-danger btn-full" type="submit">💸 Add Expense</button>
+              </form>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <div class="table-header">
+              <div class="table-title">💸 Expense Entries</div>
+              <div id="total-expense-badge" class="badge badge-danger">Total: ₹0</div>
+            </div>
+            <div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Amount</th><th>Date</th><th>Notes</th><th></th></tr></thead>
+            <tbody id="expense-tbody"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DEBIT BOOK (Debtor Management) ────────── -->
+      <div class="section" id="section-debits">
+
+        <!-- Summary strip -->
+        <div class="stats-grid" style="margin-bottom:1.5rem" id="debit-stats-strip">
+          <div class="stat-card orange"><span class="stat-icon">⏳</span><div class="stat-label">Net Outstanding</div><div class="stat-value" id="ds-pending">₹0</div></div>
+        </div>
+
+        <!-- Debtor List (primary view) -->
+        <div class="table-wrapper">
+          <div class="table-header">
+            <div class="table-title">👥 Debtor Management</div>
+            <div class="table-actions">
+              <input class="search-input" id="debtor-search" placeholder="🔍 Search students…" oninput="filterDebtors()" />
+              <button class="btn btn-outline btn-sm" onclick="loadDebits()">🔄 Refresh</button>
+              <button class="btn btn-outline btn-sm" onclick="printDebtorReport()">🖨️ Report</button>
+              <button class="btn btn-primary btn-sm" onclick="downloadDebtorCSV()">📥 Download CSV</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto"><table id="debtor-table">
+            <thead><tr>
+              <th>Student</th>
+              <th>Batch / ID</th>
+              <th style="text-align:center">Balance</th>
+            </tr></thead>
+            <tbody id="debtor-tbody"></tbody>
+          </table></div>
+        </div>
+
+      </div>
+
+      <!-- ── REPORTS ───────────────────── -->
+      <div class="section" id="section-reports">
+        <div class="panel" style="margin-bottom: 1.5rem;">
+          <div class="panel-body" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem">
+            <!-- Monthly Report Controls -->
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+              <label for="report-month-picker" style="font-weight:600; margin:0">Select Month:</label>
+              <input type="month" id="report-month-picker" class="form-control" style="width:180px; margin:0" onchange="updateMonthlyReport()" />
+              <button class="btn btn-primary" onclick="downloadMonthlyReport()">
+                🖨️ Print Monthly Report
+              </button>
+            </div>
+            
+            <!-- Custom Date Range Report Controls -->
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+              <label for="report-from-date" style="font-weight:600; margin:0">From:</label>
+              <input type="date" id="report-from-date" class="form-control" style="width:140px; margin:0" />
+              <label for="report-to-date" style="font-weight:600; margin:0">To:</label>
+              <input type="date" id="report-to-date" class="form-control" style="width:140px; margin:0" />
+              <button id="generateYearlyReportBtn" class="btn btn-outline" onclick="generateYearlyReport()">
+                🖨️ Print Custom Report
+              </button>
+            </div>
+
+            <!-- Debtor Report Controls -->
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+              <label style="font-weight:600; margin:0">Debtor Directory:</label>
+              <button class="btn btn-outline" onclick="printDebtorReport()">
+                🖨️ Print Debtor Report
+              </button>
+              <button class="btn btn-primary" onclick="downloadDebtorCSV()">
+                📥 Download CSV
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="report-stats-grid">
+          <div class="stat-card green">
+            <span class="stat-icon">💰</span>
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value" id="mr-revenue">₹0</div>
+          </div>
+          <div class="stat-card red">
+            <span class="stat-icon">💸</span>
+            <div class="stat-label">Total Expenses</div>
+            <div class="stat-value" id="mr-expenses">₹0</div>
+          </div>
+          <div class="stat-card purple">
+            <span class="stat-icon">📄</span>
+            <div class="stat-label">B&W Pages</div>
+            <div class="stat-value" id="mr-bw-pages">0</div>
+          </div>
+          <div class="stat-card blue">
+            <span class="stat-icon">🎨</span>
+            <div class="stat-label">Colour Pages</div>
+            <div class="stat-value" id="mr-colour-pages">0</div>
+          </div>
+        </div>
+      </div>
+
+
+    </div><!-- /page-content -->
+  </main>
+</div>
+
+<!-- ── Quick Charge Modal (per-row) ───────────── -->
+<div class="modal-overlay" id="quick-charge-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title" style="color:#f87171">📤 Add Charge</div>
+      <button class="modal-close" onclick="closeModal('quick-charge-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="quick-charge-form" onsubmit="handleQuickCharge(event)">
+        <input type="hidden" id="qc-student-id" />
+        <div class="qm-student-tag">
+          <strong id="qc-student-name">—</strong>
+          <span class="qm-meta" id="qc-student-meta">—</span>
+        </div>
+        <div class="balance-preview">
+          <span class="bp-label">Current Balance</span>
+          <span class="bp-value" id="qc-current-balance">₹0</span>
+        </div>
+        <div class="form-group">
+          <label>Description *</label>
+          <input class="form-control" id="qc-description" required placeholder="e.g. Lab breakage fee, Exam fee…" />
+        </div>
+        <div class="form-group">
+          <label>Charge Amount (₹) *</label>
+          <input class="form-control" id="qc-amount" type="number" required min="1" placeholder="0" />
+        </div>
+        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:.65rem .9rem;font-size:.78rem;color:#fca5a5;margin-bottom:1rem">
+          ⚠️ This will <strong>increase</strong> the student's outstanding balance.
+        </div>
+        <div id="qc-alert"></div>
+        <div class="modal-footer" style="padding:0;margin-top:1rem">
+          <button class="btn btn-outline" type="button" onclick="closeModal('quick-charge-modal')">Cancel</button>
+          <button class="btn btn-danger" type="submit">📤 Add Charge</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Quick Collect Modal (per-row) ──────────── -->
+<div class="modal-overlay" id="quick-collect-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title" style="color:#34d399">📥 Log Collection</div>
+      <button class="modal-close" onclick="closeModal('quick-collect-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="quick-collect-form" onsubmit="handleQuickCollect(event)">
+        <input type="hidden" id="ql-student-id" />
+        <div class="qm-student-tag">
+          <strong id="ql-student-name">—</strong>
+          <span class="qm-meta" id="ql-student-meta">—</span>
+        </div>
+        <div class="balance-preview">
+          <span class="bp-label">Current Balance</span>
+          <span class="bp-value" id="ql-current-balance">₹0</span>
+        </div>
+        <div class="form-group">
+          <label>Description *</label>
+          <input class="form-control" id="ql-description" required placeholder="e.g. Term fee payment, Instalment…" />
+        </div>
+        <div class="form-group">
+          <label>Amount Received (₹) *</label>
+          <input class="form-control" id="ql-amount" type="number" required min="1" placeholder="0" />
+        </div>
+        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:.65rem .9rem;font-size:.78rem;color:#6ee7b7;margin-bottom:1rem">
+          ✅ This will <strong>reduce</strong> the student's outstanding balance.
+        </div>
+        <div id="ql-alert"></div>
+        <div class="modal-footer" style="padding:0;margin-top:1rem">
+          <button class="btn btn-outline" type="button" onclick="closeModal('quick-collect-modal')">Cancel</button>
+          <button class="btn btn-success" type="submit">📥 Log Collection</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add Debit Modal ─────────────────── -->
+<div class="modal-overlay" id="debit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" style="color:#f87171">📤 Add Debit (Print Cost Calculator)</div>
+      <button class="modal-close" onclick="closeModal('debit-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="debit-form" onsubmit="handleDebitSubmit(event)">
+        <input type="hidden" id="debit-student-id" />
+
+        <div class="form-group">
+          <label>Search Student *</label>
+          <div class="student-search-wrap">
+            <input type="text" class="student-search-input" id="debit-search-input"
+                   placeholder="Type name or Student ID…"
+                   oninput="filterStudentDropdown('debit')" onfocus="openDropdown('debit')" autocomplete="off" />
+            <div class="student-dropdown" id="debit-dropdown"></div>
+          </div>
+          <div id="debit-selected-tag"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Print Type *</label>
+          <select class="form-control" id="debit-print-type" required onchange="calculatePrintCost()">
+            <option value="bw">Black & White</option>
+            <option value="colour">Colour</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Print Side *</label>
+          <select class="form-control" id="debit-print-side" required onchange="calculatePrintCost()">
+            <option value="one">One Side</option>
+            <option value="two">Two Side</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Number of Pages *</label>
+          <input class="form-control" id="debit-pages" type="number" required min="1" value="1" oninput="calculatePrintCost()" />
+        </div>
+
+        <div class="form-group">
+          <label>Calculated Amount (₹)</label>
+          <input class="form-control" id="debit-amount" type="number" readonly value="3" />
+        </div>
+
+        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:.75rem 1rem;font-size:.8rem;color:#fca5a5;margin-bottom:1rem">
+          ⚠️ This will <strong>increase</strong> the student's outstanding balance and log the charge as Revenue.
+        </div>
+
+        <div id="debit-alert"></div>
+        <div class="modal-footer" style="padding:0;margin-top:1rem">
+          <button class="btn btn-outline" type="button" onclick="closeModal('debit-modal')">Cancel</button>
+          <button class="btn btn-danger" type="submit">📤 Add Charge</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add Credit Modal ────────────────── -->
+<div class="modal-overlay" id="credit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" style="color:#34d399">📥 Add Credit to Student</div>
+      <button class="modal-close" onclick="closeModal('credit-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="credit-form" onsubmit="handleCreditSubmit(event)">
+        <input type="hidden" id="credit-student-id" />
+
+        <div class="form-group">
+          <label>Search Student *</label>
+          <div class="student-search-wrap">
+            <input type="text" class="student-search-input" id="credit-search-input"
+                   placeholder="Type name or Student ID…"
+                   oninput="filterStudentDropdown('credit')" onfocus="openDropdown('credit')" autocomplete="off" />
+            <div class="student-dropdown" id="credit-dropdown"></div>
+          </div>
+          <div id="credit-selected-tag"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Description *</label>
+          <input class="form-control" id="credit-description" required placeholder="e.g. Term fee payment" />
+        </div>
+        <div class="form-group">
+          <label>Amount Received (₹) *</label>
+          <input class="form-control" id="credit-amount" type="number" required min="1" placeholder="0" />
+        </div>
+
+        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:.75rem 1rem;font-size:.8rem;color:#6ee7b7;margin-bottom:1rem">
+          ✅ This will <strong>reduce</strong> the student's outstanding balance and log the payment as Revenue.
+        </div>
+
+        <div id="credit-alert"></div>
+        <div class="modal-footer" style="padding:0;margin-top:1rem">
+          <button class="btn btn-outline" type="button" onclick="closeModal('credit-modal')">Cancel</button>
+          <button class="btn btn-success" type="submit">📥 Record Credit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit Student Modal ─────────────── -->
+<div class="modal-overlay" id="edit-student-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Edit Student</div>
+      <button class="modal-close" onclick="closeModal('edit-student-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="edit-student-form" onsubmit="handleEditStudent(event)">
+        <input type="hidden" name="id" />
+        <div class="form-row">
+          <div class="form-group"><label>Full Name</label><input class="form-control" name="name" required /></div>
+          <div class="form-group"><label>Student ID</label><input class="form-control" name="studentId" required /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Phone</label><input class="form-control" name="phone" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Password <small style="color:var(--text-muted)">(leave blank to keep unchanged)</small></label>
+            <input class="form-control" name="password" type="password" placeholder="Enter new password…" autocomplete="new-password" />
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:0;margin-top:1rem">
+          <button class="btn btn-outline" type="button" onclick="closeModal('edit-student-modal')">Cancel</button>
+          <button class="btn btn-primary" type="submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Account Statement Modal ── -->
+<div class="modal-overlay" id="account-statement-modal">
+  <div class="modal" style="max-width: 650px; width: 90%;">
+    <div class="modal-header">
+      <div class="modal-title">📄 Account Statement</div>
+      <button class="modal-close" onclick="closeModal('account-statement-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+        <div>
+          <h3 style="margin: 0 0 0.2rem 0; font-size: 1.15rem;" id="as-student-name">—</h3>
+          <span style="font-size: 0.8rem; color: var(--text-muted);" id="as-student-id">—</span>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 0.15rem;">Current Balance</div>
+          <div style="font-size: 1.15rem; font-weight: 700;" id="as-current-balance">₹0</div>
+        </div>
+      </div>
+      
+      <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border); background: rgba(255,255,255,0.02); position: sticky; top: 0;">
+              <th style="padding: 0.65rem 0.75rem; color: var(--text-muted); font-weight: 600;">Date</th>
+              <th style="padding: 0.65rem 0.75rem; color: var(--text-muted); font-weight: 600;">Description</th>
+              <th style="padding: 0.65rem 0.75rem; color: var(--text-muted); font-weight: 600;">Type</th>
+              <th style="padding: 0.65rem 0.75rem; color: var(--text-muted); font-weight: 600; text-align: right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="as-transactions-tbody">
+            <!-- Dynamic rows go here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer" style="padding: 0; margin-top: 1rem;">
+      <button class="btn btn-outline" onclick="closeModal('account-statement-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Revenue Entry Detail Modal ── -->
+<div class="modal-overlay" id="revenue-detail-modal">
+  <div class="modal" style="max-width: 480px; width: 95%;">
+    <div class="modal-header">
+      <div class="modal-title">📝 Revenue Entry</div>
+      <button class="modal-close" onclick="closeModal('revenue-detail-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="rev-detail-form" onsubmit="handleEditRevenue(event)">
+        <input type="hidden" id="rev-detail-id" />
+
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem; padding:0.5rem 0.75rem; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; font-size:0.8rem; color:var(--text-muted)">
+          Source: <strong id="rev-detail-source" style="color:var(--accent-2); margin-left:4px">—</strong>
+        </div>
+
+        <div class="form-group">
+          <label>Title *</label>
+          <input class="form-control" id="rev-detail-title" required placeholder="e.g. A4 Paper" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input class="form-control" id="rev-detail-amount" type="number" required min="1" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input class="form-control" id="rev-detail-date" type="date" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea class="form-control" id="rev-detail-notes" rows="2" placeholder="Optional notes…"></textarea>
+        </div>
+
+        <div id="rev-detail-alert"></div>
+
+        <div class="modal-footer" style="padding:0; margin-top:1rem; display:flex; justify-content:space-between; align-items:center;">
+          <button class="btn btn-danger btn-sm" type="button" onclick="handleDeleteRevenueEntry()">🗑️ Delete</button>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-outline" type="button" onclick="closeModal('revenue-detail-modal')">Cancel</button>
+            <button class="btn btn-primary" type="submit">💾 Save Changes</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Daily Statement Modal ── -->
+<div class="modal-overlay" id="dailyStatementModal">
+  <div class="modal" style="max-width: 650px; width: 90%;">
+    <div class="modal-header">
+      <div class="modal-title">📋 Daily Print Revenue Statement</div>
+      <button class="modal-close" onclick="closeDailyStatement()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+        <h3 style="margin: 0; font-size: 1.15rem;" id="ds-date-title">—</h3>
+      </div>
+      
+      <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border); background: rgba(255,255,255,0.02); position: sticky; top: 0;">
+              <th style="padding: 0.65rem 0.75rem; color: var(--text-muted); font-weight: 600;">Student Name</th>
+              <th style="padding: 0.65rem 0.75rem; color: var(--text-muted); font-weight: 600;">Description</th>
+              <th style="padding: 0.65rem 0.75rem; color: var(--text-muted); font-weight: 600; text-align: right;">Amount</th>
+              <th style="padding: 0.65rem 0.75rem; color: var(--text-muted); font-weight: 600; text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="dailyStatementTableBody">
+            <!-- Dynamic rows go here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer" style="padding: 0; margin-top: 1rem;">
+      <button class="btn btn-outline" onclick="closeDailyStatement()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ── Fixed Debit Book FABs ─────────────────── -->
+<div class="debit-fab-container" id="debit-fab-container" style="display:none">
+  <button class="debit-fab fab-credit" onclick="openCreditModal()" title="Record a student payment">
+    📥 Add Credit
+  </button>
+  <button class="debit-fab fab-debit" onclick="openDebitModal()" title="Charge a student account">
+    📤 Add Debit
+  </button>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+<script>
+  // Show/hide the floating FABs depending on the active section
+  (function () {
+    const origNavigate = window.navigate;
+    // Patch after module loads
+    window.addEventListener('load', () => {
+      const orig = window.navigate;
+      window.navigate = function (section) {
+        orig(section);
+        const fab = document.getElementById('debit-fab-container');
+        if (fab) fab.style.display = section === 'debits' ? 'flex' : 'none';
+      };
+      // Show if debits is the default active section
+      const activeSection = document.querySelector('.nav-item.active')?.dataset.section;
+      const fab = document.getElementById('debit-fab-container');
+      if (fab && activeSection === 'debits') fab.style.display = 'flex';
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Student Debtors — Lab Accounts</title>
+<link rel="stylesheet" href="css/debtors.css"/>
+</head>
+<body>
+<div class="toast-wrap" id="toasts"></div>
+
+<div class="page-header">
+  <h1>Student Debtors</h1>
+  <p>Manage accounts and credit balances</p>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="q" placeholder="Search by name or ID…" oninput="render()"/>
+  </div>
+  <div class="filter-wrap">
+    <button class="filter-btn" id="fbtn" onclick="toggleDD()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      <span id="flabel">All Batches</span>
+    </button>
+    <div class="batch-dropdown" id="bdd"></div>
+  </div>
+</div>
+
+<div class="summary-strip">
+  <div class="sum-card"><div class="sv red" id="ss-billed">₹0</div><div class="sl">Total Billed</div></div>
+  <div class="sum-card"><div class="sv green" id="ss-collected">₹0</div><div class="sl">Collected</div></div>
+  <div class="sum-card"><div class="sv orange" id="ss-outstanding">₹0</div><div class="sl">Outstanding</div></div>
+  <div class="sum-card"><div class="sv purple" id="ss-count">0</div><div class="sl">Debtors</div></div>
+</div>
+
+<div class="list" id="list"></div>
+
+<div class="fab-wrap">
+  <div class="fab-inner">
+    <button class="fab-btn fab-debit" onclick="openModal('charge',null)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 19V5M5 12l7-7 7 7"/></svg>ADD DEBIT
+    </button>
+    <button class="fab-btn fab-credit" onclick="openModal('collect',null)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12l7 7 7-7"/></svg>ADD CREDIT
+    </button>
+  </div>
+</div>
+
+<!-- Charge modal -->
+<div class="overlay" id="m-charge" onclick="bgClose(event,'m-charge')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" style="color:#ef4444">📤 Add Debit / Charge</div>
+    <div class="sheet-sub">Increases the student's outstanding balance.</div>
+    <div class="stag" id="stag-charge"><span style="color:#9aa5b8;font-size:.83rem">Tap a student card to pre-select, or choose below.</span></div>
+    <div class="bal-row"><span>Current Balance</span><span class="bal-val" id="bal-charge">—</span></div>
+    <label>Student (required if not pre-selected)</label>
+    <select class="inp" id="sel-charge" style="margin-bottom:.8rem"></select>
+    <label>Description *</label>
+    <input class="inp" id="desc-charge" placeholder="e.g. Lab breakage, Exam fee…"/>
+    <label>Amount (₹) *</label>
+    <input class="inp" id="amt-charge" type="number" min="1" placeholder="0"/>
+    <div class="err-msg" id="err-charge"></div>
+    <div class="sheet-footer">
+      <button class="btn-cancel" onclick="closeModal('m-charge')">Cancel</button>
+      <button class="btn-submit s-debit" onclick="submitCharge()">📤 Add Charge</button>
+    </div>
+  </div>
+</div>
+
+<!-- Collect modal -->
+<div class="overlay" id="m-collect" onclick="bgClose(event,'m-collect')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" style="color:#10b981">📥 Log Collection</div>
+    <div class="sheet-sub">Reduces the student's outstanding balance.</div>
+    <div class="stag" id="stag-collect"><span style="color:#9aa5b8;font-size:.83rem">Tap a student card to pre-select, or choose below.</span></div>
+    <div class="bal-row"><span>Current Balance</span><span class="bal-val" id="bal-collect">—</span></div>
+    <label>Student (required if not pre-selected)</label>
+    <select class="inp" id="sel-collect" style="margin-bottom:.8rem"></select>
+    <label>Description *</label>
+    <input class="inp" id="desc-collect" placeholder="e.g. Term payment, Instalment…"/>
+    <label>Amount Received (₹) *</label>
+    <input class="inp" id="amt-collect" type="number" min="1" placeholder="0"/>
+    <div class="err-msg" id="err-collect"></div>
+    <div class="sheet-footer">
+      <button class="btn-cancel" onclick="closeModal('m-collect')">Cancel</button>
+      <button class="btn-submit s-credit" onclick="submitCollect()">📥 Log Collection</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm -->
+<div class="overlay" id="m-delete" onclick="bgClose(event,'m-delete')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" style="color:#ef4444">🗑️ Delete Student</div>
+    <div class="sheet-sub">All data for this student will be permanently removed and all balances reversed.</div>
+    <div class="stag" id="stag-delete"></div>
+    <div class="sheet-footer">
+      <button class="btn-cancel" onclick="closeModal('m-delete')">Cancel</button>
+      <button class="btn-submit s-danger" onclick="doDelete()">Delete Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Account Statement modal -->
+<div class="overlay" id="m-statement" onclick="bgClose(event,'m-statement')">
+  <div class="sheet" style="max-width: 600px;">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" style="color:#6c63ff">📄 Account Statement</div>
+    <div class="sheet-sub" id="as-student-info">Student Name (ID)</div>
+    
+    <div class="bal-row">
+      <span>Current Balance</span>
+      <span class="bal-val" id="as-balance">—</span>
+    </div>
+
+    <div class="statement-table-wrap">
+      <table class="statement-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th style="text-align: right;">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="as-list">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sheet-footer">
+      <button class="btn-cancel" onclick="closeModal('m-statement')" style="flex: 1;">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Storage helpers ──────────────────────────────────────
+const KEYS={STUDENTS:'lab_students',DEBITS:'lab_debits',REVENUE:'lab_revenue',USERS:'lab_users'};
+const _get=k=>{try{return JSON.parse(localStorage.getItem(k))??[];}catch{return[];}};
+const _set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const _id=()=>`${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
+
+function getStudents(){return _get(KEYS.STUDENTS);}
+function getDebits(){return _get(KEYS.DEBITS);}
+
+function applyDebit(studentId,amount,description){
+  const amt=parseFloat(amount);
+  if(!amt||amt<=0)return{error:'Amount must be greater than zero.'};
+  const students=_get(KEYS.STUDENTS);
+  const idx=students.findIndex(s=>s.id===studentId);
+  if(idx===-1)return{error:'Student not found.'};
+  students[idx].account_balance=(students[idx].account_balance??0)+amt;
+  students[idx].updatedAt=new Date().toISOString();
+  _set(KEYS.STUDENTS,students);
+  const revId=_id();
+  const rev=_get(KEYS.REVENUE);
+  rev.push({id:revId,title:`Print: ${description||'Charge'} — ${students[idx].name}`,source:'Student Debit',amount:amt,date:new Date().toISOString().split('T')[0],notes:`Student ID: ${students[idx].studentId}`,createdAt:new Date().toISOString()});
+  _set(KEYS.REVENUE,rev);
+  const debits=_get(KEYS.DEBITS);
+  const entry={id:_id(),studentId,studentName:students[idx].name,description:description||'Debit charge',amount:amt,balanceAfter:students[idx].account_balance,revenue_id:revId,dueDate:null,status:'pending',type:'debit',createdAt:new Date().toISOString(),paidAt:null};
+  debits.push(entry);
+  _set(KEYS.DEBITS,debits);
+  return{data:entry};
+}
+
+function applyCredit(studentId,amount,description){
+  const amt=parseFloat(amount);
+  if(!amt||amt<=0)return{error:'Amount must be greater than zero.'};
+  const students=_get(KEYS.STUDENTS);
+  const idx=students.findIndex(s=>s.id===studentId);
+  if(idx===-1)return{error:'Student not found.'};
+  students[idx].account_balance=(students[idx].account_balance??0)-amt;
+  students[idx].paidAmount=(students[idx].paidAmount||0)+amt;
+  students[idx].updatedAt=new Date().toISOString();
+  _set(KEYS.STUDENTS,students);
+  const revId=_id();
+  const rev=_get(KEYS.REVENUE);
+  rev.push({id:revId,title:`Payment: ${description||'Credit'} — ${students[idx].name}`,source:'Fee Payment',amount:amt,date:new Date().toISOString().split('T')[0],notes:`Student ID: ${students[idx].studentId}`,createdAt:new Date().toISOString()});
+  _set(KEYS.REVENUE,rev);
+  const debits=_get(KEYS.DEBITS);
+  debits.push({id:_id(),studentId,studentName:students[idx].name,description:description||'Credit / Payment received',amount:amt,balanceAfter:students[idx].account_balance,revenue_id:revId,dueDate:null,status:'paid',type:'credit',createdAt:new Date().toISOString(),paidAt:new Date().toISOString()});
+  _set(KEYS.DEBITS,debits);
+  return{data:students[idx]};
+}
+
+function reverseAndDelete(entryId){
+  const debits=_get(KEYS.DEBITS);
+  const entry=debits.find(d=>d.id===entryId);
+  if(!entry)return{error:'Not found.'};
+  const amt=parseFloat(entry.amount);
+  const students=_get(KEYS.STUDENTS);
+  const si=students.findIndex(s=>s.id===entry.studentId);
+  if(si!==-1){
+    if(entry.type!=='credit'){students[si].account_balance=(students[si].account_balance??0)-amt;}
+    else{students[si].account_balance=(students[si].account_balance??0)+amt;students[si].paidAmount=Math.max(0,(students[si].paidAmount||0)-amt);}
+    students[si].updatedAt=new Date().toISOString();
+    _set(KEYS.STUDENTS,students);
+  }
+  if(entry.revenue_id){const rev=_get(KEYS.REVENUE);_set(KEYS.REVENUE,rev.filter(r=>r.id!==entry.revenue_id));}
+  _set(KEYS.DEBITS,debits.filter(d=>d.id!==entryId));
+  return{reversed:{type:entry.type,amount:amt,student:entry.studentName}};
+}
+
+function removeStudent(id){
+  const students=_get(KEYS.STUDENTS);
+  const s=students.find(st=>st.id===id);
+  if(!s)return;
+  // reverse all entries for this student
+  const debits=_get(KEYS.DEBITS).filter(d=>d.studentId===id);
+  debits.forEach(d=>reverseAndDelete(d.id));
+  // remove user account
+  const users=_get(KEYS.USERS);
+  _set(KEYS.USERS,users.filter(u=>u.id!==s.userId));
+  _set(KEYS.STUDENTS,_get(KEYS.STUDENTS).filter(st=>st.id!==id));
+}
+
+// ── State ────────────────────────────────────────────────
+const COLORS=['#6c63ff','#f59e0b','#10b981','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
+const col=name=>COLORS[name.charCodeAt(0)%COLORS.length];
+const fmt=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+let activeBatch='all', selectedId={charge:null,collect:null,delete:null};
+
+// ── Render ───────────────────────────────────────────────
+function render(){
+  const students=getStudents(), debits=getDebits();
+  const q=document.getElementById('q').value.toLowerCase();
+  const filtered=students.filter(s=>{
+    const mq=!q||s.name.toLowerCase().includes(q)||s.studentId.toLowerCase().includes(q);
+    const mb=activeBatch==='all'||s.batch===activeBatch;
+    return mq&&mb;
+  });
+  renderSummary(students,debits);
+  renderBatchDD(students);
+  renderList(filtered,debits);
+  fillSelects(students);
+}
+
+function renderSummary(students,debits){
+  const billed=debits.filter(d=>d.type!=='credit').reduce((s,d)=>s+d.amount,0);
+  const collected=debits.filter(d=>d.type==='credit').reduce((s,d)=>s+d.amount,0);
+  const outstanding=students.filter(s=>(s.account_balance??0)>0).reduce((s,st)=>s+st.account_balance,0);
+  const count=students.filter(s=>(s.account_balance??0)!==0||debits.some(d=>d.studentId===s.id)).length;
+  document.getElementById('ss-billed').textContent=fmt(billed);
+  document.getElementById('ss-collected').textContent=fmt(collected);
+  document.getElementById('ss-outstanding').textContent=fmt(outstanding);
+  document.getElementById('ss-count').textContent=count;
+}
+
+function renderBatchDD(students){
+  const batches=[...new Set(students.map(s=>s.batch).filter(Boolean))].sort();
+  document.getElementById('bdd').innerHTML=['all',...batches].map(b=>
+    `<div class="batch-opt${b===activeBatch?' active':''}" onclick="setBatch('${b}')">${b==='all'?'All Batches':b}</div>`
+  ).join('');
+}
+
+function renderList(students,debits){
+  const el=document.getElementById('list');
+  if(!students.length){
+    el.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><p>No students found</p></div>`;
+    return;
+  }
+  el.innerHTML=students.map(s=>{
+    const bal=s.account_balance??0;
+    const cls=bal>0?'due':bal<0?'advance':'cleared';
+    const balTxt=bal>0?`Due: ${fmt(bal)}`:bal<0?`Adv: ${fmt(Math.abs(bal))}`:'₹0';
+    const c=col(s.name);
+    return `<div class="card ${cls}" onclick="cardTap('${s.id}')">
+      <div class="avatar" style="background:${c}">${s.name[0].toUpperCase()}</div>
+      <div class="card-info">
+        <div class="name-row">
+          <span class="sname sname-clickable" onclick="event.stopPropagation(); openAccountStatement('${s.id}')">${s.name}</span>
+          ${s.batch?`<span class="batch-badge">${s.batch}</span>`:''}
+        </div>
+        <div class="sid">${s.studentId}</div>
+      </div>
+      <div class="card-right">
+        <div class="balance-wrap">
+          <span class="bal-amount ${cls}">${balTxt}</span>
+          <div class="bal-label">BALANCE</div>
+        </div>
+        <button class="icon-btn edit" onclick="event.stopPropagation();openModal('collect','${s.id}')" title="Log Collection">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="icon-btn del" onclick="event.stopPropagation();openModal('delete','${s.id}')" title="Delete">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fillSelects(students){
+  const opts=`<option value="">— select student —</option>`+students.map(s=>`<option value="${s.id}">${s.name} (${s.studentId})</option>`).join('');
+  ['charge','collect'].forEach(t=>{
+    const sel=document.getElementById(`sel-${t}`);
+    if(sel){sel.innerHTML=opts;sel.onchange=()=>selectFromDrop(t,sel.value);}
+  });
+}
+
+// ── Modal helpers ────────────────────────────────────────
+function stagHtml(s,prefix){
+  const c=col(s.name);
+  document.getElementById(`stag-${prefix}`).innerHTML=
+    `<div class="stavatar" style="background:${c}">${s.name[0].toUpperCase()}</div>
+     <div><div class="stag-name">${s.name}${s.batch?` <span style="font-size:.7rem;color:#9aa5b8">${s.batch}</span>`:''}</div>
+     <div class="stag-meta">${s.studentId}${s.course?' · '+s.course:''}</div></div>`;
+}
+
+function setBalDisplay(prefix,bal){
+  const el=document.getElementById(`bal-${prefix}`);
+  if(!el)return;
+  el.textContent=bal>0?`Due: ${fmt(bal)}`:bal<0?`Advance: ${fmt(Math.abs(bal))}`:'Cleared';
+  el.style.color=bal>0?'#ef4444':bal<0?'#10b981':'#94a3b8';
+}
+
+function openModal(type,studentId){
+  const id=`m-${type}`;
+  if(type==='statement'){
+    document.getElementById(id).classList.add('open');
+    return;
+  }
+  // reset
+  ['charge','collect'].forEach(t=>{
+    const e=document.getElementById(`err-${t}`);if(e)e.style.display='none';
+    const d=document.getElementById(`desc-${t}`);if(d)d.value='';
+    const a=document.getElementById(`amt-${t}`);if(a)a.value='';
+  });
+  selectedId[type]=studentId;
+  if(studentId){
+    const s=getStudents().find(st=>st.id===studentId);
+    if(s&&type!=='delete'){stagHtml(s,type);setBalDisplay(type,s.account_balance??0);const sel=document.getElementById(`sel-${type}`);if(sel)sel.value=studentId;}
+    if(s&&type==='delete'){stagHtml(s,'delete');}
+  } else {
+    if(type!=='delete'){
+      ['charge','collect'].forEach(t=>{
+        document.getElementById(`stag-${t}`).innerHTML='<span style="color:#9aa5b8;font-size:.83rem">Choose a student below or tap a card</span>';
+        setBalDisplay(t,0);
+        const sel=document.getElementById(`sel-${t}`);if(sel)sel.value='';
+      });
+    }
+  }
+  document.getElementById(id).classList.add('open');
+}
+
+function openAccountStatement(studentId) {
+  const student = getStudents().find(s => s.id === studentId);
+  if (!student) return;
+
+  document.getElementById('as-student-info').textContent = `${student.name} (${student.studentId})`;
+  
+  const bal = student.account_balance ?? 0;
+  const balEl = document.getElementById('as-balance');
+  balEl.textContent = bal > 0 ? `Due: ${fmt(bal)}` : bal < 0 ? `Adv: ${fmt(Math.abs(bal))}` : 'Cleared';
+  balEl.style.color = bal > 0 ? '#ef4444' : bal < 0 ? '#10b981' : '#94a3b8';
+
+  const allDebits = getDebits();
+  const studentTrans = allDebits.filter(d => d.studentId === studentId);
+  
+  // Sort by date (newest first)
+  studentTrans.sort((a, b) => {
+    const dA = a.createdAt || '';
+    const dB = b.createdAt || '';
+    return dB.localeCompare(dA);
+  });
+
+  const tbody = document.getElementById('as-list');
+  if (!studentTrans.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="padding: 1.5rem; text-align: center; color: #9aa5b8;">No transactions found</td></tr>`;
+  } else {
+    tbody.innerHTML = studentTrans.map(t => {
+      const isCredit = t.type === 'credit';
+      const color = isCredit ? '#10b981' : '#ef4444';
+      const typeLabel = isCredit ? 'Credit' : 'Debit';
+      const dateStr = t.createdAt ? t.createdAt.split('T')[0] : '—';
+      
+      const dateParts = dateStr.split('-');
+      const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : dateStr;
+
+      return `<tr style="border-bottom: 1px solid #e2e6ed;">
+        <td style="padding: 0.6rem 0.8rem; color: #5a6275;">${formattedDate}</td>
+        <td style="padding: 0.6rem 0.8rem; font-weight: 500;">${t.description || (isCredit ? 'Credit payment' : 'Debit charge')}</td>
+        <td style="padding: 0.6rem 0.8rem;"><span style="color: ${color}; font-weight: 600; font-size: 0.75rem; text-transform: uppercase;">${typeLabel}</span></td>
+        <td style="padding: 0.6rem 0.8rem; text-align: right; font-weight: 700; color: ${color};">${isCredit ? '+' : '-'}${fmt(t.amount)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  openModal('statement', studentId);
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function bgClose(e,id){if(e.target.id===id)closeModal(id);}
+
+function cardTap(id){
+  openModal('charge',id);
+}
+
+function selectFromDrop(type,id){
+  if(!id)return;
+  selectedId[type]=id;
+  const s=getStudents().find(st=>st.id===id);
+  if(s){stagHtml(s,type);setBalDisplay(type,s.account_balance??0);}
+}
+
+// ── Submit ───────────────────────────────────────────────
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
+
+function submitCharge(){
+  const sid=selectedId.charge||document.getElementById('sel-charge').value;
+  const desc=document.getElementById('desc-charge').value.trim();
+  const amt=document.getElementById('amt-charge').value;
+  if(!sid){showErr('err-charge','Please select a student.');return;}
+  if(!desc){showErr('err-charge','Please enter a description.');return;}
+  if(!amt||Number(amt)<1){showErr('err-charge','Please enter a valid amount.');return;}
+  const r=applyDebit(sid,amt,desc);
+  if(r.error){showErr('err-charge',r.error);return;}
+  closeModal('m-charge');
+  toast(`📤 Charge of ${fmt(amt)} added!`,'t-success');
+  render();
+}
+
+function submitCollect(){
+  const sid=selectedId.collect||document.getElementById('sel-collect').value;
+  const desc=document.getElementById('desc-collect').value.trim();
+  const amt=document.getElementById('amt-collect').value;
+  if(!sid){showErr('err-collect','Please select a student.');return;}
+  if(!desc){showErr('err-collect','Please enter a description.');return;}
+  if(!amt||Number(amt)<1){showErr('err-collect','Please enter a valid amount.');return;}
+  const r=applyCredit(sid,amt,desc);
+  if(r.error){showErr('err-collect',r.error);return;}
+  closeModal('m-collect');
+  toast(`📥 Collection of ${fmt(amt)} logged!`,'t-success');
+  render();
+}
+
+function doDelete(){
+  const id=selectedId.delete;
+  if(!id)return;
+  const s=getStudents().find(st=>st.id===id);
+  removeStudent(id);
+  closeModal('m-delete');
+  toast(`🗑️ ${s?s.name:'Student'} deleted.`,'t-success');
+  render();
+}
+
+// ── Batch filter ─────────────────────────────────────────
+function toggleDD(){document.getElementById('bdd').classList.toggle('open');}
+function setBatch(b){
+  activeBatch=b;
+  document.getElementById('flabel').textContent=b==='all'?'All Batches':b;
+  document.getElementById('bdd').classList.remove('open');
+  render();
+}
+document.addEventListener('click',e=>{
+  const dd=document.getElementById('bdd'),btn=document.getElementById('fbtn');
+  if(!dd.contains(e.target)&&!btn.contains(e.target))dd.classList.remove('open');
+});
+
+// ── Toast ────────────────────────────────────────────────
+function toast(msg,cls='t-success'){
+  const el=document.createElement('div');
+  el.className=`toast ${cls}`;el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(),3000);
+}
+
+// ── Init ─────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
