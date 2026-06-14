@@ -5,7 +5,7 @@ import {
 
 // ── Auth Guard ──────────────────────────────────────────
 const user = getCurrentUser();
-if (!user || user.role !== 'student') window.location.href = 'index.html';
+if (!user || user.role !== 'student') window.location.href = 'login.html';
 
 let myStudent = null;
 
@@ -193,7 +193,7 @@ window.downloadMyStatement = async function () {
 // ── Logout ────────────────────────────────────────────────
 window.handleLogout = function () {
   logoutUser();
-  window.location.href = 'index.html';
+  window.location.href = 'login.html';
 };
 
 // ── Init ─────────────────────────────────────────────────

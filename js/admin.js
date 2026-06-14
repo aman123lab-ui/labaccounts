@@ -10,7 +10,7 @@ import {
 
 // ── Auth Guard ──────────────────────────────────────────
 const user = getCurrentUser();
-if (!user || user.role !== 'admin') window.location.href = 'index.html';
+if (!user || user.role !== 'admin') window.location.href = 'login.html';
 else {
   document.getElementById('sidebar-name').textContent = user.name;
   document.getElementById('sidebar-avatar').textContent = user.name[0].toUpperCase();
@@ -18,7 +18,7 @@ else {
 
 window.handleLogout = function () {
   logoutUser();
-  window.location.href = 'index.html';
+  window.location.href = 'login.html';
 };
 
 // ── Navigation ──────────────────────────────────────────
