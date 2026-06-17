@@ -603,3 +603,19 @@ tbody td { padding: 1rem 1.25rem; font-size: 0.875rem; color: var(--text-primary
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Loading Spinner Utility ────────────────── */
+.spinner-inline {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-rotate 0.75s linear infinite;
+  margin-right: 0.5rem;
+}
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}

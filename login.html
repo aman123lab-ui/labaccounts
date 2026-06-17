@@ -124,8 +124,11 @@
     seedDefaults();
 
     // Redirect if already logged in
+    const studentIdSaved = localStorage.getItem('student_id');
     const currentUser = getCurrentUser();
-    if (currentUser) {
+    if (studentIdSaved) {
+      window.location.href = 'student.html';
+    } else if (currentUser) {
       window.location.href = currentUser.role === 'admin' ? 'index.html' : 'student.html';
     }
 
@@ -207,6 +210,9 @@
         return;
       }
 
+      if (data.role === 'student') {
+        localStorage.setItem('student_id', data.username);
+      }
       btnText.textContent = 'Redirecting…';
       window.location.href = data.role === 'admin' ? 'index.html' : 'student.html';
     };

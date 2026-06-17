@@ -8,6 +8,21 @@ import {
   getFinancialSummary
 } from './storage.service.js';
 
+// ── Button Loading Helper ──────────────────────────────
+function setBtnLoading(btn, isLoading) {
+  if (!btn) return;
+  if (isLoading) {
+    btn.disabled = true;
+    btn.dataset.originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner-inline"></span> Processing...`;
+  } else {
+    btn.disabled = false;
+    if (btn.dataset.originalText) {
+      btn.innerHTML = btn.dataset.originalText;
+    }
+  }
+}
+
 // ── Auth Guard ──────────────────────────────────────────
 const user = getCurrentUser();
 if (!user || user.role !== 'admin') window.location.href = 'login.html';
@@ -201,7 +216,7 @@ window.openEditStudent = async function (id) {
   const { data } = await getStudentById(id);
   if (!data) return toast('Student not found.', 'error');
   const form = document.getElementById('edit-student-form');
-  ['id', 'name', 'studentId', 'email', 'phone', 'course', 'department', 'totalFee', 'paidAmount'].forEach(k => {
+  ['id', 'name', 'studentId', 'email', 'phone', 'course', 'department', 'totalFee', 'paidAmount', 'batch'].forEach(k => {
     if (form[k]) form[k].value = data[k] || '';
   });
   openModal('edit-student-modal');
@@ -210,6 +225,8 @@ window.openEditStudent = async function (id) {
 window.handleEditStudent = async function (e) {
   e.preventDefault();
   const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
   const data = Object.fromEntries(new FormData(form));
 
   // Extract and remove password from the student-record update payload
@@ -217,7 +234,11 @@ window.handleEditStudent = async function (e) {
   delete data.password;
 
   const { error } = await updateStudent(data.id, data);
-  if (error) { toast(error, 'error'); return; }
+  if (error) { 
+    toast(error, 'error'); 
+    setBtnLoading(btn, false);
+    return; 
+  }
 
   // If a new password was entered, update the linked user account
   if (newPassword) {
@@ -230,6 +251,7 @@ window.handleEditStudent = async function (e) {
 
   toast('Student updated.' + (newPassword ? ' Password changed.' : ''), 'success');
   closeModal('edit-student-modal');
+  setBtnLoading(btn, false);
   await loadStudents();
 };
 
@@ -238,6 +260,8 @@ window.handleEditStudent = async function (e) {
 window.handleRegister = async function (e) {
   e.preventDefault();
   const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
 
   const name = form.querySelector('[name="name"]').value.trim();
   const studentId = form.querySelector('[name="studentId"]').value.trim();
@@ -266,12 +290,14 @@ window.handleRegister = async function (e) {
   const { data: student, error } = await createStudent(studentData);
   if (error) {
     alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`;
+    setBtnLoading(btn, false);
     return;
   }
 
   alertEl.innerHTML = `<div class="alert alert-success">✅ Student "${student.name}" registered! Login: <strong>${studentId}</strong></div>`;
   form.reset();
   toast('Student registered successfully!', 'success');
+  setBtnLoading(btn, false);
   await loadStudents();
 };
 
@@ -292,16 +318,21 @@ window.handleCSVUpload = function (e) {
   reader.readAsText(file);
 };
 
-window.handleBulkRegister = async function () {
+window.handleBulkRegister = async function (e) {
+  if (e) e.preventDefault();
   const raw = document.getElementById('bulk-text').value.trim();
   const alertEl = document.getElementById('bulk-alert');
   if (!raw) { alertEl.innerHTML = `<div class="alert alert-error">⚠️ No data to import.</div>`; return; }
+
+  const btn = e ? e.currentTarget || e.target : document.querySelector('#section-bulk button.btn-primary');
+  setBtnLoading(btn, true);
 
   const lines = raw.split('\n').filter(l => l.trim());
   const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
 
   if (!headers.includes('name') || !headers.includes('studentid')) {
     alertEl.innerHTML = `<div class="alert alert-error">⚠️ CSV must contain at least "name" and "studentId" headers.</div>`;
+    setBtnLoading(btn, false);
     return;
   }
 
@@ -332,6 +363,7 @@ window.handleBulkRegister = async function () {
 
   if (!rows.length) {
     alertEl.innerHTML = `<div class="alert alert-error">⚠️ No valid student entries found to import.</div>`;
+    setBtnLoading(btn, false);
     return;
   }
 
@@ -356,6 +388,7 @@ window.handleBulkRegister = async function () {
     await loadStudents();
     await loadDebits();
   }
+  setBtnLoading(btn, false);
 };
 
 // ── Revenue ──────────────────────────────────────────────
@@ -418,10 +451,21 @@ window.toggleRevenueType = function () {
 window.populateRevenueStudents = async function () {
   const selectEl = document.getElementById('revStudentId');
   if (!selectEl) return;
+
+  if (!selectEl.dataset.listenerAttached) {
+    selectEl.addEventListener('change', function () {
+      if (this.value === 'register_new') {
+        window.location.href = 'register.html';
+      }
+    });
+    selectEl.dataset.listenerAttached = 'true';
+  }
+
   const { data: students } = await getStudents();
   const sorted = [...students].sort((a, b) => a.name.localeCompare(b.name));
   selectEl.innerHTML = '<option value="" disabled selected>Select registered student...</option>' +
-    sorted.map(s => `<option value="${s.id}">${s.name} (${s.studentId})</option>`).join('');
+    '<option value="register_new">+ Student Registration</option>' +
+    sorted.map(s => `<option value="${s.id}">${s.name} (${s.batch || '—'})</option>`).join('');
 };
 
 async function loadRevenue() {
@@ -430,6 +474,12 @@ async function loadRevenue() {
   document.getElementById('total-revenue-badge').textContent = `Total: ${fmt(total)}`;
 
   await populateRevenueStudents();
+
+  // Auto-fill today's date if empty
+  const dateInput = document.querySelector('#revenue-form [name="date"]');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
 
   // Group by composite key (date + title) and sort newest first
   const grouped = groupRevenueByDateAndTitle(data);
@@ -481,24 +531,36 @@ window.openRevenueDetail = async function (id) {
 window.handleEditRevenue = async function (e) {
   e.preventDefault();
   const alertEl = document.getElementById('rev-detail-alert');
+  const btn = e.target.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
   const id = document.getElementById('rev-detail-id').value;
   const title = document.getElementById('rev-detail-title').value.trim();
   const amount = parseFloat(document.getElementById('rev-detail-amount').value);
   const date = document.getElementById('rev-detail-date').value;
   const notes = document.getElementById('rev-detail-notes').value.trim();
 
-  if (!title) { alertEl.innerHTML = `<div class="alert alert-error">⚠️ Title is required.</div>`; return; }
-  if (!amount || amount <= 0) { alertEl.innerHTML = `<div class="alert alert-error">⚠️ Amount must be greater than zero.</div>`; return; }
+  if (!title) { 
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ Title is required.</div>`; 
+    setBtnLoading(btn, false);
+    return; 
+  }
+  if (!amount || amount <= 0) { 
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ Amount must be greater than zero.</div>`; 
+    setBtnLoading(btn, false);
+    return; 
+  }
 
   const { updateRevenue } = await import('./storage.service.js');
   const { error } = await updateRevenue(id, { title, amount, date, notes });
   if (error) {
     alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`;
+    setBtnLoading(btn, false);
     return;
   }
 
   toast('Revenue entry updated!', 'success');
   closeModal('revenue-detail-modal');
+  setBtnLoading(btn, false);
   await loadRevenue();
 };
 
@@ -603,6 +665,8 @@ window.deleteDailyRevenueEntry = async function (revenueId, date) {
 window.handleAddRevenue = async function (e) {
   e.preventDefault();
   const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
   const data = Object.fromEntries(new FormData(form));
   const alertEl = document.getElementById('rev-alert');
   alertEl.innerHTML = '';
@@ -611,12 +675,14 @@ window.handleAddRevenue = async function (e) {
   const title = (data.title || '').trim();
   if (!title) {
     alertEl.innerHTML = `<div class="alert alert-error">⚠️ Title is required.</div>`;
+    setBtnLoading(btn, false);
     return;
   }
 
   const amt = parseFloat(data.amount);
   if (!amt || amt <= 0) {
     alertEl.innerHTML = `<div class="alert alert-error">⚠️ Amount must be greater than zero.</div>`;
+    setBtnLoading(btn, false);
     return;
   }
 
@@ -637,6 +703,7 @@ window.handleAddRevenue = async function (e) {
     });
     if (error) {
       alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`;
+      setBtnLoading(btn, false);
       return;
     }
 
@@ -647,6 +714,7 @@ window.handleAddRevenue = async function (e) {
     const studentId = data.revStudentId;
     if (!studentId) {
       alertEl.innerHTML = `<div class="alert alert-error">⚠️ Please select a student.</div>`;
+      setBtnLoading(btn, false);
       return;
     }
 
@@ -654,15 +722,21 @@ window.handleAddRevenue = async function (e) {
     const { error } = await applyStudentManualDebit(studentId, amt, title, dateVal, notes);
     if (error) {
       alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`;
+      setBtnLoading(btn, false);
       return;
     }
   }
 
   // ── Reset & refresh ─────────────────────────────────────
   form.reset();
+  const dateInput = form.querySelector('[name="date"]');
+  if (dateInput) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
   window.toggleRevenueType();
   alertEl.innerHTML = '';
   toast('Revenue recorded successfully!', 'success');
+  setBtnLoading(btn, false);
 
   await loadRevenue();
   await loadDebits();
@@ -704,7 +778,10 @@ async function loadExpenses() {
 
 window.handleAddExpense = async function (e) {
   e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target));
+  const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
+  const data = Object.fromEntries(new FormData(form));
 
   // Use entered date or fallback to auto-generated current date
   if (!data.date) {
@@ -713,9 +790,13 @@ window.handleAddExpense = async function (e) {
 
   const alertEl = document.getElementById('exp-alert');
   const { error } = await addExpense(data);
-  if (error) { alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; return; }
+  if (error) { 
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; 
+    setBtnLoading(btn, false);
+    return; 
+  }
 
-  e.target.reset();
+  form.reset();
 
   // Reset date input to current date
   const dateInput = document.getElementById('expense-date-input');
@@ -725,6 +806,7 @@ window.handleAddExpense = async function (e) {
 
   alertEl.innerHTML = '';
   toast('Expense added!', 'success');
+  setBtnLoading(btn, false);
   await loadExpenses();
 };
 
@@ -793,7 +875,7 @@ function renderDebtorList(students, debits) {
   debtorListCache = relevant;
 
   if (!relevant.length) {
-    tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">
       <div class="empty-icon">👥</div>
       No debit/credit activity yet. Use the FAB buttons or the full-search modals to get started.
     </div></td></tr>`;
@@ -808,6 +890,28 @@ function renderDebtorList(students, debits) {
     else if (balance < 0) { pillClass = 'advance'; pillText = `🟢 Advance: ${fmt(Math.abs(balance))}`; }
     else { pillClass = 'cleared'; pillText = `✅ Cleared`; }
 
+    const isDue = balance > 0;
+    const whatsappBtn = isDue
+      ? `<button class="dropdown-item qb-whatsapp" onclick="sendWhatsAppReminder('${s.name.replace(/'/g, "\\'")}', ${balance}, '${s.phone || ''}')">💬 Remind</button>`
+      : '';
+
+    const actions = `
+      <div class="action-dropdown-container">
+        <button class="kebab-btn" onclick="toggleActionDropdown(event, '${s.id}')" title="Actions">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1.5"></circle>
+            <circle cx="12" cy="5" r="1.5"></circle>
+            <circle cx="12" cy="19" r="1.5"></circle>
+          </svg>
+        </button>
+        <div id="action-dropdown-${s.id}" class="action-dropdown-menu">
+          <button class="dropdown-item qb-charge" onclick="openQuickCharge('${s.id}')">📤 Charge</button>
+          <button class="dropdown-item qb-collect" onclick="openQuickCollect('${s.id}')">📥 Collect</button>
+          ${whatsappBtn}
+        </div>
+      </div>
+    `;
+
     return `<tr>
       <td>
         <div class="debtor-name debtor-name-clickable" onclick="openAccountStatement('${s.id}')">${s.name}</div>
@@ -818,6 +922,7 @@ function renderDebtorList(students, debits) {
         ${s.batch ? `<div class="debtor-meta" style="margin-top:3px">${s.batch}</div>` : ''}
       </td>
       <td style="text-align:center"><span class="balance-pill ${pillClass}">${pillText}</span></td>
+      <td style="text-align:center">${actions}</td>
     </tr>`;
   }).join('');
 }
@@ -836,6 +941,14 @@ window.filterDebtors = function () {
 
 
 window.openAccountStatement = async function (studentId) {
+  // Fetch fresh students list and debits to ensure balance is perfectly synchronized
+  const [{ data: students }, { data: debits }] = await Promise.all([
+    getStudents(), getDebits()
+  ]);
+
+  if (students) allStudentsCache = students;
+  if (debits) allDebits = debits;
+
   const s = allStudentsCache.find(st => st.id === studentId);
   if (!s) return;
 
@@ -848,8 +961,16 @@ window.openAccountStatement = async function (studentId) {
   balEl.textContent = bal > 0 ? `Due: ${fmt(bal)}` : bal < 0 ? `Advance: ${fmt(Math.abs(bal))}` : 'Cleared';
   balEl.style.color = bal > 0 ? '#f87171' : bal < 0 ? '#34d399' : 'var(--text-muted)';
 
-  const { data: debits } = await getDebits();
-  const studentTrans = debits.filter(d => d.studentId === studentId);
+  const actionsContainer = document.getElementById('as-actions-container');
+  if (actionsContainer) {
+    if (bal > 0) {
+      actionsContainer.innerHTML = `<button class="quick-btn qb-whatsapp" onclick="sendWhatsAppReminder('${s.name.replace(/'/g, "\\'")}', ${bal}, '${s.phone || ''}')" title="Send WhatsApp Reminder">💬 Send Reminder</button>`;
+    } else {
+      actionsContainer.innerHTML = '';
+    }
+  }
+
+  const studentTrans = (allDebits || []).filter(d => d.studentId === studentId);
 
   // Sort by date (newest first)
   studentTrans.sort((a, b) => {
@@ -881,6 +1002,18 @@ window.openAccountStatement = async function (studentId) {
   }
 
   openModal('account-statement-modal');
+};
+
+window.sendWhatsAppReminder = function (name, amount, phone) {
+  if (!phone) {
+    toast('⚠️ No phone number available for this student.', 'error');
+    return;
+  }
+  // Sanitize phone number (remove spaces, plus, etc.)
+  const cleanPhone = phone.replace(/[^\d+]/g, '');
+  const text = `Hello ${name}, this is a reminder that you have pending lab print dues of ₹${amount}. Please clear them soon.`;
+  const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
 };
 
 // ── Quick Action Modals (per-row in Debtor List) ──────────
@@ -919,28 +1052,42 @@ window.openQuickCollect = function (studentRecordId) {
 window.handleQuickCharge = async function (e) {
   e.preventDefault();
   const alertEl = document.getElementById('qc-alert');
+  const btn = e.target.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
   const studentId = document.getElementById('qc-student-id').value;
   const description = document.getElementById('qc-description').value.trim();
   const amount = document.getElementById('qc-amount').value;
   alertEl.innerHTML = '';
   const { error } = await applyStudentDebit(studentId, amount, description);
-  if (error) { alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; return; }
+  if (error) { 
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; 
+    setBtnLoading(btn, false);
+    return; 
+  }
   toast(`📤 Charge of ${fmt(amount)} added successfully!`, 'success');
   closeModal('quick-charge-modal');
+  setBtnLoading(btn, false);
   await loadDebits();
 };
 
 window.handleQuickCollect = async function (e) {
   e.preventDefault();
   const alertEl = document.getElementById('ql-alert');
+  const btn = e.target.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
   const studentId = document.getElementById('ql-student-id').value;
   const description = document.getElementById('ql-description').value.trim();
   const amount = document.getElementById('ql-amount').value;
   alertEl.innerHTML = '';
   const { error } = await applyStudentCredit(studentId, amount, description);
-  if (error) { alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; return; }
+  if (error) { 
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; 
+    setBtnLoading(btn, false);
+    return; 
+  }
   toast(`📥 Collection of ${fmt(amount)} logged successfully!`, 'success');
   closeModal('quick-collect-modal');
+  setBtnLoading(btn, false);
   await loadDebits();
 };
 
@@ -1015,7 +1162,46 @@ document.addEventListener('click', e => {
       wrap.classList.remove('open');
     }
   });
+
+  if (!e.target.closest('.action-dropdown-container')) {
+    document.querySelectorAll('.action-dropdown-menu.show').forEach(menu => {
+      menu.classList.remove('show');
+    });
+  }
 });
+
+window.toggleActionDropdown = function (event, id) {
+  event.stopPropagation();
+  const dropdown = document.getElementById(`action-dropdown-${id}`);
+  if (!dropdown) return;
+
+  const isCurrentlyShowing = dropdown.classList.contains('show');
+  
+  // Close all other dropdowns
+  document.querySelectorAll('.action-dropdown-menu.show').forEach(menu => {
+    menu.classList.remove('show');
+  });
+
+  // Toggle current one
+  if (!isCurrentlyShowing) {
+    dropdown.classList.add('show');
+    
+    // Use fixed positioning to prevent clipping by overflow-x containers
+    const btnRect = event.currentTarget.getBoundingClientRect();
+    dropdown.style.position = 'fixed';
+    
+    let top = btnRect.bottom;
+    // Prevent cut-off at bottom of screen
+    if (top + dropdown.offsetHeight > window.innerHeight) {
+      top = btnRect.top - dropdown.offsetHeight;
+    }
+    
+    dropdown.style.top = top + 'px';
+    dropdown.style.left = (btnRect.right - dropdown.offsetWidth) + 'px';
+    dropdown.style.bottom = 'auto';
+    dropdown.style.right = 'auto';
+  }
+};
 
 // ── Open Modals ────────────────────────────────────────────
 window.calculatePrintCost = function () {
@@ -1078,6 +1264,9 @@ window.handleDebitSubmit = async function (e) {
     return;
   }
 
+  const btn = e.target.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
+
   window.calculatePrintCost(); // Ensure we have the latest calculation
 
   const typeSelect = document.getElementById('debit-print-type');
@@ -1101,10 +1290,15 @@ window.handleDebitSubmit = async function (e) {
 
   alertEl.innerHTML = '';
   const { error } = await applyStudentDebit(studentId, amount, description, printMeta);
-  if (error) { alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; return; }
+  if (error) { 
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; 
+    setBtnLoading(btn, false);
+    return; 
+  }
 
   toast('Debit charged successfully!', 'success');
   closeModal('debit-modal');
+  setBtnLoading(btn, false);
   await loadDebits();
 };
 
@@ -1119,12 +1313,21 @@ window.handleCreditSubmit = async function (e) {
     alertEl.innerHTML = `<div class="alert alert-error">⚠️ Please search and select a student.</div>`;
     return;
   }
+
+  const btn = e.target.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
+
   alertEl.innerHTML = '';
   const { error } = await applyStudentCredit(studentId, amount, description);
-  if (error) { alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; return; }
+  if (error) { 
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`; 
+    setBtnLoading(btn, false);
+    return; 
+  }
 
   toast('Credit recorded successfully!', 'success');
   closeModal('credit-modal');
+  setBtnLoading(btn, false);
   await loadDebits();
 };
 
@@ -1259,9 +1462,17 @@ window.updateMonthlyReport = async function () {
 };
 
 
-window.downloadMonthlyReport = async function () {
+window.downloadMonthlyReport = async function (e) {
+  if (e) e.preventDefault();
+  const btn = e ? e.currentTarget || e.target : null;
+  setBtnLoading(btn, true);
+
   const monthVal = document.getElementById('report-month-picker').value;
-  if (!monthVal) { toast('Please select a month first.', 'error'); return; }
+  if (!monthVal) { 
+    toast('Please select a month first.', 'error'); 
+    setBtnLoading(btn, false);
+    return; 
+  }
 
   const { data: rev } = await getRevenue();
   const { data: exp } = await getExpenses();
@@ -1297,6 +1508,13 @@ window.downloadMonthlyReport = async function () {
   });
   const totalExp = monthExp.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
   const netBalance = totalRev - totalExp;
+
+  // ── Pending Debits for this month ──────────────────────────
+  const monthPendingDebits = debits.filter(d => {
+    const dStr = d.createdAt || d.date || '';
+    return dStr.startsWith(monthVal) && d.type === 'debit' && d.status === 'pending';
+  });
+  const totalPending = monthPendingDebits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0);
 
   // ── Page counters ──────────────────────────────────────────
   let bwPages = 0, colourPages = 0;
@@ -1395,7 +1613,7 @@ window.downloadMonthlyReport = async function () {
         .header { text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; }
         .header h1 { margin: 0 0 .25rem; color: #0f172a; font-size: 22px; }
         .header p  { margin: 0; color: #64748b; font-size: 13px; }
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+        .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
         .card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; text-align: center; background: #f8fafc; }
         .card .label { font-size: 10px; text-transform: uppercase; color: #64748b; margin-bottom: .25rem; font-weight: 600; }
         .card .value { font-size: 16px; font-weight: 700; color: #0f172a; }
@@ -1417,6 +1635,7 @@ window.downloadMonthlyReport = async function () {
         <div class="card"><div class="label">Total Revenue</div><div class="value text-success">${fmt(totalRev)}</div></div>
         <div class="card"><div class="label">Total Expenses</div><div class="value text-danger">${fmt(totalExp)}</div></div>
         <div class="card"><div class="label">Net Balance</div><div class="value ${netBalance >= 0 ? 'text-success' : 'text-danger'}">${fmt(netBalance)}</div></div>
+        <div class="card"><div class="label">Pending Debits</div><div class="value" style="color:#f59e0b">${fmt(totalPending)}</div></div>
         <div class="card"><div class="label">B&amp;W Pages</div><div class="value">${bwPages}</div></div>
         <div class="card"><div class="label">Colour Pages</div><div class="value">${colourPages}</div></div>
       </div>
@@ -1435,13 +1654,18 @@ window.downloadMonthlyReport = async function () {
   `);
   printWindow.document.close();
   toast('Monthly report opened!', 'success');
+  setBtnLoading(btn, false);
 };
-  // ── Print window ───────────────────────────────────────────
-  window.generateYearlyReport = async function () {
+  window.generateYearlyReport = async function (e) {
+  if (e) e.preventDefault();
+  const btn = e ? e.currentTarget || e.target : null;
+  setBtnLoading(btn, true);
+
   const fromDateVal = document.getElementById('report-from-date')?.value;
   const toDateVal = document.getElementById('report-to-date')?.value;
   if (!fromDateVal || !toDateVal) {
     toast('Please select both From Date and To Date.', 'error');
+    setBtnLoading(btn, false);
     return;
   }
 
@@ -1472,6 +1696,13 @@ window.downloadMonthlyReport = async function () {
   });
   const totalExp = yearExp.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
   const netBalance = totalRev - totalExp;
+
+  // ── Pending Debits for this period ────────────────────────
+  const periodPendingDebits = debits.filter(d => {
+    const txDate = parseTxDate(d);
+    return txDate && txDate >= startDate && txDate <= endDate && d.type === 'debit' && d.status === 'pending';
+  });
+  const totalPending = periodPendingDebits.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0);
 
   // ── Page counters ──────────────────────────────────────────
   let bwPages = 0, colourPages = 0;
@@ -1592,7 +1823,7 @@ window.downloadMonthlyReport = async function () {
         .header { text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; }
         .header h1 { margin: 0 0 .25rem; color: #0f172a; font-size: 22px; }
         .header p  { margin: 0; color: #64748b; font-size: 13px; }
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+        .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
         .card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; text-align: center; background: #f8fafc; }
         .card .label { font-size: 10px; text-transform: uppercase; color: #64748b; margin-bottom: .25rem; font-weight: 600; }
         .card .value { font-size: 16px; font-weight: 700; color: #0f172a; }
@@ -1608,7 +1839,7 @@ window.downloadMonthlyReport = async function () {
       </style>
     </head><body>
       <div class="header">
-        <h1>Lab Accounts — Custom Date Range Report</h1>
+        <h1>Lab Accounts</h1>
         <p>Report Period: ${fromDateVal} to ${toDateVal}</p>
       </div>
 
@@ -1616,6 +1847,7 @@ window.downloadMonthlyReport = async function () {
         <div class="card"><div class="label">Total Collections</div><div class="value" style="color:#16a34a">${fmt(totalRev)}</div></div>
         <div class="card"><div class="label">Total Expenses</div><div class="value" style="color:#dc2626">${fmt(totalExp)}</div></div>
         <div class="card"><div class="label">Net Status</div><div class="value ${netStatusColorClass}">${netStatusLabel}: ${fmt(Math.abs(netBalance))}</div></div>
+        <div class="card"><div class="label">Pending Debits</div><div class="value" style="color:#f59e0b">${fmt(totalPending)}</div></div>
         <div class="card"><div class="label">B&amp;W Pages</div><div class="value">${bwPages}</div></div>
         <div class="card"><div class="label">Colour Pages</div><div class="value">${colourPages}</div></div>
       </div>
@@ -1644,6 +1876,7 @@ window.downloadMonthlyReport = async function () {
   `);
   printWindow.document.close();
   toast('Yearly report opened!', 'success');
+  setBtnLoading(btn, false);
 };
 
 // ── Debtor Management Reports ──────────────────────────────
@@ -1686,7 +1919,7 @@ window.printDebtorReport = function () {
       }
 
       rowsHtml += `<tr>
-        <td><strong>${s.name}</strong> <span style="font-size:10px; color:#64748b; font-weight:normal;">(${s.studentId})</span></td>
+        <td><strong>${s.name}</strong> <span style="font-size:10px; color:#64748b; font-weight:normal;">(${s.batch || '—'})</span></td>
         <td class="text-right" style="color:${statusColor}; font-weight:700">${amtText}</td>
       </tr>`;
     });

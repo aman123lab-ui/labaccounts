@@ -101,25 +101,34 @@
       <!-- Batch -->
       <div class="form-group">
         <label for="batch">Batch <span style="color:var(--danger)">*</span></label>
-        <select id="batch" name="batch" class="form-control" required>
-          <option value="" disabled selected>— Select your batch —</option>
-          <optgroup label="JD">
-            <option value="JD 1">JD 1</option>
-            <option value="JD 2">JD 2</option>
-            <option value="JD 3">JD 3</option>
-          </optgroup>
-          <optgroup label="HS">
-            <option value="HS 1">HS 1</option>
-            <option value="HS 2">HS 2</option>
-          </optgroup>
-          <optgroup label="BS">
-            <option value="BS 1">BS 1</option>
-            <option value="BS 2">BS 2</option>
-            <option value="BS 3">BS 3</option>
-            <option value="BS 4">BS 4</option>
-            <option value="BS 5">BS 5</option>
-          </optgroup>
-        </select>
+        <input
+          id="batch" name="batch"
+          class="form-control"
+          list="batch-list"
+          placeholder="Select or type your batch..."
+          required
+        />
+        <datalist id="batch-list">
+          <option value="HS1"></option>
+          <option value="HS2"></option>
+          <option value="BS1"></option>
+          <option value="BS2"></option>
+          <option value="BS3"></option>
+          <option value="BS4"></option>
+          <option value="BS5"></option>
+        </datalist>
+      </div>
+
+      <!-- Phone -->
+      <div class="form-group">
+        <label for="phone">Phone <span style="color:var(--danger)">*</span></label>
+        <input
+          id="phone" name="phone"
+          class="form-control"
+          type="tel"
+          placeholder="e.g. +91 9876543210"
+          required
+        />
       </div>
 
       <!-- Password -->
@@ -190,9 +199,12 @@
 
     seedDefaults();
 
-    // Redirect if already logged in as student
+    // Redirect if already logged in as student or student_id is set
+    const savedStudentId = localStorage.getItem('student_id');
     const user = getCurrentUser();
-    if (user && user.role === 'student') window.location.href = 'student.html';
+    if (savedStudentId || (user && user.role === 'student')) {
+      window.location.href = 'student.html';
+    }
 
     // ── Password strength meter ────────────────
     window.checkStrength = function(val) {
@@ -232,6 +244,7 @@
       const name            = form.name.value.trim();
       const studentId       = form.studentId.value.trim();
       const batch           = form.batch.value;
+      const phone           = form.phone.value.trim();
       const password        = form.password.value;
       const confirmPassword = form.confirmPassword.value;
 
@@ -246,6 +259,10 @@
       }
       if (!batch) {
         alertEl.innerHTML = `<div class="alert alert-error">⚠️ Please select your batch.</div>`;
+        return;
+      }
+      if (!phone) {
+        alertEl.innerHTML = `<div class="alert alert-error">⚠️ Please enter your phone number.</div>`;
         return;
       }
       if (password.length < 6) {
@@ -264,6 +281,7 @@
         name,
         studentId,
         batch,
+        phone,
         password,
       });
 
@@ -274,11 +292,11 @@
         return;
       }
 
-      // Show success state
-      document.getElementById('reg-form').style.display = 'none';
-      document.getElementById('success-msg').textContent =
-        `Account for "${data.name}" (${data.studentId}) created! Log in with your Student ID and password.`;
-      document.getElementById('reg-success').style.display = 'block';
+      // Save student_id to localStorage for auto sign-in and redirect
+      localStorage.setItem('student_id', data.studentId);
+      
+      btnText.textContent = 'Redirecting…';
+      window.location.href = 'student.html';
     };
   </script>
 </body>

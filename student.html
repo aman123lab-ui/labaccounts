@@ -6,7 +6,17 @@
   <title>Student Dashboard — Lab Accounts</title>
   <meta name="description" content="Lab Accounts Student Dashboard — View your account summary and balance." />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered', reg))
+          .catch(err => console.error('Service worker registration failed', err));
+      });
+    }
+  </script>
 </head>
 <body>
 <div id="toast-container" class="toast-container"></div>
@@ -67,15 +77,11 @@
           <div class="balance-due" id="balance-due-msg"></div>
         </div>
 
-        <div class="stats-grid">
-          <div class="stat-card green"><span class="stat-icon">💰</span><div class="stat-label">Total Fee</div><div class="stat-value" id="st-totalfee">₹0</div></div>
-          <div class="stat-card purple"><span class="stat-icon">✅</span><div class="stat-label">Amount Paid</div><div class="stat-value" id="st-paid">₹0</div></div>
-          <div class="stat-card red"><span class="stat-icon">⏳</span><div class="stat-label">Fee Due</div><div class="stat-value" id="st-due">₹0</div></div>
-          <div class="stat-card orange"><span class="stat-icon">📒</span><div class="stat-label">Pending Debits</div><div class="stat-value" id="st-debits">₹0</div></div>
-        </div>
-
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">👤 My Profile</div></div>
+          <div class="panel-header">
+            <div class="panel-title">👤 My Profile</div>
+            <button class="btn btn-outline btn-sm" onclick="openEditProfileModal()">✏️ Edit Profile</button>
+          </div>
           <div class="panel-body">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem" id="profile-grid"></div>
           </div>
@@ -101,7 +107,7 @@
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">📄 Account Statement</div>
-            <button class="btn btn-primary btn-sm" onclick="downloadMyStatement()">⬇ Download</button>
+            <button class="btn btn-primary btn-sm" onclick="downloadMyStatement(event)">⬇ Download</button>
           </div>
           <div class="panel-body">
             <div id="statement-info" style="margin-bottom:1.5rem"></div>
@@ -115,6 +121,33 @@
 
     </div>
   </main>
+</div>
+
+<!-- ── Edit Profile Modal ─────────────── -->
+<div class="modal-overlay" id="edit-profile-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Edit Profile</div>
+      <button class="modal-close" onclick="closeModal('edit-profile-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="edit-profile-form" onsubmit="handleEditProfileSubmit(event)">
+        <div class="form-group">
+          <label for="ep-name">Full Name *</label>
+          <input class="form-control" id="ep-name" required placeholder="Full Name" />
+        </div>
+        <div class="form-group">
+          <label for="ep-phone">Phone Number *</label>
+          <input class="form-control" id="ep-phone" required placeholder="Phone Number" />
+        </div>
+        <div id="ep-alert"></div>
+        <div class="modal-footer" style="padding:0;margin-top:1rem">
+          <button class="btn btn-outline" type="button" onclick="closeModal('edit-profile-modal')">Cancel</button>
+          <button class="btn btn-primary" type="submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="js/student.js"></script>

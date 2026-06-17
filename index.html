@@ -7,7 +7,17 @@
   <title>Admin Dashboard — Lab Accounts</title>
   <meta name="description" content="Lab Accounts Admin Dashboard — Manage students, finances, and reports." />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered', reg))
+          .catch(err => console.error('Service worker registration failed', err));
+      });
+    }
+  </script>
   <style>
     /* ── Fixed floating action buttons ───────────────── */
     .debit-fab-container {
@@ -204,6 +214,71 @@
       border: 1px solid rgba(148, 163, 184, 0.15);
     }
 
+    /* ── Action Dropdown (Kebab Menu) ───────────── */
+    .action-dropdown-container {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .kebab-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, color 0.2s;
+    }
+    
+    .kebab-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--text-primary);
+    }
+    
+    .action-dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      z-index: 1000;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      overflow: hidden;
+      min-width: 130px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    
+    .action-dropdown-menu.show {
+      display: block;
+    }
+    
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.6rem 1rem;
+      background: transparent;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: background 0.2s;
+    }
+    
+    .dropdown-item:hover {
+      background: rgba(108, 99, 255, 0.08);
+    }
+    
+    .dropdown-item.qb-charge { color: #f87171; }
+    .dropdown-item.qb-collect { color: #34d399; }
+    .dropdown-item.qb-whatsapp { color: #25d366; }
+
     .quick-btn {
       display: inline-flex;
       align-items: center;
@@ -250,6 +325,18 @@
 
     .quick-btn.qb-history:hover {
       background: rgba(108, 99, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .quick-btn.qb-whatsapp {
+      background: rgba(37, 211, 102, 0.12);
+      border-color: rgba(37, 211, 102, 0.3);
+      color: #25d366;
+    }
+
+    .quick-btn.qb-whatsapp:hover {
+      background: rgba(37, 211, 102, 0.22);
+      border-color: #25d366;
       transform: translateY(-1px);
     }
 
@@ -509,7 +596,7 @@
                 </div>
                 <div class="form-row">
                   <div class="form-group"><label>Batch</label><input class="form-control" name="batch"
-                      placeholder="e.g. Batch A" /></div>
+                      list="batch-list" placeholder="Select or type batch..." /></div>
                   <div class="form-group"><label>Phone</label><input class="form-control" name="phone"
                       placeholder="+91 9876543210" /></div>
                   <div class="form-group"><label>Password *</label><input class="form-control" name="password"
@@ -543,9 +630,10 @@
                 <textarea class="form-control" id="bulk-text" rows="8"
                   placeholder="name,studentId,batch,phone,password,openingBalance&#10;John Doe,STU-001,Batch A,9876543210,pass123,150&#10;Jane Smith,STU-002,Batch B,9123456780,pass456,0"></textarea>
               </div>
+              <!-- Bulk Register -->
               <div id="bulk-alert"></div>
               <div id="bulk-preview" class="mt-2"></div>
-              <button class="btn btn-primary mt-2" onclick="handleBulkRegister()">📥 Import Students</button>
+              <button class="btn btn-primary mt-2" onclick="handleBulkRegister(event)">📥 Import Students</button>
             </div>
           </div>
         </div>
@@ -682,6 +770,7 @@
                     <th>Student</th>
                     <th>Batch / ID</th>
                     <th style="text-align:center">Balance</th>
+                    <th style="text-align:center">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="debtor-tbody"></tbody>
@@ -701,7 +790,7 @@
                 <label for="report-month-picker" style="font-weight:600; margin:0">Select Month:</label>
                 <input type="month" id="report-month-picker" class="form-control" style="width:180px; margin:0"
                   onchange="updateMonthlyReport()" />
-                <button class="btn btn-primary" onclick="downloadMonthlyReport()">
+                <button class="btn btn-primary" onclick="downloadMonthlyReport(event)">
                   🖨️ Print Monthly Report
                 </button>
               </div>
@@ -712,7 +801,7 @@
                 <input type="date" id="report-from-date" class="form-control" style="width:140px; margin:0" />
                 <label for="report-to-date" style="font-weight:600; margin:0">To:</label>
                 <input type="date" id="report-to-date" class="form-control" style="width:140px; margin:0" />
-                <button id="generateYearlyReportBtn" class="btn btn-outline" onclick="generateYearlyReport()">
+                <button id="generateYearlyReportBtn" class="btn btn-outline" onclick="generateYearlyReport(event)">
                   🖨️ Print Custom Report
                 </button>
               </div>
@@ -966,6 +1055,7 @@
           </div>
           <div class="form-row">
             <div class="form-group"><label>Phone</label><input class="form-control" name="phone" /></div>
+            <div class="form-group"><label>Batch</label><input class="form-control" name="batch" list="batch-list" placeholder="Select or type batch..." /></div>
           </div>
           <div class="form-row">
             <div class="form-group">
@@ -1023,7 +1113,8 @@
           </table>
         </div>
       </div>
-      <div class="modal-footer" style="padding: 0; margin-top: 1rem;">
+      <div class="modal-footer" style="padding: 0; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div id="as-actions-container"></div>
         <button class="btn btn-outline" onclick="closeModal('account-statement-modal')">Close</button>
       </div>
     </div>
@@ -1127,6 +1218,16 @@
       📤 Add Debit
     </button>
   </div>
+
+  <datalist id="batch-list">
+    <option value="HS1"></option>
+    <option value="HS2"></option>
+    <option value="BS1"></option>
+    <option value="BS2"></option>
+    <option value="BS3"></option>
+    <option value="BS4"></option>
+    <option value="BS5"></option>
+  </datalist>
 
   <script type="module" src="js/admin.js"></script>
   <script>

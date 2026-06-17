@@ -1,11 +1,19 @@
 import {
   getCurrentUser, logoutUser,
-  getStudentByUsername, getDebits, getFinancialSummary
+  getStudentByStudentId, getDebits, updateStudent
 } from './storage.service.js';
 
 // ── Auth Guard ──────────────────────────────────────────
-const user = getCurrentUser();
-if (!user || user.role !== 'student') window.location.href = 'login.html';
+let studentId = localStorage.getItem('student_id');
+let user = getCurrentUser();
+if (!studentId) {
+  if (user && user.role === 'student') {
+    studentId = user.username;
+    localStorage.setItem('student_id', studentId);
+  } else {
+    window.location.href = 'login.html';
+  }
+}
 
 let myStudent = null;
 
@@ -48,7 +56,7 @@ function toast(msg, type = 'info') {
 
 // ── Load Student Data ────────────────────────────────────
 async function init() {
-  const { data, error } = await getStudentByUsername(user.username);
+  const { data, error } = await getStudentByStudentId(studentId);
   if (error || !data) {
     toast('Could not load your student record.', 'error');
     return;
@@ -56,9 +64,9 @@ async function init() {
   myStudent = data;
 
   // Sidebar
-  document.getElementById('sidebar-name').textContent = user.name;
-  document.getElementById('sidebar-avatar').textContent = user.name[0].toUpperCase();
-  document.getElementById('student-id-badge').textContent = data.studentId;
+  document.getElementById('sidebar-name').textContent = myStudent.name;
+  document.getElementById('sidebar-avatar').textContent = myStudent.name[0].toUpperCase();
+  document.getElementById('student-id-badge').textContent = myStudent.studentId;
 
   await loadOverview();
 }
@@ -69,36 +77,28 @@ async function loadOverview() {
   const s = myStudent;
   const feeDue = s.totalFee - s.paidAmount;
 
-  // Balance hero
-  document.getElementById('balance-amount').textContent = fmt(feeDue);
-  document.getElementById('balance-due-msg').textContent =
-    feeDue > 0 ? `⚠️ You have ${fmt(feeDue)} outstanding fee balance.`
-    : '✅ Your fees are fully paid!';
-  document.getElementById('balance-amount').style.color =
-    feeDue > 0 ? 'var(--danger)' : 'var(--success)';
-
-  // Stats
-  document.getElementById('st-totalfee').textContent = fmt(s.totalFee);
-  document.getElementById('st-paid').textContent = fmt(s.paidAmount);
-  document.getElementById('st-due').textContent = fmt(feeDue);
-
   // Pending debits
   const { data: debits } = await getDebits(s.id);
-  const pendingDebitTotal = debits
+  const pendingDebitTotal = (debits || [])
     .filter(d => d.status === 'pending')
     .reduce((sum, d) => sum + d.amount, 0);
-  document.getElementById('st-debits').textContent = fmt(pendingDebitTotal);
+
+  const totalOutstanding = feeDue + pendingDebitTotal;
+
+  // Balance hero
+  document.getElementById('balance-amount').textContent = fmt(totalOutstanding);
+  document.getElementById('balance-due-msg').textContent =
+    totalOutstanding > 0 ? `⚠️ You have ${fmt(totalOutstanding)} outstanding balance.`
+    : '✅ Your fees are fully paid!';
+  document.getElementById('balance-amount').style.color =
+    totalOutstanding > 0 ? 'var(--danger)' : 'var(--success)';
 
   // Profile grid
   const fields = [
     ['Student ID', s.studentId],
     ['Full Name', s.name],
     ['Batch', s.batch || '—'],
-    ['Email', s.email || '—'],
     ['Phone', s.phone || '—'],
-    ['Course', s.course || '—'],
-    ['Department', s.department || '—'],
-    ['Semester', s.semester || '—'],
     ['Enrolled', fmtDate(s.createdAt)],
   ];
   document.getElementById('profile-grid').innerHTML = fields.map(([label, val]) => `
@@ -172,8 +172,11 @@ async function loadStatement() {
 }
 
 // ── Download My Statement ─────────────────────────────────
-window.downloadMyStatement = async function () {
+window.downloadMyStatement = async function (e) {
   if (!myStudent) return;
+  const btn = e ? e.currentTarget || e.target : null;
+  setBtnLoading(btn, true);
+
   const s = myStudent;
   const { data: debits } = await getDebits(s.id);
   let csv = `Lab Accounts - Personal Statement\nStudent: ${s.name}\nID: ${s.studentId}\n\n`;
@@ -188,11 +191,104 @@ window.downloadMyStatement = async function () {
   a.download = `statement_${s.studentId}.csv`;
   a.click();
   toast('Statement downloaded!', 'success');
+  setBtnLoading(btn, false);
+};
+
+// ── Edit Profile Modal Controls ───────────────────────────
+window.openEditProfileModal = function () {
+  if (!myStudent) return;
+  document.getElementById('ep-name').value = myStudent.name;
+  document.getElementById('ep-phone').value = myStudent.phone || '';
+  document.getElementById('ep-alert').innerHTML = '';
+  document.getElementById('edit-profile-modal').classList.add('open');
+};
+
+window.closeModal = function (modalId) {
+  document.getElementById(modalId).classList.remove('open');
+};
+
+function setBtnLoading(btn, isLoading) {
+  if (!btn) return;
+  if (isLoading) {
+    btn.disabled = true;
+    btn.dataset.originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner-inline"></span> Processing...`;
+  } else {
+    btn.disabled = false;
+    if (btn.dataset.originalText) {
+      btn.innerHTML = btn.dataset.originalText;
+    }
+  }
+}
+
+window.handleEditProfileSubmit = async function (e) {
+  e.preventDefault();
+  const alertEl = document.getElementById('ep-alert');
+  alertEl.innerHTML = '';
+
+  const name = document.getElementById('ep-name').value.trim();
+  const phone = document.getElementById('ep-phone').value.trim();
+
+  if (!name) {
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ Name is required.</div>`;
+    return;
+  }
+  if (!phone) {
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ Phone number is required.</div>`;
+    return;
+  }
+
+  const btn = e.target.querySelector('button[type="submit"]');
+  setBtnLoading(btn, true);
+
+  try {
+    const { data: updatedStudent, error } = await updateStudent(myStudent.id, { name, phone });
+
+    if (error) {
+      alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${error}</div>`;
+      setBtnLoading(btn, false);
+      return;
+    }
+
+    // Update users table name as well if userId is present
+    if (myStudent.userId) {
+      try {
+        const SUPABASE_URL = 'https://exwnfnqpuzqrzkjprbji.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_HaX6LPhPg1kZ2g1V-7w-3A_13de8qDy';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        await supabase.from('users').update({ name }).eq('id', myStudent.userId);
+
+        // Keep standard user session name updated
+        const currentUser = getCurrentUser();
+        if (currentUser && currentUser.id === myStudent.userId) {
+          currentUser.name = name;
+          localStorage.setItem('lab_current_user', JSON.stringify(currentUser));
+        }
+      } catch (err) {
+        console.error("Failed to update user table name:", err);
+      }
+    }
+
+    myStudent = updatedStudent;
+
+    // Re-render layout
+    document.getElementById('sidebar-name').textContent = myStudent.name;
+    document.getElementById('sidebar-avatar').textContent = myStudent.name[0].toUpperCase();
+    await loadOverview();
+
+    closeModal('edit-profile-modal');
+    toast('Profile updated successfully!', 'success');
+  } catch (err) {
+    alertEl.innerHTML = `<div class="alert alert-error">⚠️ ${err.message}</div>`;
+  } finally {
+    setBtnLoading(btn, false);
+  }
 };
 
 // ── Logout ────────────────────────────────────────────────
 window.handleLogout = function () {
   logoutUser();
+  localStorage.removeItem('student_id');
   window.location.href = 'login.html';
 };
 
