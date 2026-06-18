@@ -1,5 +1,4 @@
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f8;color:#1a1a2e;min-height:100vh}
 
 /* ── Header ── */
 .page-header{background:#fff;padding:1rem 1.25rem .85rem;border-bottom:1px solid #e4e7f0;position:sticky;top:0;z-index:60;box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -157,4 +156,3 @@ label{font-size:.79rem;font-weight:600;color:#5a6275;display:block;margin-bottom
 .capitalize-input {
   text-transform: capitalize;
 }
-

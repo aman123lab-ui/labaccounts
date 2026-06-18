@@ -1,18 +1,19 @@
 {
   "name": "lab-accounts",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "private": true,
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup": "node setup-public.js",
+    "predev": "node setup-public.js",
+    "dev": "next dev -p 3333",
+    "build": "node setup-public.js && next build",
+    "start": "next start -p 3333",
+    "lint": "next lint"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "express": "^5.2.1"
+    "next": "^14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@supabase/supabase-js": "^2.43.4"
   }
 }
