@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}";
+self.__REACT_LOADABLE_MANIFEST="{\"pages\\\\admin.js -> ../js/storage.service.js\":{\"id\":\"pages\\\\admin.js -> ../js/storage.service.js\",\"files\":[]}}"

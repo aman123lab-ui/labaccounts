@@ -23,13 +23,29 @@ function copyDir(src, dest) {
   }
 }
 
-// Copy index.html → public/admin-shell.html
-fs.copyFileSync(path.join(root, 'index.html'), path.join(pub, 'admin-shell.html'));
-console.log('✅ Copied index.html → public/admin-shell.html');
+// Copy and process index.html → public/admin-shell.html
+let indexContent = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+indexContent = indexContent
+  .replace(/href="css\//g, 'href="/css/')
+  .replace(/src="js\//g, 'src="/js/')
+  .replace(/href="login\.html"/g, 'href="/login"')
+  .replace(/href="student\.html"/g, 'href="/student"')
+  .replace(/href="register\.html"/g, 'href="/register"')
+  .replace(/href="index\.html"/g, 'href="/admin"');
+fs.writeFileSync(path.join(pub, 'admin-shell.html'), indexContent);
+console.log('✅ Copied and processed index.html → public/admin-shell.html');
 
-// Copy debtors.html → public/debtors-shell.html
-fs.copyFileSync(path.join(root, 'debtors.html'), path.join(pub, 'debtors-shell.html'));
-console.log('✅ Copied debtors.html → public/debtors-shell.html');
+// Copy and process debtors.html → public/debtors-shell.html
+let debtorsContent = fs.readFileSync(path.join(root, 'debtors.html'), 'utf8');
+debtorsContent = debtorsContent
+  .replace(/href="css\//g, 'href="/css/')
+  .replace(/src="js\//g, 'src="/js/')
+  .replace(/href="login\.html"/g, 'href="/login"')
+  .replace(/href="student\.html"/g, 'href="/student"')
+  .replace(/href="register\.html"/g, 'href="/register"')
+  .replace(/href="index\.html"/g, 'href="/admin"');
+fs.writeFileSync(path.join(pub, 'debtors-shell.html'), debtorsContent);
+console.log('✅ Copied and processed debtors.html → public/debtors-shell.html');
 
 // Copy css/ → public/css/
 copyDir(path.join(root, 'css'), path.join(pub, 'css'));

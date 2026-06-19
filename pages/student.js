@@ -478,12 +478,12 @@ export default function StudentDashboard() {
       {/* ── Edit Profile Modal ── */}
       {isEditModalOpen && (
         <div className="modal-overlay open" onClick={(e) => e.target === e.currentTarget && setIsEditModalOpen(false)}>
-          <div className="modal" style={{ maxWidth: '400px' }}>
+          <div className="modal w-full max-w-md mx-auto">
             <div className="modal-header">
               <div className="modal-title">✏️ Edit Profile</div>
               <button className="modal-close" onClick={() => setIsEditModalOpen(false)}>✕</button>
             </div>
-            <div className="modal-body">
+            <div className="modal-body p-5 lg:p-6">
               <form onSubmit={handleEditProfileSubmit}>
                 <div className="form-group">
                   <label htmlFor="ep-name">Full Name *</label>

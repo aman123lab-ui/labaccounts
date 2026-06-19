@@ -1241,3 +1241,30 @@ export async function resetAllFinancialData() {
   }
 }
 
+// ── Calculate Opening Balance (Database Query) ────────────
+export async function getOpeningBalance(startDate) {
+  try {
+    const [revRes, expRes] = await Promise.all([
+      supabase.from('revenue').select('amount, source').lt('date', startDate),
+      supabase.from('expenses').select('amount').lt('date', startDate)
+    ]);
+
+    if (revRes.error) throw revRes.error;
+    if (expRes.error) throw expRes.error;
+
+    // Filter by cash-basis sources to avoid double counting with unpaid student debits
+    const CASH_SOURCES = new Set(['direct cash', 'fee payment', 'opening cash balance', 'opening cash']);
+    const totalRev = (revRes.data || [])
+      .filter(r => CASH_SOURCES.has((r.source || '').toLowerCase()))
+      .reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+
+    const totalExp = (expRes.data || []).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+
+    return { openingBalance: totalRev - totalExp, error: null };
+  } catch (err) {
+    console.error('Error fetching opening balance:', err);
+    return { openingBalance: 0, error: err.message };
+  }
+}
+
+
