@@ -113,15 +113,17 @@ export default function Register() {
       return;
     }
 
-    localStorage.setItem('student_id', data.studentId);
-    router.replace('/student');
+    setAlertMsg({ type: 'success', text: '✅ Registration successful! Redirecting to login...' });
+    setTimeout(() => {
+      router.replace('/login');
+    }, 2000);
   };
 
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <Link href="/login" legacyBehavior>
-          <a className="back-link">← Back to Login</a>
+        <Link href="/login" className="back-link">
+          ← Back to Login
         </Link>
 
         <div className="auth-logo">
@@ -263,8 +265,8 @@ export default function Register() {
 
         <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '1.5rem' }}>
           Already registered?{' '}
-          <Link href="/login" legacyBehavior>
-            <a style={{ color: 'var(--accent-2)', textDecoration: 'none' }}>Sign In</a>
+          <Link href="/login" className="text-accent hover:underline">
+            Sign In
           </Link>
         </p>
       </div>

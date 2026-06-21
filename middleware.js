@@ -1,41 +1,68 @@
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 
-export function middleware(request) {
+export async function middleware(request) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://exwnfnqpuzqrzkjprbji.supabase.co';
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || 'sb_publishable_HaX6LPhPg1kZ2g1V-7w-3A_13de8qDy';
+
+  const supabase = createServerClient(
+    supabaseUrl,
+    supabaseKey,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { pathname } = request.nextUrl;
-  
-  // Public routes that don't need authentication
   const isPublicRoute = pathname === '/login' || pathname === '/register';
-  
-  // Get the user's role from the cookie we set during login
-  const roleCookie = request.cookies.get('lab_role');
-  const role = roleCookie?.value;
+
+  // Support for legacy role cookie temporarily
+  const legacyRole = request.cookies.get('lab_role')?.value;
+  const isAuthenticated = user || legacyRole;
 
   // 1. If trying to access a protected route without being logged in
-  if (!role && !isPublicRoute && !pathname.startsWith('/api') && !pathname.includes('.')) {
+  if (!isAuthenticated && !isPublicRoute && !pathname.startsWith('/api') && !pathname.includes('.')) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // 2. If already logged in, prevent accessing the login/register pages
-  if (role && isPublicRoute) {
-    if (role === 'admin') {
-      return NextResponse.redirect(new URL('/', request.url));
-    } else {
+  if (isAuthenticated && isPublicRoute) {
+    if (legacyRole === 'student') {
       return NextResponse.redirect(new URL('/student', request.url));
     }
-  }
-
-  // 3. Role-Based Route Protection
-  // If a student tries to access the admin dashboard (/) or /debtors
-  if (role === 'student' && (pathname === '/' || pathname === '/debtors')) {
-    return NextResponse.redirect(new URL('/student', request.url));
-  }
-
-  // If an admin tries to access the student portal
-  if (role === 'admin' && pathname === '/student') {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next();
+  // 3. Role-Based Route Protection (Legacy/Temp)
+  if (legacyRole === 'student' && (pathname === '/' || pathname === '/debtors')) {
+    return NextResponse.redirect(new URL('/student', request.url));
+  }
+  if (legacyRole === 'admin' && pathname === '/student') {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  return supabaseResponse;
 }
 
 export const config = {

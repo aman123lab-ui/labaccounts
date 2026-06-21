@@ -189,7 +189,14 @@ export function getCurrentUser() {
 export async function getStudents() {
   try {
     await fetchInitialData();
-    return { data: cachedStudents, error: null };
+    const mapped = (cachedStudents || []).map(s => {
+      const u = (cachedUsers || []).find(user => user.id === s.userId);
+      return {
+        ...s,
+        password: u ? u.password : ''
+      };
+    });
+    return { data: mapped, error: null };
   } catch (err) {
     return { data: [], error: err.message };
   }

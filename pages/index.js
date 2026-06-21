@@ -101,9 +101,21 @@ export default function AdminPage() {
   const [qlAlert, setQlAlert] = useState(null);
   const [qlLoading, setQlLoading] = useState(false);
 
-  // Add Debit Modal Form
+  // Inline Quick Register states
+  const [showInlineRegister, setShowInlineRegister] = useState(false);
+  const [inlineRegName, setInlineRegName] = useState('');
+  const [inlineRegStudentId, setInlineRegStudentId] = useState('');
+  const [inlineRegBatch, setInlineRegBatch] = useState('');
+  const [inlineRegPhone, setInlineRegPhone] = useState('');
+  const [inlineRegPassword, setInlineRegPassword] = useState('');
+  const [inlineRegLoading, setInlineRegLoading] = useState(false);
+  const [inlineRegAlert, setInlineRegAlert] = useState(null);
+
+  // Password visibility state
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+
   const [debitSearchInput, setDebitSearchInput] = useState('');
-  const [debitSelectedStudent, setDebitSelectedStudent] = useState(null);
+  const [debitSelectedStudents, setDebitSelectedStudents] = useState([]);
   const [debitDropdownOpen, setDebitDropdownOpen] = useState(false);
   const [debitType, setDebitType] = useState('bw');
   const [debitSide, setDebitSide] = useState('one');
@@ -149,6 +161,21 @@ export default function AdminPage() {
 
   const [delallConfirmInput, setDelallConfirmInput] = useState('');
   const [delallModalAlert, setDelallModalAlert] = useState(null);
+
+  // Custom Confirmation Modal
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTitle, setConfirmTitle] = useState('');
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [confirmBtnText, setConfirmBtnText] = useState('Delete');
+
+  const triggerConfirm = (title, message, onConfirm, btnText = 'Delete') => {
+    setConfirmTitle(title);
+    setConfirmMessage(message);
+    setConfirmAction(() => onConfirm);
+    setConfirmBtnText(btnText);
+    setConfirmOpen(true);
+  };
 
   // Reports filters
   const [reportMonthPicker, setReportMonthPicker] = useState('');
@@ -307,6 +334,18 @@ export default function AdminPage() {
     return () => window.removeEventListener('click', handleGlobalClick);
   }, []);
 
+  useEffect(() => {
+    if (!activeModal) {
+      setShowInlineRegister(false);
+      setInlineRegName('');
+      setInlineRegStudentId('');
+      setInlineRegBatch('');
+      setInlineRegPhone('');
+      setInlineRegPassword('');
+      setInlineRegAlert(null);
+    }
+  }, [activeModal]);
+
   if (!isMounted || !currentUser) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0a0f1e', color: '#fff', fontFamily: 'system-ui, sans-serif' }}>
@@ -319,6 +358,7 @@ export default function AdminPage() {
 
   const handleLogoutClick = () => {
     logoutUser();
+    localStorage.removeItem('auto_login_admin');
     router.push('/login');
   };
 
@@ -368,6 +408,57 @@ export default function AdminPage() {
     setRegPhone('');
     setRegPassword('');
     setRegLoading(false);
+    showToast('Student registered successfully!', 'success');
+    await loadAllData();
+  };
+
+  // Inline Quick Register Form Submit
+  const handleInlineRegisterSubmit = async (e) => {
+    e.preventDefault();
+    setInlineRegLoading(true);
+    setInlineRegAlert(null);
+
+    const titleCasedName = toTitleCase(inlineRegName.trim());
+    const studentIdClean = inlineRegStudentId.trim();
+
+    const studentData = {
+      name: titleCasedName,
+      studentId: studentIdClean,
+      phone: inlineRegPhone.trim(),
+      password: inlineRegPassword,
+      batch: inlineRegBatch.trim(),
+      email: '',
+      course: '',
+      department: '',
+      semester: '',
+      totalFee: 0,
+      paidAmount: 0,
+      account_balance: 0
+    };
+
+    const { data, error } = await createStudent(studentData);
+    if (error) {
+      setInlineRegAlert({ type: 'error', text: error });
+      setInlineRegLoading(false);
+      return;
+    }
+
+    // Auto-select this student
+    if (activeModal === 'debit-modal') {
+      setDebitSelectedStudents(prev => [...prev, data]);
+      setDebitSearchInput('');
+    } else if (activeModal === 'credit-modal') {
+      setCreditSelectedStudent(data);
+      setCreditSearchInput('');
+    }
+
+    setInlineRegName('');
+    setInlineRegStudentId('');
+    setInlineRegBatch('');
+    setInlineRegPhone('');
+    setInlineRegPassword('');
+    setInlineRegLoading(false);
+    setShowInlineRegister(false);
     showToast('Student registered successfully!', 'success');
     await loadAllData();
   };
@@ -559,19 +650,30 @@ export default function AdminPage() {
   };
 
   const handleDeleteExpenseClick = async (id) => {
-    if (!confirm('Delete this expense entry?')) return;
-    await deleteExpense(id);
-    showToast('Expense deleted.', 'success');
-    await loadAllData();
+    triggerConfirm(
+      'Delete Expense',
+      'Are you sure you want to delete this expense entry? This cannot be undone.',
+      async () => {
+        const { error } = await deleteExpense(id);
+        if (error) return showToast(error, 'error');
+        showToast('Expense deleted.', 'success');
+        await loadAllData();
+      }
+    );
   };
 
   // Delete Student
   const handleDeleteStudentClick = async (id) => {
-    if (!confirm('Delete this student account? This will also remove all their transaction details.')) return;
-    const { error } = await deleteStudent(id);
-    if (error) return showToast(error, 'error');
-    showToast('Student deleted successfully.', 'success');
-    await loadAllData();
+    triggerConfirm(
+      'Delete Student Account',
+      'Are you sure you want to delete this student account? This will also permanently remove all their transaction details and balances.',
+      async () => {
+        const { error } = await deleteStudent(id);
+        if (error) return showToast(error, 'error');
+        showToast('Student deleted successfully.', 'success');
+        await loadAllData();
+      }
+    );
   };
 
   // Edit Student
@@ -713,7 +815,7 @@ export default function AdminPage() {
   // Debit Print Modal
   const handleOpenDebitModal = () => {
     setDebitSearchInput('');
-    setDebitSelectedStudent(null);
+    setDebitSelectedStudents([]);
     setDebitType('bw');
     setDebitSide('one');
     setDebitPages(1);
@@ -725,8 +827,8 @@ export default function AdminPage() {
 
   const handleDebitModalSubmit = async (e) => {
     e.preventDefault();
-    if (!debitSelectedStudent) {
-      setDebitAlert({ type: 'error', text: 'Please search and select a student.' });
+    if (!debitSelectedStudents || debitSelectedStudents.length === 0) {
+      setDebitAlert({ type: 'error', text: 'Please search and select at least one student.' });
       return;
     }
     setDebitLoading(true);
@@ -751,14 +853,22 @@ export default function AdminPage() {
       };
     }
 
-    const { error } = await applyStudentDebit(debitSelectedStudent.id, debitAmount, description, printMeta);
-    if (error) {
-      setDebitAlert({ type: 'error', text: error });
+    const errors = [];
+    for (const student of debitSelectedStudents) {
+      const { error } = await applyStudentDebit(student.id, debitAmount, description, printMeta);
+      if (error) {
+        errors.push(`${student.name}: ${error}`);
+      }
+    }
+
+    if (errors.length > 0) {
+      setDebitAlert({ type: 'error', text: `Failed for: ${errors.join(', ')}` });
       setDebitLoading(false);
+      await loadAllData();
       return;
     }
 
-    showToast('Debit charged successfully!', 'success');
+    showToast(`Debit charged successfully to ${debitSelectedStudents.length} student${debitSelectedStudents.length > 1 ? 's' : ''}!`, 'success');
     setActiveModal(null);
     setDebitLoading(false);
     await loadAllData();
@@ -851,17 +961,23 @@ export default function AdminPage() {
   };
 
   const handleDeleteRevenueEntry = async () => {
-    if (!confirm('Delete this revenue entry? This cannot be undone.')) return;
-    const linkedDebit = debits.find((d) => d.revenue_id === modalRevenueEntry.id);
-    if (linkedDebit) {
-      const { error } = await reverseAndDeleteEntry(linkedDebit.id);
-      if (error) return showToast(error, 'error');
-    } else {
-      await deleteRevenue(modalRevenueEntry.id);
-    }
-    showToast('Revenue entry deleted.', 'success');
-    setActiveModal(null);
-    await loadAllData();
+    triggerConfirm(
+      'Delete Revenue Entry',
+      'Are you sure you want to delete this revenue entry? This cannot be undone and will reverse any linked student charges/payments.',
+      async () => {
+        const linkedDebit = debits.find((d) => d.revenue_id === modalRevenueEntry.id);
+        if (linkedDebit) {
+          const { error } = await reverseAndDeleteEntry(linkedDebit.id);
+          if (error) return showToast(error, 'error');
+        } else {
+          const { error } = await deleteRevenue(modalRevenueEntry.id);
+          if (error) return showToast(error, 'error');
+        }
+        showToast('Revenue entry deleted.', 'success');
+        setActiveModal(null);
+        await loadAllData();
+      }
+    );
   };
 
   // Daily statement
@@ -876,24 +992,30 @@ export default function AdminPage() {
   };
 
   const handleDeleteDailyRevenueEntry = async (revenueId) => {
-    if (!confirm('Are you sure you want to delete this revenue entry? This will reverse any linked student charges/payments.')) return;
-    const linkedDebit = debits.find((d) => d.revenue_id === revenueId);
-    if (linkedDebit) {
-      const { error } = await reverseAndDeleteEntry(linkedDebit.id);
-      if (error) return showToast(`Error reversing entry: ${error}`, 'error');
-    } else {
-      await deleteRevenue(revenueId);
-    }
-    showToast('Revenue entry deleted successfully!', 'success');
-    // Refresh local lists
-    const updatedRev = revenue.filter((r) => r.id !== revenueId);
-    setRevenue(updatedRev);
-    const updatedEntries = dailyStatementEntries.filter((r) => r.id !== revenueId);
-    setDailyStatementEntries(updatedEntries);
-    if (updatedEntries.length === 0) {
-      setActiveModal(null);
-    }
-    await loadAllData();
+    triggerConfirm(
+      'Delete Revenue Entry',
+      'Are you sure you want to delete this revenue entry? This will reverse any linked student charges/payments.',
+      async () => {
+        const linkedDebit = debits.find((d) => d.revenue_id === revenueId);
+        if (linkedDebit) {
+          const { error } = await reverseAndDeleteEntry(linkedDebit.id);
+          if (error) return showToast(`Error reversing entry: ${error}`, 'error');
+        } else {
+          const { error } = await deleteRevenue(revenueId);
+          if (error) return showToast(`Error deleting entry: ${error}`, 'error');
+        }
+        showToast('Revenue entry deleted successfully!', 'success');
+        // Refresh local lists
+        const updatedRev = revenue.filter((r) => r.id !== revenueId);
+        setRevenue(updatedRev);
+        const updatedEntries = dailyStatementEntries.filter((r) => r.id !== revenueId);
+        setDailyStatementEntries(updatedEntries);
+        if (updatedEntries.length === 0) {
+          setActiveModal(null);
+        }
+        await loadAllData();
+      }
+    );
   };
 
   // --- REPORT EXPORTS (HTML PRINTS) ---
@@ -1607,15 +1729,20 @@ export default function AdminPage() {
 
   // Reverse debit/credit transaction from statement list
   const handleReverseDebitFromStatement = async (debitId) => {
-    if (!confirm('Are you sure you want to reverse and delete this transaction? This will automatically reverse student balances.')) return;
-    const { error, reversed } = await reverseAndDeleteEntry(debitId);
-    if (error) {
-      showToast(error, 'error');
-      return;
-    }
-    showToast(`Transaction reversed successfully for ${reversed.student}`, 'success');
-    setActiveModal(null);
-    await loadAllData();
+    triggerConfirm(
+      'Reverse & Delete Transaction',
+      'Are you sure you want to reverse and delete this transaction? This will automatically adjust the student\'s balance.',
+      async () => {
+        const { error, reversed } = await reverseAndDeleteEntry(debitId);
+        if (error) {
+          showToast(error, 'error');
+          return;
+        }
+        showToast(`Transaction reversed successfully for ${reversed.student}`, 'success');
+        setActiveModal(null);
+        await loadAllData();
+      }
+    );
   };
 
   // --- RENDERING FILTER LOGICS ---
@@ -1650,7 +1777,8 @@ export default function AdminPage() {
   // Autocomplete student filter for Debits Search
   const filteredDebitDropdownStudents = students.filter((s) => {
     const q = debitSearchInput.toLowerCase();
-    return s.name.toLowerCase().includes(q) || s.studentId.toLowerCase().includes(q);
+    const isAlreadySelected = debitSelectedStudents.some((selected) => selected.id === s.id);
+    return !isAlreadySelected && (s.name.toLowerCase().includes(q) || s.studentId.toLowerCase().includes(q));
   });
 
   // Autocomplete student filter for Credits Search
@@ -1718,376 +1846,7 @@ export default function AdminPage() {
         <meta name="description" content="Lab Accounts Admin Dashboard — Manage students, finances, and reports." />
       </Head>
 
-      {/* Styles Injection */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        .debit-fab-container {
-          position: fixed;
-          bottom: 1.75rem;
-          right: 1.75rem;
-          z-index: 900;
-          display: flex;
-          flex-direction: column;
-          gap: .65rem;
-          align-items: flex-end;
-        }
-        .debit-fab {
-          display: inline-flex;
-          align-items: center;
-          gap: .5rem;
-          padding: .55rem 1.1rem;
-          border-radius: 50px;
-          font-size: .82rem;
-          font-weight: 700;
-          cursor: pointer;
-          border: 2px solid transparent;
-          transition: all 0.2s ease;
-          user-select: none;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
-          white-space: nowrap;
-        }
-        .debit-fab:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
-        }
-        .debit-fab:active {
-          transform: translateY(0);
-        }
-        .debit-fab.fab-debit {
-          background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.85));
-          border-color: rgba(239, 68, 68, 0.6);
-          color: #fff;
-        }
-        .debit-fab.fab-credit {
-          background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.85));
-          border-color: rgba(16, 185, 129, 0.6);
-          color: #fff;
-        }
-        .student-search-wrap {
-          position: relative;
-        }
-        .student-search-input {
-          width: 100%;
-          padding: 0.75rem 1rem;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-sm);
-          color: var(--text-primary);
-          font-family: inherit;
-          font-size: 0.9rem;
-          outline: none;
-          transition: all 0.25s;
-        }
-        .student-search-input:focus {
-          border-color: var(--accent);
-          background: rgba(108, 99, 255, 0.08);
-          box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
-        }
-        .student-search-input::placeholder {
-          color: var(--text-muted);
-        }
-        .student-dropdown {
-          position: absolute;
-          top: calc(100% + 4px);
-          left: 0;
-          right: 0;
-          background: #1a2540;
-          border: 1px solid var(--border);
-          border-radius: var(--radius-sm);
-          z-index: 600;
-          max-height: 220px;
-          overflow-y: auto;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-        }
-        .student-opt {
-          padding: 0.65rem 1rem;
-          cursor: pointer;
-          font-size: 0.875rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-          transition: background 0.15s;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .student-opt:last-child {
-          border-bottom: none;
-        }
-        .student-opt:hover {
-          background: rgba(108, 99, 255, 0.15);
-        }
-        .student-opt .opt-id {
-          font-size: 0.72rem;
-          color: var(--text-muted);
-        }
-        .selected-student-tag {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: rgba(108, 99, 255, 0.15);
-          border: 1px solid rgba(108, 99, 255, 0.3);
-          border-radius: 6px;
-          padding: 0.35rem 0.75rem;
-          font-size: 0.82rem;
-          margin-top: 0.5rem;
-          color: var(--accent-2);
-        }
-        .selected-student-tag button {
-          background: none;
-          border: none;
-          color: var(--text-muted);
-          cursor: pointer;
-          font-size: 0.9rem;
-          padding: 0;
-          line-height: 1;
-        }
-        .selected-student-tag button:hover {
-          color: var(--danger);
-        }
-        .type-debit {
-          background: rgba(239, 68, 68, 0.15);
-          color: #f87171;
-          border-radius: 5px;
-          padding: 2px 8px;
-          font-size: .72rem;
-          font-weight: 700;
-        }
-        .type-credit {
-          background: rgba(16, 185, 129, 0.15);
-          color: #34d399;
-          border-radius: 5px;
-          padding: 2px 8px;
-          font-size: .72rem;
-          font-weight: 700;
-        }
-        .balance-pill {
-          display: inline-block;
-          padding: .25rem .75rem;
-          border-radius: 50px;
-          font-size: .8rem;
-          font-weight: 700;
-          white-space: nowrap;
-        }
-        .balance-pill.due {
-          background: rgba(239, 68, 68, 0.15);
-          color: #f87171;
-          border: 1px solid rgba(239, 68, 68, 0.25);
-        }
-        .balance-pill.advance {
-          background: rgba(16, 185, 129, 0.15);
-          color: #34d399;
-          border: 1px solid rgba(16, 185, 129, 0.25);
-        }
-        .balance-pill.cleared {
-          background: rgba(148, 163, 184, 0.1);
-          color: var(--text-muted);
-          border: 1px solid rgba(148, 163, 184, 0.15);
-        }
-        .action-dropdown-container {
-          position: relative;
-          display: inline-block;
-        }
-        .kebab-btn {
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          padding: 6px;
-          border-radius: 50%;
-          color: var(--text-muted);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.2s, color 0.2s;
-        }
-        .kebab-btn:hover {
-          background: rgba(255, 255, 255, 0.05);
-          color: var(--text-primary);
-        }
-        .action-dropdown-menu {
-          position: absolute;
-          right: 0;
-          top: 100%;
-          z-index: 1000;
-          background: var(--bg-secondary);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-          border-radius: 8px;
-          overflow: hidden;
-          min-width: 150px;
-          text-align: left;
-          border: 1px solid var(--border);
-        }
-        .dropdown-item {
-          display: block;
-          width: 100%;
-          text-align: left;
-          padding: 0.6rem 1rem;
-          background: transparent;
-          border: none;
-          font-size: 0.8rem;
-          font-weight: 600;
-          cursor: pointer;
-          color: var(--text-primary);
-          transition: background 0.2s;
-        }
-        .dropdown-item:hover {
-          background: rgba(108, 99, 255, 0.08);
-        }
-        .dropdown-item.qb-charge { color: #f87171; }
-        .dropdown-item.qb-collect { color: #34d399; }
-        .dropdown-item.qb-whatsapp { color: #25d366; }
-        .dropdown-item.qb-del { color: var(--danger); }
-        
-        .quick-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: .25rem;
-          padding: .3rem .7rem;
-          border-radius: 50px;
-          font-size: .72rem;
-          font-weight: 700;
-          cursor: pointer;
-          border: 1.5px solid transparent;
-          transition: all .18s;
-          white-space: nowrap;
-        }
-        .quick-btn.qb-charge {
-          background: rgba(239, 68, 68, 0.12);
-          border-color: rgba(239, 68, 68, 0.3);
-          color: #f87171;
-        }
-        .quick-btn.qb-charge:hover {
-          background: rgba(239, 68, 68, 0.22);
-          border-color: #ef4444;
-          transform: translateY(-1px);
-        }
-        .quick-btn.qb-collect {
-          background: rgba(16, 185, 129, 0.12);
-          border-color: rgba(16, 185, 129, 0.3);
-          color: #34d399;
-        }
-        .quick-btn.qb-collect:hover {
-          background: rgba(16, 185, 129, 0.22);
-          border-color: #10b981;
-          transform: translateY(-1px);
-        }
-        .quick-btn.qb-history {
-          background: rgba(108, 99, 255, 0.1);
-          border-color: rgba(108, 99, 255, 0.25);
-          color: var(--accent-2);
-        }
-        .quick-btn.qb-history:hover {
-          background: rgba(108, 99, 255, 0.18);
-          transform: translateY(-1px);
-        }
-        .quick-btn.qb-whatsapp {
-          background: rgba(37, 211, 102, 0.12);
-          border-color: rgba(37, 211, 102, 0.3);
-          color: #25d366;
-        }
-        .quick-btn.qb-whatsapp:hover {
-          background: rgba(37, 211, 102, 0.22);
-          border-color: #25d366;
-          transform: translateY(-1px);
-        }
-        .quick-btn.qb-del {
-          background: rgba(239, 68, 68, 0.06);
-          border-color: rgba(239, 68, 68, 0.12);
-          color: #f87171;
-          opacity: .65;
-        }
-        .quick-btn.qb-del:hover {
-          opacity: 1;
-        }
-        .debtor-name {
-          font-weight: 700;
-          font-size: .9rem;
-        }
-        .debtor-meta {
-          font-size: .72rem;
-          color: var(--text-muted);
-          margin-top: 1px;
-        }
-        .qm-student-tag {
-          background: rgba(108, 99, 255, 0.1);
-          border: 1px solid rgba(108, 99, 255, 0.2);
-          border-radius: 8px;
-          padding: .6rem 1rem;
-          margin-bottom: 1rem;
-          font-size: .88rem;
-        }
-        .qm-student-tag strong {
-          color: var(--accent-2);
-        }
-        .qm-student-tag .qm-meta {
-          color: var(--text-muted);
-          font-size: .75rem;
-          display: block;
-          margin-top: 2px;
-        }
-        .balance-preview {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: .6rem 1rem;
-          font-size: .82rem;
-          margin-bottom: 1rem;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .balance-preview .bp-label {
-          color: var(--text-muted);
-        }
-        .balance-preview .bp-value {
-          font-weight: 700;
-        }
-        .debtor-name-clickable {
-          cursor: pointer;
-          color: var(--accent-2);
-          transition: color 0.15s ease, text-decoration 0.15s ease;
-        }
-        .debtor-name-clickable:hover {
-          color: var(--accent);
-          text-decoration: underline;
-        }
-        /* Mobile sidebar toggle & Responsive Utilities */
-        @media (max-width: 1024px) {
-          .sidebar {
-            position: fixed;
-            left: -280px;
-            top: 0;
-            bottom: 0;
-            width: 280px;
-            z-index: 999;
-            transition: left 0.3s ease;
-          }
-          .sidebar.open {
-            left: 0;
-          }
-          .main-content {
-            margin-left: 0 !important;
-          }
-          .hamburger-menu, .sidebar-close {
-            display: block !important;
-          }
-        }
-        @media (max-width: 768px) {
-          .stats-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .form-row, .responsive-grid-1col {
-            display: flex !important;
-            flex-direction: column !important;
-          }
-          .modal {
-            width: 95% !important;
-            max-width: 100% !important;
-            padding: 1.25rem 1rem !important;
-            margin: 1rem auto !important;
-          }
-          .summary-strip, .debit-fab-container {
-            display: flex;
-          }
-        }
-      ` }} />
+
 
       {/* Toast container */}
       <div className="toast-container">
@@ -2103,7 +1862,13 @@ export default function AdminPage() {
         <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-logo">
             <div className="logo-mark">
-              <div className="logo-icon-sm">🧪</div>
+              <div className="logo-icon-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </div>
               <div className="logo-text">Lab Accounts <span>Admin Panel</span></div>
             </div>
             <button className="btn btn-outline btn-sm sidebar-close" style={{ display: 'none' }} onClick={() => setSidebarOpen(false)}>✕</button>
@@ -2310,6 +2075,7 @@ export default function AdminPage() {
                               <th>Name</th>
                               <th>Batch</th>
                               <th>Phone</th>
+                              <th>Password</th>
                               <th>Balance</th>
                               <th style={{ textAlign: 'right' }}>Actions</th>
                             </tr>
@@ -2327,6 +2093,46 @@ export default function AdminPage() {
                                     <td><strong>{s.name}</strong></td>
                                     <td>{s.batch || <span style={{ color: 'var(--text-muted)' }}>—</span>}</td>
                                     <td>{s.phone || <span style={{ color: 'var(--text-muted)' }}>—</span>}</td>
+                                    <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>
+                                      {s.password ? (
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                                          <span style={{ fontSize: visiblePasswords[s.id] ? 'inherit' : '1rem', letterSpacing: visiblePasswords[s.id] ? 'normal' : '1.5px', verticalAlign: 'middle' }}>
+                                            {visiblePasswords[s.id] ? s.password : '••••••'}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => setVisiblePasswords(prev => ({ ...prev, [s.id]: !prev[s.id] }))}
+                                            style={{
+                                              background: 'none',
+                                              border: 'none',
+                                              cursor: 'pointer',
+                                              padding: '4px',
+                                              display: 'inline-flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              color: visiblePasswords[s.id] ? 'var(--accent)' : 'var(--text-muted)',
+                                              opacity: visiblePasswords[s.id] ? 1 : 0.5,
+                                              transition: 'color 0.2s, opacity 0.2s'
+                                            }}
+                                            title={visiblePasswords[s.id] ? "Hide Password" : "Show Password"}
+                                          >
+                                            {visiblePasswords[s.id] ? (
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                              </svg>
+                                            ) : (
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                                <line x1="1" y1="1" x2="23" y2="23" />
+                                              </svg>
+                                            )}
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <span style={{ color: 'var(--text-muted)' }}>—</span>
+                                      )}
+                                    </td>
                                     <td style={{ fontWeight: 700, color: balColor }}>{balLabel}</td>
                                     <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                                       <button className="quick-btn qb-edit" onClick={() => handleOpenEditStudent(s)} title="Edit Student" style={{ marginRight: '4px' }}>✏️</button>
@@ -2337,7 +2143,7 @@ export default function AdminPage() {
                               })
                             ) : (
                               <tr>
-                                <td colSpan="6">
+                                <td colSpan="7">
                                   <div className="empty-state">
                                     <div className="empty-icon">🎓</div>No students found matching your filters.
                                   </div>
@@ -2488,8 +2294,7 @@ export default function AdminPage() {
                               >
                                 <option value="Cash">Cash (Direct Income)</option>
                                 <option value="Credit">Credit (Student Debit)</option>
-                                <option value="Opening Cash">Opening Cash Balance</option>
-                              </select>
+                                <option value="Opening Cash">Opening Cash Balance</option>                              </select>
                             </div>
                             {revType === 'Credit' && (
                               <div className="form-group">
@@ -2564,7 +2369,7 @@ export default function AdminPage() {
                           <div className="table-title">💰 Revenue Entries</div>
                           <div className="badge badge-success">Total: {fmt(totalRevenue)}</div>
                         </div>
-                        <div style={{ overflowX: 'auto' }}>
+                        <div className="desktop-only" style={{ overflowX: 'auto' }}>
                           <table>
                             <thead>
                               <tr>
@@ -2619,6 +2424,54 @@ export default function AdminPage() {
                               )}
                             </tbody>
                           </table>
+                        </div>
+
+                        {/* Mobile card list for Revenue Entries */}
+                        <div className="mobile-only statement-card-list">
+                          {groupedRevenueList.length > 0 ? (
+                            groupedRevenueList.map((t, idx) => (
+                              <div key={idx} className="statement-card">
+                                <div className="statement-card-header">
+                                  <span className="statement-card-student">
+                                    {t.isPrint ? (
+                                      <span
+                                        onClick={() => handleOpenDailyStatement(t.date)}
+                                        style={{ color: 'var(--accent-2)', cursor: 'pointer', fontWeight: 600 }}
+                                      >
+                                        Daily Print Revenue
+                                      </span>
+                                    ) : (
+                                      <span
+                                        onClick={() => handleOpenRevenueDetail(revenue.find((r) => r.id === t.id))}
+                                        style={{ color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600 }}
+                                      >
+                                        {t.title}
+                                      </span>
+                                    )}
+                                  </span>
+                                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                    {fmtDate(t.date)}
+                                  </span>
+                                </div>
+                                <div className="statement-card-body">
+                                  <span className="statement-card-desc">
+                                    {t.isPrint ? (
+                                      <span className="badge badge-success">Print</span>
+                                    ) : (
+                                      <span className="badge badge-info">{t.source}</span>
+                                    )}
+                                  </span>
+                                  <span className="statement-card-amount" style={{ color: '#34d399' }}>
+                                    {fmt(t.amount)}
+                                  </span>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="empty-state">
+                              <div className="empty-icon">💰</div>No revenue entries yet.
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2693,7 +2546,7 @@ export default function AdminPage() {
                           <div className="table-title">💸 Expense Entries</div>
                           <div className="badge badge-danger">Total: {fmt(totalExpenses)}</div>
                         </div>
-                        <div style={{ overflowX: 'auto' }}>
+                        <div className="desktop-only" style={{ overflowX: 'auto' }}>
                           <table>
                             <thead>
                               <tr>
@@ -2728,6 +2581,37 @@ export default function AdminPage() {
                               )}
                             </tbody>
                           </table>
+                        </div>
+
+                        {/* Mobile card list for Expense Entries */}
+                        <div className="mobile-only statement-card-list">
+                          {expenses.length > 0 ? (
+                            [...expenses].reverse().map((e) => (
+                              <div key={e.id} className="statement-card">
+                                <div className="statement-card-header">
+                                  <span className="statement-card-student">{e.title}</span>
+                                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                    {fmtDate(e.date)}
+                                  </span>
+                                </div>
+                                <div className="statement-card-body" style={{ alignItems: 'center' }}>
+                                  <span className="statement-card-desc" style={{ fontSize: '0.75rem' }}>
+                                    {e.notes || 'No notes'}
+                                  </span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span className="statement-card-amount" style={{ color: '#f87171' }}>
+                                      {fmt(e.amount)}
+                                    </span>
+                                    <button className="btn btn-danger btn-sm" style={{ padding: '0.25rem 0.5rem', minHeight: 'auto', height: '28px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => handleDeleteExpenseClick(e.id)}>🗑️</button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="empty-state">
+                              <div className="empty-icon">💸</div>No expense entries yet.
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2878,10 +2762,10 @@ export default function AdminPage() {
                 {activeSection === 'reports' && (
                   <div className="section active" id="section-reports">
                     <div className="panel" style={{ marginBottom: '1.5rem' }}>
-                      <div className="panel-body" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+                      <div className="panel-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                         {/* Monthly report month picker */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                          <label htmlFor="report-month-picker" style={{ fontWeight: 600, margin: 0 }}>Select Month:</label>
+                          <label htmlFor="report-month-picker" style={{ fontWeight: 600, width: '135px', display: 'inline-block', flexShrink: 0, margin: 0 }}>Select Month:</label>
                           <input
                             type="month"
                             id="report-month-picker"
@@ -2897,7 +2781,7 @@ export default function AdminPage() {
 
                         {/* Custom date range picker */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                          <label style={{ fontWeight: 600, margin: 0 }}>From:</label>
+                          <label style={{ fontWeight: 600, width: '135px', display: 'inline-block', flexShrink: 0, margin: 0 }}>Date Range:</label>
                           <input
                             type="date"
                             className="form-control"
@@ -2905,7 +2789,7 @@ export default function AdminPage() {
                             value={reportFromDate}
                             onChange={(e) => setReportFromDate(e.target.value)}
                           />
-                          <label style={{ fontWeight: 600, margin: 0 }}>To:</label>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>to</span>
                           <input
                             type="date"
                             className="form-control"
@@ -2920,7 +2804,7 @@ export default function AdminPage() {
 
                         {/* Debtor Directory report */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                          <label style={{ fontWeight: 600, margin: 0 }}>Debtor Directory:</label>
+                          <label style={{ fontWeight: 600, width: '135px', display: 'inline-block', flexShrink: 0, margin: 0 }}>Debtor Directory:</label>
                           <button className="btn btn-outline" onClick={handlePrintDebtorReport}>
                             🖨️ Print Debtor Report
                           </button>
@@ -2932,7 +2816,7 @@ export default function AdminPage() {
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="stats-grid">
+                    <div className="stats-grid-5">
                       <div className="stat-card blue">
                         <span className="stat-icon">📊</span>
                         <div className="stat-label">Opening Balance</div>
@@ -3194,65 +3078,153 @@ export default function AdminPage() {
             </div>
             <div className="modal-body p-5 lg:p-6">
               <form onSubmit={handleDebitModalSubmit}>
-                <div className="form-group">
-                  <label>Search Student *</label>
-                  <div className="student-search-wrap">
-                    <input
-                      type="text"
-                      className="student-search-input"
-                      value={debitSearchInput}
-                      onChange={(e) => {
-                        setDebitSearchInput(e.target.value);
-                        setDebitDropdownOpen(true);
-                      }}
-                      onFocus={(e) => {
-                        e.stopPropagation();
-                        setDebitDropdownOpen(true);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      placeholder="Type name or Student ID…"
-                      autoComplete="off"
-                    />
-                    {debitDropdownOpen && (
-                      <div className="student-dropdown open" onClick={(e) => e.stopPropagation()}>
-                        {filteredDebitDropdownStudents.length > 0 ? (
-                          filteredDebitDropdownStudents.map((s) => (
-                            <div key={s.id} className="student-opt" onClick={() => { setDebitSelectedStudent(s); setDebitSearchInput(''); setDebitDropdownOpen(false); }}>
-                              <span>{s.name}</span>
-                              <span className="opt-id">{s.studentId} {s.batch ? `· ${s.batch}` : ''}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="student-opt" style={{ color: 'var(--text-muted)', cursor: 'default' }}>No students found</div>
-                        )}
-                        <div 
-                          className="student-opt register-shortcut" 
-                          style={{ color: '#6c63ff', fontWeight: 600, borderTop: '1px solid var(--border)', cursor: 'pointer' }} 
-                          onClick={() => { 
-                            setDebitDropdownOpen(false); 
-                            setActiveModal(null); 
-                            setActiveSection('register'); 
-                          }}
-                        >
-                          + Register New Student
+                {showInlineRegister ? (
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '8px', padding: '1rem', marginBottom: '1.25rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: 'var(--accent)' }}>➕ Register New Student</h4>
+                      <button type="button" className="modal-close" style={{ fontSize: '1rem', padding: 0 }} onClick={() => setShowInlineRegister(false)}>✕</button>
+                    </div>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Full Name *</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegName}
+                          onChange={(e) => setInlineRegName(e.target.value)}
+                          onBlur={(e) => setInlineRegName(toTitleCase(e.target.value))}
+                          required={showInlineRegister}
+                          placeholder="e.g. Anfaz Ahamed"
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Student ID *</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegStudentId}
+                          onChange={(e) => setInlineRegStudentId(e.target.value)}
+                          required={showInlineRegister}
+                          placeholder="e.g. 2024CS001"
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Batch</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegBatch}
+                          onChange={(e) => setInlineRegBatch(e.target.value)}
+                          placeholder="Batch name"
+                          list="batch-list"
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Phone</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegPhone}
+                          onChange={(e) => setInlineRegPhone(e.target.value)}
+                          placeholder="+91 98765..."
+                        />
+                      </div>
+                      <div className="form-group" style={{ gridColumn: 'span 2', marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Password *</label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegPassword}
+                          onChange={(e) => setInlineRegPassword(e.target.value)}
+                          required={showInlineRegister}
+                          placeholder="Password"
+                        />
+                      </div>
+                    </div>
+
+                    {inlineRegAlert && (
+                      <div className={`alert alert-${inlineRegAlert.type}`} style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem', marginTop: '0.75rem', marginBottom: 0 }}>
+                        {inlineRegAlert.type === 'success' ? '✅' : '⚠️'} {inlineRegAlert.text}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                      <button type="button" className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setShowInlineRegister(false)}>Cancel</button>
+                      <button type="button" className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }} onClick={handleInlineRegisterSubmit} disabled={inlineRegLoading}>
+                        {inlineRegLoading ? 'Saving...' : 'Register & Select'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="form-group">
+                    <label>Search Student *</label>
+                    <div className="student-search-wrap">
+                      <input
+                        type="text"
+                        className="student-search-input"
+                        value={debitSearchInput}
+                        onChange={(e) => {
+                          setDebitSearchInput(e.target.value);
+                          setDebitDropdownOpen(true);
+                        }}
+                        onFocus={(e) => {
+                          e.stopPropagation();
+                          setDebitDropdownOpen(true);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Type name or Student ID…"
+                        autoComplete="off"
+                      />
+                      {debitDropdownOpen && (
+                        <div className="student-dropdown open" onClick={(e) => e.stopPropagation()}>
+                          {filteredDebitDropdownStudents.length > 0 ? (
+                            filteredDebitDropdownStudents.map((s) => (
+                              <div key={s.id} className="student-opt" onClick={() => { setDebitSelectedStudents(prev => [...prev, s]); setDebitSearchInput(''); setDebitDropdownOpen(false); }}>
+                                <span>{s.name}</span>
+                                <span className="opt-id">{s.batch || ''}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="student-opt" style={{ color: 'var(--text-muted)', cursor: 'default' }}>No students found</div>
+                          )}
+                          <div 
+                            className="student-opt register-shortcut" 
+                            style={{ color: '#6c63ff', fontWeight: 600, borderTop: '1px solid var(--border)', cursor: 'pointer' }} 
+                            onClick={() => { 
+                              setDebitDropdownOpen(false); 
+                              setShowInlineRegister(true); 
+                            }}
+                          >
+                            + Register New Student
+                          </div>
                         </div>
+                      )}
+                    </div>
+                    {debitSelectedStudents && debitSelectedStudents.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                        {debitSelectedStudents.map((student) => (
+                          <div key={student.id} className="selected-student-tag" style={{ marginTop: 0 }}>
+                            🎓 {student.name} {student.batch ? <span className="td-muted">({student.batch})</span> : ''}
+                            <button type="button" onClick={() => setDebitSelectedStudents(prev => prev.filter(s => s.id !== student.id))}>✕</button>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-                  {debitSelectedStudent && (
-                    <div className="selected-student-tag">
-                      🎓 {debitSelectedStudent.name} <span className="td-muted">({debitSelectedStudent.studentId})</span>
-                      <button type="button" onClick={() => setDebitSelectedStudent(null)}>✕</button>
-                    </div>
-                  )}
-                </div>
+                )}
 
                 <div className="form-group">
                   <label>Debit Type *</label>
                   <select className="form-control" value={debitType} onChange={(e) => setDebitType(e.target.value)} required>
                     <option value="bw">Black &amp; White Print</option>
                     <option value="colour">Colour Print</option>
-                    <option value="opening">Previous Arrears / Opening Balance</option>
+
                   </select>
                 </div>
 
@@ -3334,47 +3306,142 @@ export default function AdminPage() {
             </div>
             <div className="modal-body p-5 lg:p-6">
               <form onSubmit={handleCreditModalSubmit}>
-                <div className="form-group">
-                  <label>Search Student *</label>
-                  <div className="student-search-wrap">
-                    <input
-                      type="text"
-                      className="student-search-input"
-                      value={creditSearchInput}
-                      onChange={(e) => {
-                        setCreditSearchInput(e.target.value);
-                        setCreditDropdownOpen(true);
-                      }}
-                      onFocus={(e) => {
-                        e.stopPropagation();
-                        setCreditDropdownOpen(true);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      placeholder="Type name or Student ID…"
-                      autoComplete="off"
-                    />
-                    {creditDropdownOpen && (
-                      <div className="student-dropdown open" onClick={(e) => e.stopPropagation()}>
-                        {filteredCreditDropdownStudents.length > 0 ? (
-                          filteredCreditDropdownStudents.map((s) => (
-                            <div key={s.id} className="student-opt" onClick={() => { setCreditSelectedStudent(s); setCreditSearchInput(''); setCreditDropdownOpen(false); }}>
-                              <span>{s.name}</span>
-                              <span className="opt-id">{s.studentId} {s.batch ? `· ${s.batch}` : ''}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="student-opt" style={{ color: 'var(--text-muted)', cursor: 'default' }}>No students found</div>
-                        )}
+                {showInlineRegister ? (
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '8px', padding: '1rem', marginBottom: '1.25rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: 'var(--accent)' }}>➕ Register New Student</h4>
+                      <button type="button" className="modal-close" style={{ fontSize: '1rem', padding: 0 }} onClick={() => setShowInlineRegister(false)}>✕</button>
+                    </div>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Full Name *</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegName}
+                          onChange={(e) => setInlineRegName(e.target.value)}
+                          onBlur={(e) => setInlineRegName(toTitleCase(e.target.value))}
+                          required={showInlineRegister}
+                          placeholder="e.g. Anfaz Ahamed"
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Student ID *</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegStudentId}
+                          onChange={(e) => setInlineRegStudentId(e.target.value)}
+                          required={showInlineRegister}
+                          placeholder="e.g. 2024CS001"
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Batch</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegBatch}
+                          onChange={(e) => setInlineRegBatch(e.target.value)}
+                          placeholder="Batch name"
+                          list="batch-list"
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Phone</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegPhone}
+                          onChange={(e) => setInlineRegPhone(e.target.value)}
+                          placeholder="+91 98765..."
+                        />
+                      </div>
+                      <div className="form-group" style={{ gridColumn: 'span 2', marginBottom: 0 }}>
+                        <label style={{ fontSize: '0.75rem' }}>Password *</label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
+                          value={inlineRegPassword}
+                          onChange={(e) => setInlineRegPassword(e.target.value)}
+                          required={showInlineRegister}
+                          placeholder="Password"
+                        />
+                      </div>
+                    </div>
+
+                    {inlineRegAlert && (
+                      <div className={`alert alert-${inlineRegAlert.type}`} style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem', marginTop: '0.75rem', marginBottom: 0 }}>
+                        {inlineRegAlert.type === 'success' ? '✅' : '⚠️'} {inlineRegAlert.text}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                      <button type="button" className="btn btn-outline btn-sm" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setShowInlineRegister(false)}>Cancel</button>
+                      <button type="button" className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }} onClick={handleInlineRegisterSubmit} disabled={inlineRegLoading}>
+                        {inlineRegLoading ? 'Saving...' : 'Register & Select'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="form-group">
+                    <label>Search Student *</label>
+                    <div className="student-search-wrap">
+                      <input
+                        type="text"
+                        className="student-search-input"
+                        value={creditSearchInput}
+                        onChange={(e) => {
+                          setCreditSearchInput(e.target.value);
+                          setCreditDropdownOpen(true);
+                        }}
+                        onFocus={(e) => {
+                          e.stopPropagation();
+                          setCreditDropdownOpen(true);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Type name or Student ID…"
+                        autoComplete="off"
+                      />
+                      {creditDropdownOpen && (
+                        <div className="student-dropdown open" onClick={(e) => e.stopPropagation()}>
+                          {filteredCreditDropdownStudents.length > 0 ? (
+                            filteredCreditDropdownStudents.map((s) => (
+                              <div key={s.id} className="student-opt" onClick={() => { setCreditSelectedStudent(s); setCreditSearchInput(''); setCreditDropdownOpen(false); }}>
+                                <span>{s.name}</span>
+                                <span className="opt-id">{s.batch || ''}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="student-opt" style={{ color: 'var(--text-muted)', cursor: 'default' }}>No students found</div>
+                          )}
+                          <div 
+                            className="student-opt register-shortcut" 
+                            style={{ color: '#6c63ff', fontWeight: 600, borderTop: '1px solid var(--border)', cursor: 'pointer' }} 
+                            onClick={() => { 
+                              setCreditDropdownOpen(false); 
+                              setShowInlineRegister(true); 
+                            }}
+                          >
+                            + Register New Student
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {creditSelectedStudent && (
+                      <div className="selected-student-tag">
+                        🎓 {creditSelectedStudent.name} {creditSelectedStudent.batch ? <span className="td-muted">({creditSelectedStudent.batch})</span> : ''}
+                        <button type="button" onClick={() => setCreditSelectedStudent(null)}>✕</button>
                       </div>
                     )}
                   </div>
-                  {creditSelectedStudent && (
-                    <div className="selected-student-tag">
-                      🎓 {creditSelectedStudent.name} <span className="td-muted">({creditSelectedStudent.studentId})</span>
-                      <button type="button" onClick={() => setCreditSelectedStudent(null)}>✕</button>
-                    </div>
-                  )}
-                </div>
+                )}
 
                 <div className="form-group">
                   <label>Description *</label>
@@ -3471,11 +3538,17 @@ export default function AdminPage() {
                   </div>
                 )}
 
-                <div className="modal-footer" style={{ padding: 0, marginTop: '1rem' }}>
-                  <button className="btn btn-outline" type="button" onClick={() => setActiveModal(null)}>Cancel</button>
-                  <button className="btn btn-primary" type="submit" disabled={editLoading}>
-                    {editLoading ? 'Saving...' : 'Save Changes'}
-                  </button>
+                <div className="modal-footer" style={{ padding: 0, marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <button className="btn btn-danger btn-sm" type="button" onClick={() => {
+                    handleDeleteStudentClick(modalStudent.id);
+                    setActiveModal(null);
+                  }}>🗑️ Delete Student</button>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-outline" type="button" onClick={() => setActiveModal(null)}>Cancel</button>
+                    <button className="btn btn-primary" type="submit" disabled={editLoading}>
+                      {editLoading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
@@ -3508,7 +3581,8 @@ export default function AdminPage() {
               </div>
 
               <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                {/* Desktop View Table */}
+                <table className="desktop-only" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid var(--border)', background: 'rgba(255,255,255,0.02)', position: 'sticky', top: 0 }}>
                       <th style={{ padding: '0.65rem 0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Date</th>
@@ -3546,6 +3620,41 @@ export default function AdminPage() {
                     )}
                   </tbody>
                 </table>
+
+                {/* Mobile View Card List */}
+                <div className="mobile-only">
+                  {asTransactions.length > 0 ? (
+                    <div className="statement-card-list">
+                      {asTransactions.map((t) => {
+                        const isCredit = t.type === 'credit';
+                        const color = isCredit ? '#34d399' : '#f87171';
+                        const dateStr = t.createdAt ? t.createdAt.split('T')[0] : '—';
+                        const dateParts = dateStr.split('-');
+                        const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : dateStr;
+
+                        return (
+                          <div key={t.id} className="statement-card">
+                            <div className="statement-card-header">
+                              <span className="statement-card-student" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{formattedDate}</span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span style={{ color, fontWeight: 600, fontSize: '0.75rem', textTransform: 'uppercase' }}>{isCredit ? 'Credit' : 'Debit'}</span>
+                                <button className="quick-btn qb-del" onClick={() => handleReverseDebitFromStatement(t.id)} title="Delete &amp; Reverse">🗑️</button>
+                              </div>
+                            </div>
+                            <div className="statement-card-body">
+                              <span className="statement-card-desc">{t.description || (isCredit ? 'Credit payment' : 'Debit charge')}</span>
+                              <span className="statement-card-amount" style={{ color }}>{isCredit ? '+' : '-'}{fmt(t.amount)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                      No transactions found.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="modal-footer" style={{ padding: 0, marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -3630,7 +3739,8 @@ export default function AdminPage() {
               </div>
 
               <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                {/* Desktop View Table */}
+                <table className="desktop-only" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid var(--border)', background: 'rgba(255,255,255,0.02)', position: 'sticky', top: 0 }}>
                       <th style={{ padding: '0.65rem 0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Student Name</th>
@@ -3664,6 +3774,36 @@ export default function AdminPage() {
                     )}
                   </tbody>
                 </table>
+
+                {/* Mobile View Card List */}
+                <div className="mobile-only">
+                  {dailyStatementEntries.length > 0 ? (
+                    <div className="statement-card-list">
+                      {dailyStatementEntries.map((item) => {
+                        const matchName = item.title.split(' — ');
+                        const studentName = matchName.length > 1 ? matchName[matchName.length - 1].trim() : 'General / Admin';
+                        const description = matchName[0].trim();
+
+                        return (
+                          <div key={item.id} className="statement-card">
+                            <div className="statement-card-header">
+                              <span className="statement-card-student">{studentName}</span>
+                              <button className="quick-btn qb-del" onClick={() => handleDeleteDailyRevenueEntry(item.id)} title="Delete &amp; Reverse">🗑️</button>
+                            </div>
+                            <div className="statement-card-body">
+                              <span className="statement-card-desc">{description}</span>
+                              <span className="statement-card-amount">+{fmt(item.amount)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                      No print revenue entries found for this date.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="modal-footer" style={{ padding: 0, marginTop: '1rem' }}>
@@ -3683,6 +3823,32 @@ export default function AdminPage() {
         <option value="BS4"></option>
         <option value="BS5"></option>
       </datalist>
+
+      {/* ── Custom Confirmation Modal ── */}
+      {confirmOpen && (
+        <div className="modal-overlay open" style={{ zIndex: 9999 }} onClick={() => setConfirmOpen(false)}>
+          <div className="modal" style={{ maxWidth: '400px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header" style={{ borderBottomColor: 'rgba(239, 68, 68, 0.15)' }}>
+              <div className="modal-title" style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span>⚠️</span> {confirmTitle}
+              </div>
+              <button className="modal-close" onClick={() => setConfirmOpen(false)}>✕</button>
+            </div>
+            <div className="modal-body" style={{ padding: '1.5rem' }}>
+              <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: 1.5, color: '#94a3b8' }}>
+                {confirmMessage}
+              </p>
+            </div>
+            <div className="modal-footer" style={{ borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
+              <button className="btn btn-outline" onClick={() => setConfirmOpen(false)}>Cancel</button>
+              <button className="btn btn-danger" onClick={() => {
+                if (confirmAction) confirmAction();
+                setConfirmOpen(false);
+              }}>{confirmBtnText}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

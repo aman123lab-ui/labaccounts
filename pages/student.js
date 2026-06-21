@@ -16,6 +16,7 @@ export default function StudentDashboard() {
   const [activeSection, setActiveSection] = useState('overview');
   const [debits, setDebits] = useState([]);
   const [toasts, setToasts] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -69,6 +70,7 @@ export default function StudentDashboard() {
   const handleSignOut = () => {
     logoutUser();
     localStorage.removeItem('student_id');
+    localStorage.removeItem('auto_login_student');
     router.replace('/login');
   };
 
@@ -215,33 +217,38 @@ export default function StudentDashboard() {
       </div>
 
       {/* ── Sidebar ── */}
-      <aside className="sidebar" id="sidebar">
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`} id="sidebar">
         <div className="sidebar-logo">
-          <div className="sidebar-logo">
-            <div className="logo-mark">
-              <div className="logo-icon-sm">🧪</div>
-              <div className="logo-text">Lab Accounts <span>Student Portal</span></div>
+          <div className="logo-mark">
+            <div className="logo-icon-sm">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
             </div>
+            <div className="logo-text">Lab Accounts <span>Student Portal</span></div>
           </div>
+          <button className="btn btn-outline btn-sm sidebar-close" style={{ display: 'none' }} onClick={() => setSidebarOpen(false)}>✕</button>
         </div>
 
         <nav className="nav-section">
           <div className="nav-label">My Account</div>
           <div
             className={`nav-item ${activeSection === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveSection('overview')}
+            onClick={() => { setActiveSection('overview'); setSidebarOpen(false); }}
           >
             <span className="nav-icon">📊</span> Account Overview
           </div>
           <div
             className={`nav-item ${activeSection === 'debits' ? 'active' : ''}`}
-            onClick={() => setActiveSection('debits')}
+            onClick={() => { setActiveSection('debits'); setSidebarOpen(false); }}
           >
             <span className="nav-icon">📒</span> My Debits
           </div>
           <div
             className={`nav-item ${activeSection === 'statement' ? 'active' : ''}`}
-            onClick={() => setActiveSection('statement')}
+            onClick={() => { setActiveSection('statement'); setSidebarOpen(false); }}
           >
             <span className="nav-icon">📄</span> Account Statement
           </div>
@@ -252,7 +259,7 @@ export default function StudentDashboard() {
             <div className="user-avatar">{myStudent.name[0].toUpperCase()}</div>
             <div className="user-info">
               <div className="user-name">{myStudent.name}</div>
-              <div className="user-role">Student Account</div>
+              <div className="user-role">{myStudent.studentId}</div>
             </div>
           </div>
           <button className="btn btn-outline btn-full btn-sm" onClick={handleSignOut}>🚪 Sign Out</button>
@@ -262,19 +269,27 @@ export default function StudentDashboard() {
       {/* ── Main Content ── */}
       <main className="main-content">
         <div className="topbar">
-          <div>
-            <div className="topbar-title">
-              {activeSection === 'overview' && 'Account Overview'}
-              {activeSection === 'debits' && 'My Debits & Dues'}
-              {activeSection === 'statement' && 'Account Statement'}
-            </div>
-            <div className="topbar-subtitle">
-              {activeSection === 'overview' && 'Your financial summary'}
-              {activeSection === 'debits' && 'Your pending charges'}
-              {activeSection === 'statement' && 'Full transaction record'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button 
+              className="btn btn-outline btn-sm hamburger-menu" 
+              style={{ display: 'none' }} 
+              onClick={() => setSidebarOpen(true)}
+            >
+              ☰
+            </button>
+            <div>
+              <div className="topbar-title">
+                {activeSection === 'overview' && 'Account Overview'}
+                {activeSection === 'debits' && 'My Debits & Dues'}
+                {activeSection === 'statement' && 'Account Statement'}
+              </div>
+              <div className="topbar-subtitle">
+                {activeSection === 'overview' && 'Your financial summary'}
+                {activeSection === 'debits' && 'Your pending charges'}
+                {activeSection === 'statement' && 'Full transaction record'}
+              </div>
             </div>
           </div>
-          <span className="badge badge-purple">{myStudent.studentId}</span>
         </div>
 
         <div className="page-content">
@@ -289,10 +304,13 @@ export default function StudentDashboard() {
                 >
                   {fmt(totalOutstanding)}
                 </div>
-                <div className="balance-due">
+                <div 
+                  className="balance-due"
+                  style={{ color: totalOutstanding > 0 ? 'var(--danger)' : 'var(--success)' }}
+                >
                   {totalOutstanding > 0
-                    ? `⚠️ You have ${fmt(totalOutstanding)} outstanding balance.`
-                    : '✅ Your fees are fully paid!'}
+                    ? `You have ${fmt(totalOutstanding)} outstanding balance.`
+                    : 'Your fees are fully paid!'}
                 </div>
               </div>
 
@@ -350,7 +368,8 @@ export default function StudentDashboard() {
                   <span className="badge badge-warning">Pending: {fmt(pendingDebitTotal)}</span>
                 </div>
                 <div style={{ overflowX: 'auto' }}>
-                  <table>
+                  {/* Desktop View */}
+                  <table className="desktop-only">
                     <thead>
                       <tr>
                         <th>Description</th>
@@ -392,6 +411,42 @@ export default function StudentDashboard() {
                       )}
                     </tbody>
                   </table>
+
+                  {/* Mobile View */}
+                  <div className="mobile-only">
+                    {debits.length === 0 ? (
+                      <div className="empty-state" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <div className="empty-icon">📒</div>No debit entries for your account.
+                      </div>
+                    ) : (
+                      <div className="statement-card-list" style={{ padding: 0 }}>
+                        {[...debits].reverse().map((d) => {
+                          const badgeClass =
+                            d.status === 'paid'
+                              ? 'badge-success'
+                              : d.status === 'partial'
+                              ? 'badge-warning'
+                              : 'badge-danger';
+                          return (
+                            <div key={d.id} className="statement-card">
+                              <div className="statement-card-header">
+                                <span className="statement-card-student">{d.description}</span>
+                                <span className={`badge ${badgeClass}`}>{d.status}</span>
+                              </div>
+                              <div className="statement-card-body">
+                                <span className="statement-card-desc" style={{ fontSize: '0.75rem' }}>
+                                  Due: {fmtDate(d.dueDate)} · Added: {fmtDate(d.createdAt)}
+                                </span>
+                                <span className="statement-card-amount" style={{ color: d.status === 'paid' ? 'var(--success)' : 'var(--danger)' }}>
+                                  {fmt(d.amount)}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -425,7 +480,8 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                   <div style={{ overflowX: 'auto' }}>
-                    <table>
+                    {/* Desktop View */}
+                    <table className="desktop-only">
                       <thead>
                         <tr>
                           <th>#</th>
@@ -467,6 +523,35 @@ export default function StudentDashboard() {
                         )}
                       </tbody>
                     </table>
+
+                    {/* Mobile View */}
+                    <div className="mobile-only">
+                      {statementRows.length === 0 ? (
+                        <div className="empty-state" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>No transactions yet.</div>
+                      ) : (
+                        <div className="statement-card-list" style={{ padding: 0 }}>
+                          {statementRows.map((r, i) => (
+                            <div key={i} className="statement-card">
+                              <div className="statement-card-header">
+                                <span className="statement-card-student" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>#{i + 1} · {fmtDate(r.date)}</span>
+                                <span className={`badge ${r.credit ? 'badge-success' : 'badge-info'}`}>{r.type}</span>
+                              </div>
+                              <div className="statement-card-body">
+                                <span className="statement-card-desc">{r.desc}</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.2rem' }}>
+                                  <span className={`${r.credit ? 'text-success' : 'text-danger'} fw-bold`} style={{ fontSize: '0.9rem' }}>
+                                    {r.credit ? '+' : '-'}{fmt(r.amount)}
+                                  </span>
+                                  <span className={`badge ${r.status === 'completed' || r.status === 'paid' ? 'badge-success' : 'badge-warning'}`} style={{ transform: 'scale(0.85)', transformOrigin: 'right' }}>
+                                    {r.status}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
