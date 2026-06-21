@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{\"pages\\\\admin.js -> ../js/storage.service.js\":{\"id\":\"pages\\\\admin.js -> ../js/storage.service.js\",\"files\":[]}}"
+self.__REACT_LOADABLE_MANIFEST="{\"pages\\\\index.js -> ../js/storage.service.js\":{\"id\":\"pages\\\\index.js -> ../js/storage.service.js\",\"files\":[]}}"

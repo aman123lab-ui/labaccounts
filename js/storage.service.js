@@ -157,6 +157,8 @@ export async function loginUser(identifier, password) {
     delete session.password;
     if (typeof window !== 'undefined') {
       localStorage.setItem('lab_current_user', JSON.stringify(session));
+      // Set secure cookie for middleware routing (expires in 1 day)
+      document.cookie = `lab_role=${userData.role}; path=/; max-age=86400; SameSite=Lax`;
     }
     return { data: session, error: null };
   } catch (err) {
@@ -167,6 +169,7 @@ export async function loginUser(identifier, password) {
 export function logoutUser() {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('lab_current_user');
+    document.cookie = 'lab_role=; path=/; max-age=0; SameSite=Lax';
   }
 }
 

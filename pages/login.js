@@ -20,7 +20,7 @@ export default function Login() {
     const currentUser = getCurrentUser();
     if (currentUser) {
       if (currentUser.role === 'admin') {
-        router.replace('/admin');
+        router.replace('/');
       } else {
         router.replace('/student');
       }
@@ -75,7 +75,8 @@ export default function Login() {
 
     addToast('🔑 Login successful!', 'success');
     setTimeout(() => {
-      router.push(data.role === 'admin' ? '/admin' : '/student');
+      // The cookie is set. Redirect to the correct RBAC dashboard.
+      router.push(data.role === 'admin' ? '/' : '/student');
     }, 500);
   };
 
@@ -121,7 +122,25 @@ export default function Login() {
         )}
 
         {alertMsg && (
-          <div className={`alert alert-${alertMsg.type === 'error' ? 'error' : 'success'}`}>
+          <div
+            className={`alert alert-${alertMsg.type === 'error' ? 'error' : 'success'}`}
+            style={
+              alertMsg.type === 'error'
+                ? {
+                    backgroundColor: '#fee2e2',
+                    color: '#dc2626',
+                    border: '1px solid #ef4444',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    marginBottom: '1rem',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }
+                : {}
+            }
+          >
             {alertMsg.text}
           </div>
         )}

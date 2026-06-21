@@ -10,7 +10,6 @@ const nextConfig = {
   async rewrites() {
     return [
       // Map old HTML requests directly to the processed static shells in /public
-      { source: '/index.html', destination: '/admin-shell.html' },
       { source: '/debtors.html', destination: '/debtors-shell.html' },
       // Redirects for Next.js pages
       { source: '/login.html', destination: '/login' },
@@ -18,6 +17,11 @@ const nextConfig = {
       { source: '/register.html', destination: '/register' },
       // Note: We removed the API rewrites for /css and /js because 
       // Next.js automatically serves everything inside /public directly!
+    ];
+  },
+  async redirects() {
+    return [
+      { source: '/index.html', destination: '/', permanent: true },
     ];
   },
 };

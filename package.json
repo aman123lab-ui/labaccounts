@@ -3,11 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "setup": "node setup-public.js",
-    "predev": "node setup-public.js",
-    "dev": "next dev -p 3333",
-    "build": "node setup-public.js && next build",
-    "start": "next start -p 3333",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
