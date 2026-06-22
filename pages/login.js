@@ -84,6 +84,30 @@ export default function Login() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (showForgotModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showForgotModal]);
+
+
+
+  const handleLogoClick = () => {
+    const nextRole = role === 'student' ? 'admin' : 'student';
+    setRole(nextRole);
+    setErrorMsg('');
+    const savedId = localStorage.getItem(`saved_${nextRole}_id`) || '';
+    const savedPwd = localStorage.getItem(`saved_${nextRole}_pwd`) || '';
+    setIdentifier(savedId);
+    setPassword(savedPwd);
+    setRememberMe(!!savedId || nextRole === 'student');
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -133,9 +157,28 @@ export default function Login() {
     }} className="login-wrapper">
 
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; }
+
         @media (max-width: 768px) {
-          .login-wrapper     { justify-content: flex-start !important; align-items: flex-start !important; flex-direction: column !important; padding: 0 !important; overflow-y: auto !important; }
-          .login-card        { margin: 0 16px 40px !important; padding: 24px 20px !important; width: calc(100% - 32px) !important; max-width: 100% !important; border-radius: 20px !important; }
+          .login-wrapper {
+            justify-content: flex-start !important;
+            align-items: center !important;
+            flex-direction: column !important;
+            padding: 0 !important;
+            overflow-y: auto !important;
+            min-height: 100vh;
+          }
+          .login-card {
+            margin: 0 16px 40px !important;
+            padding: 28px 20px !important;
+            width: calc(100% - 32px) !important;
+            max-width: 420px !important;
+            border-radius: 20px !important;
+            align-self: center !important;
+          }
           .login-logo        { display: none !important; }
           .login-testimonial { display: none !important; }
           .mobile-hero       { display: flex !important; }
@@ -159,17 +202,17 @@ export default function Login() {
         .mobile-hero > *:nth-child(4) { animation-delay: 0.3s; }
         .mobile-hero > *:nth-child(5) { animation-delay: 0.42s; }
         @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(80px); }
+          from { opacity: 0; transform: translateX(60px); }
           to   { opacity: 1; transform: translateX(0); }
         }
         @media (max-width: 768px) {
           .login-card {
             opacity: 0;
-            transform: translateX(80px);
+            transform: translateX(60px);
             transition: none;
           }
           .login-card.card-visible {
-            animation: slideInRight 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: slideInRight 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
           }
         }
         @keyframes bounce {
@@ -177,6 +220,13 @@ export default function Login() {
           50%       { transform: translateY(7px); }
         }
         .scroll-hint { animation: bounce 1.8s ease-in-out infinite; }
+
+        /* Forgot password modal mobile fix */
+        @media (max-width: 480px) {
+          .forgot-modal-inner {
+            padding: 24px 18px 20px !important;
+          }
+        }
       `}</style>
 
       {/* ── Background Image ── */}
@@ -195,31 +245,36 @@ export default function Login() {
         padding: '72px 28px 44px', width: '100%',
         position: 'relative', zIndex: 10, minHeight: '100vh',
       }}>
-        <div style={{
-          width: 68, height: 68, borderRadius: 20, marginBottom: 20,
-          background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 0 36px rgba(108,99,255,0.55)',
-        }}>
+        <div 
+          onClick={handleLogoClick}
+          style={{
+            width: 68, height: 68, borderRadius: 20, marginBottom: 20,
+            background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 36px rgba(108,99,255,0.55)',
+            cursor: 'pointer',
+            userSelect: 'none'
+          }}
+        >
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="3" width="20" height="14" rx="2"/>
             <line x1="8" y1="21" x2="16" y2="21"/>
             <line x1="12" y1="17" x2="12" y2="21"/>
           </svg>
         </div>
-
+ 
         <h1 style={{ fontSize: 28, fontWeight: 800, color: '#f1f5f9', marginBottom: 8, letterSpacing: '-0.5px' }}>
           Aman Computer Lab
         </h1>
-
+ 
         <p style={{ fontSize: 15, color: 'rgba(167,139,250,0.9)', fontWeight: 500, lineHeight: 1.75, maxWidth: 300, marginBottom: 6 }}>
           "Digital skills empower every student to build, create, and innovate in today's world."
         </p>
-
+ 
         <p style={{ fontSize: 12, color: 'rgba(148,163,184,0.6)', marginBottom: 36, fontStyle: 'italic' }}>
           — Aman Computer Lab
         </p>
-
+ 
         <div className="scroll-hint" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
           <p style={{ fontSize: 12, color: 'rgba(148,163,184,0.55)', fontWeight: 500, letterSpacing: '0.04em' }}>SCROLL TO SIGN IN</p>
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="rgba(108,99,255,0.7)" strokeWidth="2">
@@ -227,15 +282,20 @@ export default function Login() {
           </svg>
         </div>
       </div>
-
+ 
       {/* ── Logo top-left ── */}
       <div className="login-logo" style={{ position: 'absolute', top: 32, left: 40, zIndex: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{
-          width: 38, height: 38, borderRadius: 10,
-          background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 0 20px rgba(108,99,255,0.45)',
-        }}>
+        <div 
+          onClick={handleLogoClick}
+          style={{
+            width: 38, height: 38, borderRadius: 10,
+            background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 20px rgba(108,99,255,0.45)',
+            cursor: 'pointer',
+            userSelect: 'none'
+          }}
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="3" width="20" height="14" rx="2"/>
             <line x1="8" y1="21" x2="16" y2="21"/>
@@ -277,29 +337,35 @@ export default function Login() {
 
         {/* Header */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: 14, marginBottom: 14,
-            background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 24px rgba(108,99,255,0.4)',
-          }}>
+          <div 
+            onClick={handleLogoClick}
+            style={{
+              width: 48, height: 48, borderRadius: 14, marginBottom: 14,
+              background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 0 24px rgba(108,99,255,0.4)',
+              cursor: 'pointer',
+              userSelect: 'none'
+            }}
+            title="Switch login mode"
+          >
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="3" width="20" height="14" rx="2"/>
               <line x1="8" y1="21" x2="16" y2="21"/>
               <line x1="12" y1="17" x2="12" y2="21"/>
             </svg>
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#f1f5f9', marginBottom: 4, letterSpacing: '-0.5px' }}>
-            Hi there, great to see you
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#f1f5f9', marginBottom: 4, letterSpacing: '-0.5px', fontFamily: "'Syne', sans-serif" }}>
+            {role === 'admin' ? 'Admin Gateway' : 'Hi there, great to see you'}
           </h1>
           <p style={{ color: t.textSecondary, fontWeight: 500, fontSize: 14 }}>
-            Welcome back! Select your role and sign in.
+            {role === 'admin' ? 'Sign in to the Admin Dashboard.' : 'Welcome back! Sign in to your student account.'}
           </p>
         </div>
 
-        {/* Role Tabs */}
+        {/* Role Tabs - Hidden */}
         <div style={{
-          display: 'flex', gap: 5,
+          display: 'none', gap: 5,
           background: 'rgba(255,255,255,0.04)',
           border: `1px solid ${t.border}`,
           borderRadius: 10, padding: 4, marginBottom: 20,
@@ -450,8 +516,16 @@ export default function Login() {
       {/* ── Forgot Password Modal ── */}
       {showForgotModal && (
         <div onClick={() => setShowForgotModal(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          style={{ 
+            position: 'fixed', inset: 0, zIndex: 100, 
+            background: 'rgba(0,0,0,0.7)', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            padding: '24px 16px',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch'
+          }}>
           <div onClick={e => e.stopPropagation()}
+            className="forgot-modal-inner"
             style={{
               background: '#0d1526',
               border: `1px solid ${t.border}`,
@@ -460,6 +534,7 @@ export default function Login() {
               maxWidth: 400, width: '100%',
               boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(108,99,255,0.15)',
               textAlign: 'center',
+              margin: 'auto'
             }}>
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(108,99,255,0.15)', border: '1px solid rgba(108,99,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 26 }}>🔑</div>
             <h2 style={{ fontSize: 19, fontWeight: 800, color: t.textPrimary, marginBottom: 6 }}>Forgot Your Password?</h2>

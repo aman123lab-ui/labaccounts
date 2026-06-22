@@ -34,6 +34,7 @@ export default function StudentDashboard() {
         storedId = user.username.toLowerCase();
         localStorage.setItem('student_id', storedId);
       } else {
+        document.cookie = 'lab_role=; path=/; max-age=0; SameSite=Lax';
         router.replace('/login');
         return;
       }
@@ -120,25 +121,248 @@ export default function StudentDashboard() {
     }
   }
 
+  const generatePDF = (jspdfLib) => {
+    const { jsPDF } = jspdfLib;
+    const doc = new jsPDF();
+    
+    // Page dimensions
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    
+    const fmtPDF = (n) => 'Rs. ' + Number(n || 0).toLocaleString('en-IN');
+
+    // Visual Accent Bar (Navy Blue)
+    doc.setFillColor(30, 58, 138);
+    doc.rect(15, 18, 4, 16, 'F');
+
+    // Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(15, 23, 42); // Dark slate
+    doc.text("AMAN COMPUTER LAB", 22, 25);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139); // Slate-500
+    doc.text("Student Account Statement", 22, 31);
+    
+    const todayStr = new Date().toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    doc.text(`Generated: ${todayStr}`, pageWidth - 15, 31, { align: 'right' });
+    
+    // Separator line
+    doc.setDrawColor(226, 232, 240); // Slate-200
+    doc.setLineWidth(0.5);
+    doc.line(15, 37, pageWidth - 15, 37);
+    
+    // Student Info Box
+    doc.setFillColor(248, 250, 252); // Slate-50
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(15, 42, pageWidth - 30, 26, 3, 3, 'FD');
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(30, 58, 138); // Slate-600
+    doc.text("STUDENT INFORMATION", 20, 48);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(15, 23, 42);
+    
+    doc.text(`Name:`, 20, 54);
+    doc.setFont("helvetica", "bold");
+    doc.text(myStudent.name, 45, 54);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(`Student ID:`, 20, 61);
+    doc.setFont("helvetica", "bold");
+    doc.text(myStudent.studentId.toLowerCase(), 45, 61);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(`Batch:`, 110, 54);
+    doc.setFont("helvetica", "bold");
+    doc.text(myStudent.batch || '—', 130, 54);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(`Phone:`, 110, 61);
+    doc.setFont("helvetica", "bold");
+    doc.text(myStudent.phone || '—', 130, 61);
+    
+    // Financial Summary
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(15, 73, pageWidth - 30, 20, 3, 3, 'FD');
+    
+    const colW = (pageWidth - 30) / 3;
+    
+    // Total Fee
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text("TOTAL FEE", 15 + colW / 2, 79, { align: 'center' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    doc.text(fmtPDF(myStudent.totalFee), 15 + colW / 2, 87, { align: 'center' });
+    
+    // Paid Amount
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text("AMOUNT PAID", 15 + colW + colW / 2, 79, { align: 'center' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(16, 185, 129); // emerald-500
+    doc.text(fmtPDF(myStudent.paidAmount), 15 + colW + colW / 2, 87, { align: 'center' });
+    
+    // Balance Due
+    const balDue = myStudent.totalFee - myStudent.paidAmount;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text("BALANCE DUE", 15 + colW * 2 + colW / 2, 79, { align: 'center' });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(balDue > 0 ? 239 : 16, balDue > 0 ? 68 : 185, balDue > 0 ? 68 : 129); // red or emerald
+    doc.text(fmtPDF(balDue), 15 + colW * 2 + colW / 2, 87, { align: 'center' });
+    
+    // Segment dividers
+    doc.setDrawColor(226, 232, 240);
+    doc.line(15 + colW, 73, 15 + colW, 93);
+    doc.line(15 + colW * 2, 73, 15 + colW * 2, 93);
+    
+    // Statement Table Label
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(30, 58, 138);
+    doc.text("TRANSACTION LEDGER", 15, 102);
+    
+    // Table Header
+    doc.setFillColor(30, 41, 59); // slate-800
+    doc.rect(15, 106, pageWidth - 30, 10, 'F');
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(255, 255, 255);
+    doc.text("#", 18, 112.5);
+    doc.text("Date", 26, 112.5);
+    doc.text("Type", 51, 112.5);
+    doc.text("Description", 76, 112.5);
+    doc.text("Amount", 160, 112.5, { align: 'right' });
+    doc.text("Status", 175, 112.5);
+    
+    // Table Rows
+    let y = 116;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    
+    statementRows.forEach((r, idx) => {
+      // Check page overflow
+      if (y > pageHeight - 25) {
+        doc.addPage();
+        y = 20;
+        // Redraw table headers on new page
+        doc.setFillColor(30, 41, 59);
+        doc.rect(15, y, pageWidth - 30, 10, 'F');
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.text("#", 18, y + 6.5);
+        doc.text("Date", 26, y + 6.5);
+        doc.text("Type", 51, y + 6.5);
+        doc.text("Description", 76, y + 6.5);
+        doc.text("Amount", 160, y + 6.5, { align: 'right' });
+        doc.text("Status", 175, y + 6.5);
+        
+        y += 10;
+        doc.setFont("helvetica", "normal");
+      }
+      
+      // Row background
+      if (idx % 2 === 0) {
+        doc.setFillColor(248, 250, 252);
+        doc.rect(15, y, pageWidth - 30, 10, 'F');
+      } else {
+        doc.setFillColor(255, 255, 255);
+        doc.rect(15, y, pageWidth - 30, 10, 'F');
+      }
+      
+      doc.setTextColor(100, 116, 139);
+      doc.text(String(idx + 1), 18, y + 6.5);
+      doc.text(fmtDate(r.date), 26, y + 6.5);
+      
+      doc.setFont("helvetica", "bold");
+      // Color badge for type
+      if (r.credit) {
+        doc.setTextColor(16, 185, 129); // green
+      } else {
+        doc.setTextColor(59, 130, 246); // blue
+      }
+      doc.text(r.type, 51, y + 6.5);
+      
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(15, 23, 42);
+      // Truncate description if too long
+      let desc = r.desc || '';
+      if (desc.length > 38) desc = desc.slice(0, 35) + '...';
+      doc.text(desc, 76, y + 6.5);
+      
+      doc.setFont("helvetica", "bold");
+      if (r.credit) {
+        doc.setTextColor(16, 185, 129);
+      } else {
+        doc.setTextColor(239, 68, 68);
+      }
+      const sign = r.credit ? '+' : '-';
+      doc.text(`${sign}${fmtPDF(r.amount)}`, 160, y + 6.5, { align: 'right' });
+      
+      doc.setFont("helvetica", "bold");
+      if (r.status === 'completed' || r.status === 'paid') {
+        doc.setTextColor(16, 185, 129);
+      } else {
+        doc.setTextColor(245, 158, 11);
+      }
+      doc.text(r.status.toUpperCase(), 175, y + 6.5);
+      
+      // Bottom border for row
+      doc.setDrawColor(241, 245, 249);
+      doc.line(15, y + 10, pageWidth - 15, y + 10);
+      
+      y += 10;
+    });
+    
+    // Add document footer
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184); // slate-400
+    doc.text("This is a computer generated document and does not require a physical signature.", pageWidth / 2, pageHeight - 12, { align: 'center' });
+    doc.text("Aman Computer Lab · All Rights Reserved", pageWidth / 2, pageHeight - 8, { align: 'center' });
+    
+    doc.save(`Statement_${myStudent.studentId}.pdf`);
+    addToast('Statement PDF downloaded!', 'success');
+  };
+
   const downloadMyStatement = () => {
     if (!myStudent) return;
-    let csv = `Lab Accounts - Personal Statement\nStudent: ${myStudent.name}\nID: ${myStudent.studentId}\n\n`;
-    csv += 'Type,Description,Amount,Status,Date\n';
-    if (myStudent.paidAmount > 0) {
-      csv += `Fee Payment,Tuition fee payment,${myStudent.paidAmount},completed,${myStudent.createdAt}\n`;
-    }
-    debits.forEach((d) => {
-      csv += `Debit,${d.description},${d.amount},${d.status},${d.createdAt}\n`;
-    });
-    if (feeDue > 0) {
-      csv += `Fee Balance,Outstanding tuition fee,${feeDue},pending,${new Date().toISOString()}\n`;
+    addToast('Generating statement PDF...', 'info');
+
+    if (window.jspdf) {
+      generatePDF(window.jspdf);
+      return;
     }
 
-    const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = `statement_${myStudent.studentId}.csv`;
-    a.click();
-    addToast('Statement downloaded!', 'success');
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = () => {
+      generatePDF(window.jspdf);
+    };
+    script.onerror = () => {
+      addToast('Failed to load PDF generator. Please try again.', 'error');
+    };
+    document.body.appendChild(script);
   };
 
   const openEditProfileModal = () => {
@@ -323,7 +547,7 @@ export default function StudentDashboard() {
                   </button>
                 </div>
                 <div className="panel-body">
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="profile-info-grid">
                     <div style={{ padding: '.6rem 0', borderBottom: '1px solid var(--border)' }}>
                       <div style={{ fontSize: '.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '.2rem' }}>
                         Student ID
@@ -465,7 +689,7 @@ export default function StudentDashboard() {
                 </div>
                 <div className="panel-body">
                   <div style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', marginBottom: '1rem' }}>
+                    <div className="statement-summary-grid" style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)', marginBottom: '1rem' }}>
                       <div>
                         <div style={{ fontSize: '.72rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Fee</div>
                         <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{fmt(myStudent.totalFee)}</div>

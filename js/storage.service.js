@@ -907,7 +907,7 @@ export async function applyStudentCredit(studentRecordId, amount, description) {
 }
 
 // ── Apply Student Manual Debit ────────────────────────────
-export async function applyStudentManualDebit(studentRecordId, amount, title, dateVal, notes) {
+export async function applyStudentManualDebit(studentRecordId, amount, title, dateVal, notes, description = 'Manual Credit') {
   try {
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) return { error: 'Amount must be greater than zero.' };
@@ -932,7 +932,7 @@ export async function applyStudentManualDebit(studentRecordId, amount, title, da
     const revenueEntry = {
       title: title,
       source: 'Manual Credit',
-      description: 'Manual Credit',
+      description: description,
       amount: amt,
       date: dateVal || new Date().toISOString().split('T')[0],
       notes: notes ? `${notes} | Student: ${student.studentId}` : `Student: ${student.studentId}`,

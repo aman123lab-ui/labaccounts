@@ -120,6 +120,7 @@ export default function AdminPage() {
   const [debitType, setDebitType] = useState('bw');
   const [debitSide, setDebitSide] = useState('one');
   const [debitPages, setDebitPages] = useState(1);
+  const [debitDescription, setDebitDescription] = useState('');
   const [debitDiscount, setDebitDiscount] = useState(0);
   const [debitAmount, setDebitAmount] = useState(3);
   const [debitAlert, setDebitAlert] = useState(null);
@@ -148,6 +149,7 @@ export default function AdminPage() {
 
   // Edit Revenue Form
   const [revDetailTitle, setRevDetailTitle] = useState('');
+  const [revDetailDescription, setRevDetailDescription] = useState('');
   const [revDetailAmount, setRevDetailAmount] = useState('');
   const [revDetailDate, setRevDetailDate] = useState('');
   const [revDetailNotes, setRevDetailNotes] = useState('');
@@ -239,6 +241,7 @@ export default function AdminPage() {
     setIsMounted(true);
     const user = getCurrentUser();
     if (!user || user.role !== 'admin') {
+      document.cookie = 'lab_role=; path=/; max-age=0; SameSite=Lax';
       router.replace('/login');
     } else {
       setCurrentUser(user);
@@ -819,6 +822,7 @@ export default function AdminPage() {
     setDebitType('bw');
     setDebitSide('one');
     setDebitPages(1);
+    setDebitDescription('');
     setDebitDiscount(0);
     setDebitAmount(3);
     setDebitAlert(null);
@@ -836,7 +840,7 @@ export default function AdminPage() {
 
     let description, printMeta;
     if (debitType === 'opening') {
-      description = 'Previous Arrears / Opening Balance';
+      description = debitDescription.trim() || 'Previous Arrears / Opening Balance';
       printMeta = {
         print_type: 'opening',
         print_side: null,
@@ -845,7 +849,8 @@ export default function AdminPage() {
     } else {
       const typeLabel = debitType === 'bw' ? 'B&W' : 'Colour';
       const sideLabel = debitSide === 'two' ? 'Two Side' : 'One Side';
-      description = `${debitPages} pages ${typeLabel} ${sideLabel}`;
+      const calcDesc = `${debitPages} pages ${typeLabel} ${sideLabel}`;
+      description = debitDescription.trim() ? `${calcDesc} (${debitDescription.trim()})` : calcDesc;
       printMeta = {
         print_type: debitType,
         print_side: debitSide,
@@ -869,6 +874,7 @@ export default function AdminPage() {
     }
 
     showToast(`Debit charged successfully to ${debitSelectedStudents.length} student${debitSelectedStudents.length > 1 ? 's' : ''}!`, 'success');
+    setDebitDescription('');
     setActiveModal(null);
     setDebitLoading(false);
     await loadAllData();
@@ -917,6 +923,7 @@ export default function AdminPage() {
   const handleOpenRevenueDetail = (entry) => {
     setModalRevenueEntry(entry);
     setRevDetailTitle(entry.title || '');
+    setRevDetailDescription(entry.description || '');
     setRevDetailAmount(entry.amount || '');
     setRevDetailDate(entry.date || '');
     setRevDetailNotes(entry.notes || '');
@@ -943,6 +950,7 @@ export default function AdminPage() {
 
     const { error } = await updateRevenue(modalRevenueEntry.id, {
       title: revDetailTitle.trim(),
+      description: revDetailDescription.trim(),
       amount: amt,
       date: revDetailDate,
       notes: revDetailNotes.trim()
@@ -1822,7 +1830,7 @@ export default function AdminPage() {
     return a.title.localeCompare(b.title);
   });
 
-  const recentRevenueGrouped = Object.values(
+  const recentRevenueGrouped = Object.keys(
     revenue
       .filter((r) => {
         const src = (r.source || '').toLowerCase();
@@ -1996,6 +2004,7 @@ export default function AdminPage() {
                       </div>
                     </div>
 
+
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginTop: '1.5rem' }} className="responsive-grid-1col">
                       <div className="panel">
                         <div className="panel-header">
@@ -2052,22 +2061,24 @@ export default function AdminPage() {
                             onChange={(e) => setStudentSearch(e.target.value)}
                             placeholder="🔍 Search students…"
                           />
-                          <select
-                            className="search-input"
-                            value={studentBatchFilter}
-                            onChange={(e) => setStudentBatchFilter(e.target.value)}
-                            style={{ width: 'auto', minWidth: '130px', height: '38px', cursor: 'pointer', padding: '0 0.75rem' }}
-                          >
-                            <option value="all">All Batches</option>
-                            {uniqueBatches.map((b) => (
-                              <option key={b} value={b}>{b}</option>
-                            ))}
-                          </select>
-                          <button className="btn btn-primary btn-sm" onClick={() => setActiveSection('register')}>➕ Add Student</button>
+                          <div className="mobile-filter-row">
+                            <select
+                              className="search-input"
+                              value={studentBatchFilter}
+                              onChange={(e) => setStudentBatchFilter(e.target.value)}
+                              style={{ width: 'auto', minWidth: '130px', height: '38px', cursor: 'pointer', padding: '0 0.75rem' }}
+                            >
+                              <option value="all">All Batches</option>
+                              {uniqueBatches.map((b) => (
+                                <option key={b} value={b}>{b}</option>
+                              ))}
+                            </select>
+                            <button className="btn btn-primary btn-sm" onClick={() => setActiveSection('register')}>➕ Add Student</button>
+                          </div>
                           <button className="btn btn-danger btn-sm" onClick={() => { setDelallConfirmInput(''); setDelallModalAlert(null); setActiveModal('delete-all-students-modal'); }}>🗑️ Wipe Accounts</button>
                         </div>
                       </div>
-                      <div style={{ overflowX: 'auto' }}>
+                      <div className="desktop-only" style={{ overflowX: 'auto' }}>
                         <table>
                           <thead>
                             <tr>
@@ -2152,6 +2163,79 @@ export default function AdminPage() {
                             )}
                           </tbody>
                         </table>
+                      </div>
+
+                      {/* Mobile card list for Students list */}
+                      <div className="mobile-only statement-card-list">
+                        {filteredStudents.length > 0 ? (
+                          filteredStudents.map((s) => {
+                            const bal = s.account_balance ?? 0;
+                            const balColor = bal > 0 ? '#f87171' : bal < 0 ? '#34d399' : 'var(--text-muted)';
+                            const balLabel = bal > 0 ? `Due: ${fmt(Math.abs(bal))}` : bal < 0 ? `Adv: ${fmt(Math.abs(bal))}` : 'Cleared';
+                            return (
+                              <div key={s.id} className="statement-card">
+                                <div className="statement-card-header">
+                                  <span className="statement-card-student">{s.name}</span>
+                                  <span className="badge badge-purple">{s.studentId}</span>
+                                </div>
+                                <div className="statement-card-body" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.4rem', marginTop: '0.25rem' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                    <span>Batch: {s.batch || '—'}</span>
+                                    <span>Phone: {s.phone || '—'}</span>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '0.4rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                      <span style={{ color: 'var(--text-secondary)' }}>PWD:</span>
+                                      <span style={{ fontFamily: 'monospace', letterSpacing: visiblePasswords[s.id] ? 'normal' : '1.5px' }}>
+                                        {s.password ? (visiblePasswords[s.id] ? s.password : '••••••') : '—'}
+                                      </span>
+                                      {s.password && (
+                                        <button
+                                          type="button"
+                                          onClick={() => setVisiblePasswords(prev => ({ ...prev, [s.id]: !prev[s.id] }))}
+                                          style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '4px',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: visiblePasswords[s.id] ? 'var(--accent)' : 'var(--text-muted)',
+                                            opacity: visiblePasswords[s.id] ? 1 : 0.5,
+                                            transition: 'color 0.2s, opacity 0.2s'
+                                          }}
+                                          title={visiblePasswords[s.id] ? "Hide Password" : "Show Password"}
+                                        >
+                                          {visiblePasswords[s.id] ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                              <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                          ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                              <line x1="1" y1="1" x2="23" y2="23" />
+                                            </svg>
+                                          )}
+                                        </button>
+                                      )}
+                                    </div>
+                                    <span style={{ fontWeight: 700, color: balColor }}>{balLabel}</span>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '0.4rem' }}>
+                                    <button className="quick-btn qb-edit" onClick={() => handleOpenEditStudent(s)} style={{ padding: '0.25rem 0.6rem' }}>✏️ Edit</button>
+                                    <button className="quick-btn qb-del" onClick={() => handleDeleteStudentClick(s.id)} style={{ padding: '0.25rem 0.6rem' }}>🗑️ Delete</button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="empty-state">
+                            <div className="empty-icon">🎓</div>No students found matching your filters.
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -2343,6 +2427,7 @@ export default function AdminPage() {
                                 type="date"
                               />
                             </div>
+
                             <div className="form-group">
                               <label>Notes</label>
                               <textarea
@@ -2401,6 +2486,11 @@ export default function AdminPage() {
                                           </span>
                                         )}
                                       </strong>
+                                      {!t.isPrint && t.description && (
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 'normal' }}>
+                                          {t.description}
+                                        </div>
+                                      )}
                                     </td>
                                     <td>
                                       {t.isPrint ? (
@@ -2641,12 +2731,14 @@ export default function AdminPage() {
                             onChange={(e) => setDebtorSearch(e.target.value)}
                             placeholder="🔍 Search students…"
                           />
-                          <button className="btn btn-outline btn-sm" onClick={() => loadAllData(true)}>🔄 Refresh</button>
-                          <button className="btn btn-outline btn-sm" onClick={handlePrintDebtorReport}>🖨️ Report</button>
+                          <div className="mobile-filter-row">
+                            <button className="btn btn-outline btn-sm" onClick={() => loadAllData(true)}>🔄 Refresh</button>
+                            <button className="btn btn-outline btn-sm" onClick={handlePrintDebtorReport}>🖨️ Report</button>
+                          </div>
                           <button className="btn btn-primary btn-sm" onClick={handleDownloadDebtorCSV}>📥 Download CSV</button>
                         </div>
                       </div>
-                      <div style={{ overflowX: 'auto' }}>
+                      <div className="desktop-only" style={{ overflowX: 'auto' }}>
                         <table id="debtor-table">
                           <thead>
                             <tr>
@@ -2743,6 +2835,59 @@ export default function AdminPage() {
                             )}
                           </tbody>
                         </table>
+                      </div>
+
+                      {/* Mobile card list for Debtor Management */}
+                      <div className="mobile-only statement-card-list">
+                        {filteredDebtors.length > 0 ? (
+                          filteredDebtors.map((s) => {
+                            const balance = s.account_balance ?? 0;
+                            let pillClass = 'cleared';
+                            let pillText = '✅ Cleared';
+
+                            if (balance > 0) {
+                              pillClass = 'due';
+                              pillText = `🔴 Due: ${fmt(balance)}`;
+                            } else if (balance < 0) {
+                              pillClass = 'advance';
+                              pillText = `🟢 Adv: ${fmt(Math.abs(balance))}`;
+                            }
+                            return (
+                              <div key={s.id} className="statement-card">
+                                <div className="statement-card-header">
+                                  <span className="statement-card-student debtor-name-clickable" onClick={() => handleOpenAccountStatement(s)}>
+                                    {s.name}
+                                  </span>
+                                  <span className="badge badge-purple">{s.studentId}</span>
+                                </div>
+                                <div className="statement-card-body" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.4rem', marginTop: '0.25rem' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                    <span>Batch: {s.batch || '—'}</span>
+                                    <span>{s.phone || 'No Phone'}</span>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '0.4rem' }}>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                      {[s.course, s.department].filter(Boolean).join(' · ') || '—'}
+                                    </span>
+                                    <span className={`balance-pill ${pillClass}`} style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem' }}>{pillText}</span>
+                                  </div>
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '0.4rem', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '0.5rem' }}>
+                                    <button className="quick-btn qb-charge" onClick={() => handleOpenQuickCharge(s)} style={{ padding: '0.25rem 0.6rem' }}>📤 Charge</button>
+                                    <button className="quick-btn qb-collect" onClick={() => handleOpenQuickCollect(s)} style={{ padding: '0.25rem 0.6rem' }}>📥 Collect</button>
+                                    {balance > 0 && (
+                                      <button className="quick-btn qb-whatsapp" onClick={() => sendWhatsAppReminder(s.name, balance, s.phone)} style={{ padding: '0.25rem 0.6rem' }}>💬 Remind</button>
+                                    )}
+                                    <button className="quick-btn qb-del" onClick={() => handleDeleteStudentClick(s.id)} style={{ padding: '0.25rem 0.6rem' }}>🗑️ Delete</button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="empty-state">
+                            <div className="empty-icon">👥</div>No debit/credit activity yet. Use the FAB buttons to get started.
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -3085,7 +3230,7 @@ export default function AdminPage() {
                       <button type="button" className="modal-close" style={{ fontSize: '1rem', padding: 0 }} onClick={() => setShowInlineRegister(false)}>✕</button>
                     </div>
                     
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-row" style={{ gap: '0.75rem' }}>
                       <div className="form-group" style={{ marginBottom: 0 }}>
                         <label style={{ fontSize: '0.75rem' }}>Full Name *</label>
                         <input
@@ -3224,7 +3369,7 @@ export default function AdminPage() {
                   <select className="form-control" value={debitType} onChange={(e) => setDebitType(e.target.value)} required>
                     <option value="bw">Black &amp; White Print</option>
                     <option value="colour">Colour Print</option>
-
+                    <option value="opening">Arrears / Opening Balance</option>
                   </select>
                 </div>
 
@@ -3250,6 +3395,16 @@ export default function AdminPage() {
                     </div>
                   </>
                 )}
+
+                <div className="form-group">
+                  <label>Description</label>
+                  <input
+                    className="form-control"
+                    value={debitDescription}
+                    onChange={(e) => setDebitDescription(e.target.value)}
+                    placeholder="Optional description..."
+                  />
+                </div>
 
                 <div className="form-group">
                   <label>Discount (₹)</label>
@@ -3313,7 +3468,7 @@ export default function AdminPage() {
                       <button type="button" className="modal-close" style={{ fontSize: '1rem', padding: 0 }} onClick={() => setShowInlineRegister(false)}>✕</button>
                     </div>
                     
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-row" style={{ gap: '0.75rem' }}>
                       <div className="form-group" style={{ marginBottom: 0 }}>
                         <label style={{ fontSize: '0.75rem' }}>Full Name *</label>
                         <input
@@ -3696,6 +3851,10 @@ export default function AdminPage() {
                     <label>Date</label>
                     <input className="form-control" type="date" value={revDetailDate} onChange={(e) => setRevDetailDate(e.target.value)} />
                   </div>
+                </div>
+                <div className="form-group">
+                  <label>Description</label>
+                  <input className="form-control" value={revDetailDescription} onChange={(e) => setRevDetailDescription(e.target.value)} placeholder="Description" />
                 </div>
                 <div className="form-group">
                   <label>Notes</label>

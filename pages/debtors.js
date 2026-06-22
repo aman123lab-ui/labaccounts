@@ -13,6 +13,7 @@ export default function DebtorsPage() {
     } catch (_) {}
 
     if (!currentUser || currentUser.role !== 'admin') {
+      document.cookie = 'lab_role=; path=/; max-age=0; SameSite=Lax';
       router.replace('/login');
       return;
     }
