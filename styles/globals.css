@@ -1116,3 +1116,37 @@ tbody td { padding: 1rem 1.25rem; font-size: 0.875rem; color: var(--text-primary
   color: #34d399;
 }
 
+/* ── Back to Login Button Styling ── */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  margin-bottom: 1.5rem;
+  width: fit-content;
+}
+
+.back-link:hover {
+  color: #fff;
+  background: rgba(108, 99, 255, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(108, 99, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.back-link svg {
+  transition: transform 0.2s ease;
+}
+
+.back-link:hover svg {
+  transform: translateX(-4px);
+}
+

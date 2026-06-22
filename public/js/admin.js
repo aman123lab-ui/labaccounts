@@ -321,7 +321,7 @@ window.handleRegister = async function (e) {
 
   const rawName = form.querySelector('[name="name"]').value.trim();
   const name = toTitleCase(rawName);
-  const studentId = form.querySelector('[name="studentId"]').value.trim();
+  const studentId = form.querySelector('[name="studentId"]').value.trim().toLowerCase();
   const batch = form.querySelector('[name="batch"]').value.trim();
   const phone = form.querySelector('[name="phone"]').value.trim();
   const password = form.querySelector('[name="password"]').value;
@@ -403,9 +403,9 @@ window.handleBulkRegister = async function (e) {
 
     return {
       name: rowObj.name || '',
-      studentId: rowObj.studentid || '',
+      studentId: (rowObj.studentid || '').toLowerCase(),
       phone: rowObj.phone || '',
-      password: rowObj.password || (rowObj.studentid ? rowObj.studentid + '123' : 'pass123'),
+      password: rowObj.password || (rowObj.studentid ? rowObj.studentid.toLowerCase() + '123' : 'pass123'),
       batch: rowObj.batch || '',
       email: '',
       course: '',

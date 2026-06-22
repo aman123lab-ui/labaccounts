@@ -89,7 +89,7 @@ export default function Login() {
     setErrorMsg('');
     setLoading(true);
 
-    const { data, error } = await loginUser(identifier.trim(), password);
+    const { data, error } = await loginUser(identifier.trim().toLowerCase(), password);
 
     if (error) { setErrorMsg(error); setLoading(false); return; }
     if (data.role !== role) {
@@ -100,7 +100,7 @@ export default function Login() {
 
     // Auto-save ID and password logic
     if (rememberMe) {
-      localStorage.setItem(`saved_${role}_id`, identifier.trim());
+      localStorage.setItem(`saved_${role}_id`, identifier.trim().toLowerCase());
       localStorage.setItem(`saved_${role}_pwd`, password);
       localStorage.setItem(`auto_login_${role}`, 'true');
     } else {
@@ -359,7 +359,7 @@ export default function Login() {
               <input
                 id="identifier" type="text"
                 placeholder={role === 'admin' ? 'Enter admin username' : 'Enter your Student ID'}
-                value={identifier} onChange={e => setIdentifier(e.target.value)} required
+                value={identifier} onChange={e => setIdentifier(role === 'student' ? e.target.value.toLowerCase() : e.target.value)} required
                 style={inputStyle(false)}
                 onFocus={e => { e.target.style.borderColor = t.accent; e.target.style.background = 'rgba(108,99,255,0.08)'; }}
                 onBlur={e => { e.target.style.borderColor = t.border; e.target.style.background = 'rgba(255,255,255,0.05)'; }}

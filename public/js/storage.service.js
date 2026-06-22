@@ -115,11 +115,12 @@ export async function seedDefaults() {
 
 export async function loginUser(identifier, password) {
   try {
+    const cleanIdentifier = (identifier || '').trim().toLowerCase();
     // 1. Try to find the user in users table by username and password
     let { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
-      .eq('username', identifier)
+      .eq('username', cleanIdentifier)
       .eq('password', password)
       .maybeSingle();
 
@@ -130,7 +131,7 @@ export async function loginUser(identifier, password) {
       const { data: studentData, error: studentError } = await supabase
         .from('students')
         .select('*')
-        .eq('studentId', identifier)
+        .eq('studentId', cleanIdentifier)
         .maybeSingle();
 
       if (studentError) throw studentError;
@@ -206,7 +207,8 @@ export async function getStudentById(id) {
 export async function getStudentByUsername(username) {
   try {
     await fetchInitialData();
-    const user = cachedUsers.find(u => u.username === username && u.role === 'student');
+    const cleanUsername = (username || '').trim().toLowerCase();
+    const user = cachedUsers.find(u => (u.username || '').toLowerCase() === cleanUsername && u.role === 'student');
     if (!user) return { data: null, error: 'Student not found.' };
     const student = cachedStudents.find(s => s.userId === user.id);
     if (!student) return { data: null, error: 'Student record not found.' };
@@ -219,7 +221,8 @@ export async function getStudentByUsername(username) {
 export async function getStudentByStudentId(studentId) {
   try {
     await fetchInitialData();
-    const student = cachedStudents.find(s => s.studentId === studentId);
+    const cleanStudentId = (studentId || '').trim().toLowerCase();
+    const student = cachedStudents.find(s => (s.studentId || '').toLowerCase() === cleanStudentId);
     if (!student) return { data: null, error: 'Student not found.' };
     const user = cachedUsers.find(u => u.id === student.userId);
     return { data: { ...student, user }, error: null };
@@ -230,7 +233,7 @@ export async function getStudentByStudentId(studentId) {
 
 export async function createStudent(studentData) {
   try {
-    const studentId = (studentData.studentId || '').trim();
+    const studentId = (studentData.studentId || '').trim().toLowerCase();
     if (!studentId) return { data: null, error: 'Student ID is required.' };
 
     // Prevent duplicate Student IDs in students table
@@ -357,9 +360,13 @@ export async function createStudent(studentData) {
 
 export async function updateStudent(id, updates) {
   try {
+    const cleanUpdates = { ...updates };
+    if (cleanUpdates.studentId) {
+      cleanUpdates.studentId = cleanUpdates.studentId.trim().toLowerCase();
+    }
     const { data, error } = await supabase
       .from('students')
-      .update({ ...updates, updatedAt: new Date().toISOString() })
+      .update({ ...cleanUpdates, updatedAt: new Date().toISOString() })
       .eq('id', id)
       .select('*')
       .single();

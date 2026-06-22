@@ -377,7 +377,7 @@ export default function AdminPage() {
     setRegAlert(null);
 
     const titleCasedName = toTitleCase(regName.trim());
-    const studentIdClean = regStudentId.trim();
+    const studentIdClean = regStudentId.trim().toLowerCase();
 
     const studentData = {
       name: titleCasedName,
@@ -419,7 +419,7 @@ export default function AdminPage() {
     setInlineRegAlert(null);
 
     const titleCasedName = toTitleCase(inlineRegName.trim());
-    const studentIdClean = inlineRegStudentId.trim();
+    const studentIdClean = inlineRegStudentId.trim().toLowerCase();
 
     const studentData = {
       name: titleCasedName,
@@ -511,9 +511,9 @@ export default function AdminPage() {
 
       return {
         name: rowObj.name || '',
-        studentId: rowObj.studentid || '',
+        studentId: (rowObj.studentid || '').toLowerCase(),
         phone: rowObj.phone || '',
-        password: rowObj.password || (rowObj.studentid ? rowObj.studentid + '123' : 'pass123'),
+        password: rowObj.password || (rowObj.studentid ? rowObj.studentid.toLowerCase() + '123' : 'pass123'),
         batch: rowObj.batch || '',
         email: '',
         course: '',
@@ -2183,9 +2183,9 @@ export default function AdminPage() {
                               <input
                                 className="form-control w-full h-11 px-4 py-2 border border-gray-300 rounded-md"
                                 value={regStudentId}
-                                onChange={(e) => setRegStudentId(e.target.value)}
+                                onChange={(e) => setRegStudentId(e.target.value.toLowerCase())}
                                 required
-                                placeholder="e.g. 2024CS001"
+                                placeholder="e.g. 2024cs001"
                               />
                             </div>
                             <div className="form-group">
@@ -3106,9 +3106,9 @@ export default function AdminPage() {
                           className="form-control"
                           style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
                           value={inlineRegStudentId}
-                          onChange={(e) => setInlineRegStudentId(e.target.value)}
+                          onChange={(e) => setInlineRegStudentId(e.target.value.toLowerCase())}
                           required={showInlineRegister}
-                          placeholder="e.g. 2024CS001"
+                          placeholder="e.g. 2024cs001"
                         />
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>
@@ -3334,9 +3334,9 @@ export default function AdminPage() {
                           className="form-control"
                           style={{ height: '36px', fontSize: '0.82rem', padding: '0.5rem' }}
                           value={inlineRegStudentId}
-                          onChange={(e) => setInlineRegStudentId(e.target.value)}
+                          onChange={(e) => setInlineRegStudentId(e.target.value.toLowerCase())}
                           required={showInlineRegister}
-                          placeholder="e.g. 2024CS001"
+                          placeholder="e.g. 2024cs001"
                         />
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>

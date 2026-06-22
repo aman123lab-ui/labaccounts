@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { seedDefaults, createStudent, getCurrentUser } from '../js/storage.service';
+import { seedDefaults, createStudent, getCurrentUser, loginUser } from '../js/storage.service';
 
 export default function Register() {
   const router = useRouter();
@@ -101,7 +101,7 @@ export default function Register() {
 
     const { data, error } = await createStudent({
       name: name.trim(),
-      studentId: studentId.trim().toUpperCase(),
+      studentId: studentId.trim().toLowerCase(),
       batch,
       phone: phone.trim(),
       password,
@@ -113,17 +113,50 @@ export default function Register() {
       return;
     }
 
-    setAlertMsg({ type: 'success', text: '✅ Registration successful! Redirecting to login...' });
+    // Auto-login after successful registration
+    const loginRes = await loginUser(studentId.trim().toLowerCase(), password);
+    if (loginRes.error) {
+      setAlertMsg({ type: 'success', text: '✅ Registration successful! Redirecting to login...' });
+      setTimeout(() => {
+        router.replace('/login');
+      }, 2000);
+      return;
+    }
+
+    if (loginRes.data.role === 'student') {
+      localStorage.setItem('student_id', loginRes.data.username);
+    }
+    
+    // Prefill login session info for future sessions
+    localStorage.setItem('saved_student_id', studentId.trim().toLowerCase());
+    localStorage.setItem('saved_student_pwd', password);
+    localStorage.setItem('auto_login_student', 'true');
+
+    setAlertMsg({ type: 'success', text: '✅ Registration successful! Logging you in...' });
     setTimeout(() => {
-      router.replace('/login');
-    }, 2000);
+      router.replace('/student');
+    }, 1500);
   };
 
   return (
     <div className="auth-page">
       <div className="auth-card">
         <Link href="/login" className="back-link">
-          ← Back to Login
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Back to Login</span>
         </Link>
 
         <div className="auth-logo">
@@ -153,9 +186,9 @@ export default function Register() {
               id="studentId"
               className="form-control"
               type="text"
-              placeholder="e.g. 2024CS001"
+              placeholder="e.g. 2024cs001"
               value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
+              onChange={(e) => setStudentId(e.target.value.toLowerCase())}
               required
             />
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>

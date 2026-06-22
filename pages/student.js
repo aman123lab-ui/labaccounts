@@ -27,10 +27,11 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     let storedId = localStorage.getItem('student_id');
+    if (storedId) storedId = storedId.toLowerCase();
     const user = getCurrentUser();
     if (!storedId) {
       if (user && user.role === 'student') {
-        storedId = user.username;
+        storedId = user.username.toLowerCase();
         localStorage.setItem('student_id', storedId);
       } else {
         router.replace('/login');

@@ -5,10 +5,11 @@ import {
 
 // ── Auth Guard ──────────────────────────────────────────
 let studentId = localStorage.getItem('student_id');
+if (studentId) studentId = studentId.toLowerCase();
 let user = getCurrentUser();
 if (!studentId) {
   if (user && user.role === 'student') {
-    studentId = user.username;
+    studentId = user.username.toLowerCase();
     localStorage.setItem('student_id', studentId);
   } else {
     window.location.href = 'login.html';
