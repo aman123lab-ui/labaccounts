@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET() {
-  const supabase = createAdminClient();
+  const supabase: any = createAdminClient();
 
   try {
     const assertions: { test: string; status: 'PASSED' | 'FAILED'; details: any }[] = [];

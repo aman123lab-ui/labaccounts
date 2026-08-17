@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const supabase = createAdminClient();
+    const supabase: any = createAdminClient();
 
     // 1. Fetch current FY
     const { data: fys } = await supabase
