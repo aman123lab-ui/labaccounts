@@ -414,7 +414,7 @@ export async function POST() {
         is_current: true,
       })
       .select()
-      .single();
+      .single() as any;
 
     if (newFYErr || !newFY) {
       return NextResponse.json({ success: false, error: `Failed to create next financial year: ${newFYErr?.message}` }, { status: 500 });

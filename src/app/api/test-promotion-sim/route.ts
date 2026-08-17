@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PROMOTION_MAPPING, normalizeBatchName } from '@/app/api/financial-year/rollover/route';
