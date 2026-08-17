@@ -1,0 +1,429 @@
+[
+  {
+    "id": "3b4d7fdb-7cc6-4de9-9d4f-af8f194d21ff",
+    "journal_entry_id": "4c3bcbfa-2616-401e-a593-5300db55e992",
+    "account_id": "b2c78191-48f7-4908-b96f-ac9e04eb2019",
+    "debit_amount": 20,
+    "credit_amount": 0
+  },
+  {
+    "id": "8b528c1a-616c-4692-8806-b4c3aa0e542c",
+    "journal_entry_id": "4c3bcbfa-2616-401e-a593-5300db55e992",
+    "account_id": "30000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 20
+  },
+  {
+    "id": "bda13ad9-e3ac-4c99-832c-0a471a0b7151",
+    "journal_entry_id": "32744ef4-e60a-4f8b-976e-44d5309f990c",
+    "account_id": "7c2652fd-5d8a-4acb-a571-7e55d973511d",
+    "debit_amount": 20,
+    "credit_amount": 0
+  },
+  {
+    "id": "ce4d955f-ab32-4e13-82b2-c80be2829e55",
+    "journal_entry_id": "32744ef4-e60a-4f8b-976e-44d5309f990c",
+    "account_id": "30000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 20
+  },
+  {
+    "id": "b4502994-5561-4620-a3a8-7da93d87cf8b",
+    "journal_entry_id": "7761c3f6-952e-451c-bcf9-3185ca0de292",
+    "account_id": "4b1bcb3f-8594-4530-8e64-9e7a60f62467",
+    "debit_amount": 30,
+    "credit_amount": 0
+  },
+  {
+    "id": "5c50f330-6eb6-4ceb-8976-45dbf054f77e",
+    "journal_entry_id": "7761c3f6-952e-451c-bcf9-3185ca0de292",
+    "account_id": "30000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 30
+  },
+  {
+    "id": "9f7d9607-2953-4acf-b44d-e1b6722a0a24",
+    "journal_entry_id": "0e121878-4a7d-473a-920e-1005ce7ae692",
+    "account_id": "df5918e9-f65a-4b4d-8d00-8d3452ffd93a",
+    "debit_amount": 50,
+    "credit_amount": 0
+  },
+  {
+    "id": "e576a3fa-c268-4636-9e26-d4c68719a633",
+    "journal_entry_id": "0e121878-4a7d-473a-920e-1005ce7ae692",
+    "account_id": "30000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 50
+  },
+  {
+    "id": "20ffc836-d5ec-4e1c-a274-db210a36e284",
+    "journal_entry_id": "bcbebfb2-0df6-42b5-a4be-2f25324ac1ca",
+    "account_id": "6c8c5bbb-87c2-415c-9662-cf60e63a823c",
+    "debit_amount": 60,
+    "credit_amount": 0
+  },
+  {
+    "id": "c79d8826-a2c6-4ed6-a413-7aa672b1c4e6",
+    "journal_entry_id": "bcbebfb2-0df6-42b5-a4be-2f25324ac1ca",
+    "account_id": "30000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 60
+  },
+  {
+    "id": "22099730-5df8-4c37-8612-b3afe6481252",
+    "journal_entry_id": "54acf81e-39ee-416b-8989-21e3736220f7",
+    "account_id": "f86d7c08-1b12-4121-94a6-3a683b49b72b",
+    "debit_amount": 6,
+    "credit_amount": 0
+  },
+  {
+    "id": "724ac69e-c554-49b4-af7f-2a8a093aa7d3",
+    "journal_entry_id": "54acf81e-39ee-416b-8989-21e3736220f7",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 6
+  },
+  {
+    "id": "8964d4dc-af48-4554-b92b-03d8ebadaa86",
+    "journal_entry_id": "1c3b59d3-8427-4957-99eb-c2e927c84218",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 6,
+    "credit_amount": 0
+  },
+  {
+    "id": "12d18159-a115-4cbe-9825-ee16e4e782b9",
+    "journal_entry_id": "1c3b59d3-8427-4957-99eb-c2e927c84218",
+    "account_id": "f86d7c08-1b12-4121-94a6-3a683b49b72b",
+    "debit_amount": 0,
+    "credit_amount": 6
+  },
+  {
+    "id": "6d4c4efe-9a08-41cc-8351-2730f56c9d06",
+    "journal_entry_id": "583638d6-bf6a-456e-b861-9a3fc1c94c8b",
+    "account_id": "f86d7c08-1b12-4121-94a6-3a683b49b72b",
+    "debit_amount": 15,
+    "credit_amount": 0
+  },
+  {
+    "id": "bcbfe775-6edf-4a95-9c12-b67941695b01",
+    "journal_entry_id": "583638d6-bf6a-456e-b861-9a3fc1c94c8b",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 15
+  },
+  {
+    "id": "05d3c281-a2f0-455e-8d2b-c239c20b50d8",
+    "journal_entry_id": "cf1f1271-07db-4b85-b032-e518cafeb575",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 15,
+    "credit_amount": 0
+  },
+  {
+    "id": "9e4667a7-0337-467a-966f-a6cea217d8d3",
+    "journal_entry_id": "cf1f1271-07db-4b85-b032-e518cafeb575",
+    "account_id": "f86d7c08-1b12-4121-94a6-3a683b49b72b",
+    "debit_amount": 0,
+    "credit_amount": 15
+  },
+  {
+    "id": "9101a8d1-5465-4385-8187-000d011c0ce8",
+    "journal_entry_id": "22abe411-a034-438c-8267-e2c2fedd3675",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 500,
+    "credit_amount": 0
+  },
+  {
+    "id": "69f442ac-d351-463a-a67d-6d6ce625b477",
+    "journal_entry_id": "22abe411-a034-438c-8267-e2c2fedd3675",
+    "account_id": "30000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 500
+  },
+  {
+    "id": "66afbe7d-d978-4da2-b073-ce709c8fc2e5",
+    "journal_entry_id": "e2963906-a80f-43f9-bb3e-a56162bb7147",
+    "account_id": "78d4b568-d6cb-4595-83b2-862a2e88fda3",
+    "debit_amount": 203,
+    "credit_amount": 0
+  },
+  {
+    "id": "40fa5969-65e2-4df4-b6f1-e5b00937a9ff",
+    "journal_entry_id": "e2963906-a80f-43f9-bb3e-a56162bb7147",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 203
+  },
+  {
+    "id": "69e7cc91-116e-47aa-af77-f18bc2e04f67",
+    "journal_entry_id": "2b907aa8-5fa4-4e6a-9f48-56d74265d811",
+    "account_id": "50000000-0000-0000-0000-000000000002",
+    "debit_amount": 200,
+    "credit_amount": 0
+  },
+  {
+    "id": "66ecd867-d111-483a-ad77-0b39285e84f8",
+    "journal_entry_id": "2b907aa8-5fa4-4e6a-9f48-56d74265d811",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 200
+  },
+  {
+    "id": "5773303d-91f2-4360-a12d-7f1bef0228ea",
+    "journal_entry_id": "585da42d-c49b-40d2-9ffa-392801b7337f",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 20,
+    "credit_amount": 0
+  },
+  {
+    "id": "e1e8a859-a216-4f47-93fa-b7147c1f940c",
+    "journal_entry_id": "585da42d-c49b-40d2-9ffa-392801b7337f",
+    "account_id": "7c2652fd-5d8a-4acb-a571-7e55d973511d",
+    "debit_amount": 0,
+    "credit_amount": 20
+  },
+  {
+    "id": "e56d94d9-f50d-428b-8c37-d75d4d72a1f3",
+    "journal_entry_id": "404324c4-411b-4f25-9acd-c9149819da7b",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 30,
+    "credit_amount": 0
+  },
+  {
+    "id": "cd4dbb35-d95c-4df9-8a2d-a48c1d78f612",
+    "journal_entry_id": "404324c4-411b-4f25-9acd-c9149819da7b",
+    "account_id": "4b1bcb3f-8594-4530-8e64-9e7a60f62467",
+    "debit_amount": 0,
+    "credit_amount": 30
+  },
+  {
+    "id": "deacdfee-1fb8-47b9-8b55-b507a92905e5",
+    "journal_entry_id": "cf1c5cee-ca7e-408f-adc9-1b66efcb3a07",
+    "account_id": "10000000-0000-0000-0000-000000000003",
+    "debit_amount": 50,
+    "credit_amount": 0
+  },
+  {
+    "id": "e6eac329-22ef-4540-a217-68fc6fdac6d3",
+    "journal_entry_id": "cf1c5cee-ca7e-408f-adc9-1b66efcb3a07",
+    "account_id": "df5918e9-f65a-4b4d-8d00-8d3452ffd93a",
+    "debit_amount": 0,
+    "credit_amount": 50
+  },
+  {
+    "id": "de1b052b-8cd6-4cff-9085-5d879e161ecd",
+    "journal_entry_id": "a79c7082-5670-42e5-acae-94fa552cb683",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 20,
+    "credit_amount": 0
+  },
+  {
+    "id": "3f97555b-f7ba-41b7-8719-51aebb8d0dea",
+    "journal_entry_id": "a79c7082-5670-42e5-acae-94fa552cb683",
+    "account_id": "10000000-0000-0000-0000-000000000003",
+    "debit_amount": 0,
+    "credit_amount": 20
+  },
+  {
+    "id": "366ff01a-361f-439c-8b31-1c084a76e211",
+    "journal_entry_id": "22604ed6-1dbc-4b60-9ada-1b71f5e8666a",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 10,
+    "credit_amount": 0
+  },
+  {
+    "id": "51de147c-d933-48e2-ac6a-b1b66a462979",
+    "journal_entry_id": "22604ed6-1dbc-4b60-9ada-1b71f5e8666a",
+    "account_id": "10000000-0000-0000-0000-000000000003",
+    "debit_amount": 0,
+    "credit_amount": 10
+  },
+  {
+    "id": "f17312cf-164a-4442-9d91-9813ca1ee305",
+    "journal_entry_id": "10231ef1-6800-4753-afc8-4fdc9b06d27b",
+    "account_id": "10000000-0000-0000-0000-000000000003",
+    "debit_amount": 60,
+    "credit_amount": 0
+  },
+  {
+    "id": "355a425e-7527-4745-86bb-33d98a1f5195",
+    "journal_entry_id": "10231ef1-6800-4753-afc8-4fdc9b06d27b",
+    "account_id": "6c8c5bbb-87c2-415c-9662-cf60e63a823c",
+    "debit_amount": 0,
+    "credit_amount": 60
+  },
+  {
+    "id": "5bbf7324-f177-4e11-97a2-1f6b42f662d0",
+    "journal_entry_id": "665c6fb5-241d-43c2-a357-1c5abfb73078",
+    "account_id": "f86d7c08-1b12-4121-94a6-3a683b49b72b",
+    "debit_amount": 15,
+    "credit_amount": 0
+  },
+  {
+    "id": "dd980150-c0c9-4277-a423-73d5262db925",
+    "journal_entry_id": "665c6fb5-241d-43c2-a357-1c5abfb73078",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 15
+  },
+  {
+    "id": "14647bc4-7bd2-4bec-9995-25c3899d8c65",
+    "journal_entry_id": "0e1699f5-e5a9-4f7a-b478-a26d4394b0ea",
+    "account_id": "10000000-0000-0000-0000-000000000003",
+    "debit_amount": 15,
+    "credit_amount": 0
+  },
+  {
+    "id": "8f7cb10c-43b5-4413-9cf4-a0aa4d8cc4da",
+    "journal_entry_id": "0e1699f5-e5a9-4f7a-b478-a26d4394b0ea",
+    "account_id": "f86d7c08-1b12-4121-94a6-3a683b49b72b",
+    "debit_amount": 0,
+    "credit_amount": 15
+  },
+  {
+    "id": "ee3a5686-8155-43c3-a346-cac7473f8b96",
+    "journal_entry_id": "9efb896f-50e1-437c-9fdb-d512e1cfaf49",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 50,
+    "credit_amount": 0
+  },
+  {
+    "id": "00de246a-0b66-4f4d-a01d-388d267e125f",
+    "journal_entry_id": "9efb896f-50e1-437c-9fdb-d512e1cfaf49",
+    "account_id": "10000000-0000-0000-0000-000000000003",
+    "debit_amount": 0,
+    "credit_amount": 50
+  },
+  {
+    "id": "2bc21985-85c8-4ebb-ab1a-0caae482b0ec",
+    "journal_entry_id": "6de5a394-e49f-46ff-8217-a57d2b8944d8",
+    "account_id": "f86d7c08-1b12-4121-94a6-3a683b49b72b",
+    "debit_amount": 6,
+    "credit_amount": 0
+  },
+  {
+    "id": "7f6ac3e4-889b-44dd-b852-37872407d9d4",
+    "journal_entry_id": "6de5a394-e49f-46ff-8217-a57d2b8944d8",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 6
+  },
+  {
+    "id": "da314981-0e34-4cd6-946d-8be119d76182",
+    "journal_entry_id": "4f2f0d9e-4216-4c1c-973a-f9aacd265abe",
+    "account_id": "b2c78191-48f7-4908-b96f-ac9e04eb2019",
+    "debit_amount": 6,
+    "credit_amount": 0
+  },
+  {
+    "id": "43b79444-adfd-405b-b429-1c2b1bd25c2d",
+    "journal_entry_id": "4f2f0d9e-4216-4c1c-973a-f9aacd265abe",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 6
+  },
+  {
+    "id": "325ad4e5-62b6-4fe1-a71f-dea2c7394ac2",
+    "journal_entry_id": "c9761512-f6cc-4630-8a22-60ff793f9fa9",
+    "account_id": "7c2652fd-5d8a-4acb-a571-7e55d973511d",
+    "debit_amount": 6,
+    "credit_amount": 0
+  },
+  {
+    "id": "34428452-78ad-4d82-aa10-2a9b93698b82",
+    "journal_entry_id": "c9761512-f6cc-4630-8a22-60ff793f9fa9",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 6
+  },
+  {
+    "id": "684908e8-d302-4fad-9e39-8784626b9c21",
+    "journal_entry_id": "5e2dd155-9452-444d-a0fe-afe5e78bb641",
+    "account_id": "4b1bcb3f-8594-4530-8e64-9e7a60f62467",
+    "debit_amount": 6,
+    "credit_amount": 0
+  },
+  {
+    "id": "5d3cc709-616f-4c25-ac9f-2dee1c5d72c5",
+    "journal_entry_id": "5e2dd155-9452-444d-a0fe-afe5e78bb641",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 6
+  },
+  {
+    "id": "ead2853f-88ee-47d6-b694-eb8933814078",
+    "journal_entry_id": "d2961eca-065c-4b80-9b4c-b982520a894f",
+    "account_id": "df5918e9-f65a-4b4d-8d00-8d3452ffd93a",
+    "debit_amount": 6,
+    "credit_amount": 0
+  },
+  {
+    "id": "d43ad3b2-f104-4d5d-938f-1643494769c9",
+    "journal_entry_id": "d2961eca-065c-4b80-9b4c-b982520a894f",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 6
+  },
+  {
+    "id": "363af301-8bd3-4173-a816-b8622db824d9",
+    "journal_entry_id": "b9dbd44f-e2e6-4482-aa97-2196a203529f",
+    "account_id": "6c8c5bbb-87c2-415c-9662-cf60e63a823c",
+    "debit_amount": 6,
+    "credit_amount": 0
+  },
+  {
+    "id": "619a2db6-b890-43b0-89e4-2d46a89cae37",
+    "journal_entry_id": "b9dbd44f-e2e6-4482-aa97-2196a203529f",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 6
+  },
+  {
+    "id": "af39ee2f-cd69-4cda-b0f3-abc25ec38de0",
+    "journal_entry_id": "8fe3b5e0-66ad-42a9-b9a2-0321d0e7e857",
+    "account_id": "30000000-0000-0000-0000-000000000001",
+    "debit_amount": 331,
+    "credit_amount": 0
+  },
+  {
+    "id": "e1291048-f3e5-48eb-b6f3-b047eee79d22",
+    "journal_entry_id": "8fe3b5e0-66ad-42a9-b9a2-0321d0e7e857",
+    "account_id": "50000000-0000-0000-0000-000000000002",
+    "debit_amount": 0,
+    "credit_amount": 331
+  },
+  {
+    "id": "e4f9eb16-75ec-4288-8df3-d496079bd1f3",
+    "journal_entry_id": "8aee49a7-5ff1-4dc1-a0b1-fd307b4b9f52",
+    "account_id": "50000000-0000-0000-0000-000000000001",
+    "debit_amount": 500,
+    "credit_amount": 0
+  },
+  {
+    "id": "71cea758-0fb7-4101-b8de-7ac89524e285",
+    "journal_entry_id": "8aee49a7-5ff1-4dc1-a0b1-fd307b4b9f52",
+    "account_id": "10000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 500
+  },
+  {
+    "id": "24fd702a-5b0e-4203-b10f-93bfb247fe69",
+    "journal_entry_id": "f4f213ed-315c-4ee1-808a-fc0be8fd5ef1",
+    "account_id": "50000000-0000-0000-0000-000000000001",
+    "debit_amount": 0,
+    "credit_amount": 500
+  },
+  {
+    "id": "c57765b5-d2b3-4ed6-9dfd-be600d925de4",
+    "journal_entry_id": "f4f213ed-315c-4ee1-808a-fc0be8fd5ef1",
+    "account_id": "40000000-0000-0000-0000-000000000001",
+    "debit_amount": 21,
+    "credit_amount": 0
+  },
+  {
+    "id": "3e523fbd-f50e-410b-9bb8-a2bcd776d0de",
+    "journal_entry_id": "f4f213ed-315c-4ee1-808a-fc0be8fd5ef1",
+    "account_id": "30000000-0000-0000-0000-000000000001",
+    "debit_amount": 479,
+    "credit_amount": 0
+  }
+]

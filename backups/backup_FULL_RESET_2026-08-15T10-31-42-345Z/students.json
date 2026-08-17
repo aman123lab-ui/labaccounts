@@ -1,0 +1,56 @@
+[
+  {
+    "id": "641fa5d6-4c94-487b-a3c1-db82f0f2689f",
+    "name": "Muhammed Anfaz",
+    "phone": "8593971496",
+    "password_hash": "anfaz123",
+    "batch_id": "22222222-2222-2222-2222-222222222223",
+    "status": "active",
+    "created_at": "2026-08-09T12:16:34.689223+00:00"
+  },
+  {
+    "id": "5afb3ca0-5526-426b-bc00-d2c9607ab61c",
+    "name": "Muhammed Nijad",
+    "phone": "1234567890",
+    "password_hash": "123456",
+    "batch_id": "22222222-2222-2222-2222-222222222223",
+    "status": "active",
+    "created_at": "2026-08-09T12:25:12.845028+00:00"
+  },
+  {
+    "id": "257d4dcb-d089-4ce9-bbef-2a4b6af711a0",
+    "name": "nashid",
+    "phone": "1234567899",
+    "password_hash": "123456",
+    "batch_id": "e9305635-4841-4b66-a94d-7a0edec6a888",
+    "status": "active",
+    "created_at": "2026-08-09T12:25:15.881671+00:00"
+  },
+  {
+    "id": "2bb586d8-7481-4b16-a247-ed8144d3b9e4",
+    "name": "shakir",
+    "phone": "1234567908",
+    "password_hash": "123456",
+    "batch_id": "e11506a6-219c-4b5f-bf93-ef6a626244a0",
+    "status": "active",
+    "created_at": "2026-08-09T12:25:17.350271+00:00"
+  },
+  {
+    "id": "db819bf4-15de-4041-8756-98979ec40c2b",
+    "name": "muhsin",
+    "phone": "1234567917",
+    "password_hash": "123456",
+    "batch_id": "ef0cebb5-08a8-45e1-8d68-e193f80e0652",
+    "status": "active",
+    "created_at": "2026-08-09T12:25:18.762798+00:00"
+  },
+  {
+    "id": "5c6c7321-f809-4979-b6fb-ed73489da4e9",
+    "name": "shammas",
+    "phone": "1234567926",
+    "password_hash": "123456",
+    "batch_id": "22222222-2222-2222-2222-222222222221",
+    "status": "active",
+    "created_at": "2026-08-09T12:25:20.145715+00:00"
+  }
+]

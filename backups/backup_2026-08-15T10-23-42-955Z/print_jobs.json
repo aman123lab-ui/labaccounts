@@ -1,0 +1,110 @@
+[
+  {
+    "id": "cf71c819-fc35-454d-8094-2b3b966b3c52",
+    "journal_entry_id": "54acf81e-39ee-416b-8989-21e3736220f7",
+    "student_id": "641fa5d6-4c94-487b-a3c1-db82f0f2689f",
+    "print_type": "bw",
+    "side": "single",
+    "num_pages": 2,
+    "description": "Print (BW single, 2 pages)",
+    "discount": 0,
+    "amount": 6,
+    "created_at": "2026-08-09T12:36:34.757508+00:00"
+  },
+  {
+    "id": "6f328063-c981-4479-a986-d8810fa7f5d6",
+    "journal_entry_id": "583638d6-bf6a-456e-b861-9a3fc1c94c8b",
+    "student_id": "641fa5d6-4c94-487b-a3c1-db82f0f2689f",
+    "print_type": "bw",
+    "side": "single",
+    "num_pages": 5,
+    "description": "print",
+    "discount": 0,
+    "amount": 15,
+    "created_at": "2026-08-09T17:21:01.203003+00:00"
+  },
+  {
+    "id": "1de43fdd-e16c-472a-81b8-b2064e9068e8",
+    "journal_entry_id": "665c6fb5-241d-43c2-a357-1c5abfb73078",
+    "student_id": "641fa5d6-4c94-487b-a3c1-db82f0f2689f",
+    "print_type": "bw",
+    "side": "single",
+    "num_pages": 5,
+    "description": "Print Job (B/W, single, 1 pages)",
+    "discount": 0,
+    "amount": 15,
+    "created_at": "2026-08-14T04:36:28.769796+00:00"
+  },
+  {
+    "id": "5d5d8fd2-b66d-444b-8387-5c9b62826770",
+    "journal_entry_id": "6de5a394-e49f-46ff-8217-a57d2b8944d8",
+    "student_id": "641fa5d6-4c94-487b-a3c1-db82f0f2689f",
+    "print_type": "bw",
+    "side": "single",
+    "num_pages": 2,
+    "description": "Print (BW single, 2 pages)",
+    "discount": 0,
+    "amount": 6,
+    "created_at": "2026-08-15T04:16:13.561277+00:00"
+  },
+  {
+    "id": "0d76c18f-a949-4c13-b7af-d39b6c565361",
+    "journal_entry_id": "4f2f0d9e-4216-4c1c-973a-f9aacd265abe",
+    "student_id": "5afb3ca0-5526-426b-bc00-d2c9607ab61c",
+    "print_type": "bw",
+    "side": "single",
+    "num_pages": 2,
+    "description": "Print (BW single, 2 pages)",
+    "discount": 0,
+    "amount": 6,
+    "created_at": "2026-08-15T04:16:14.151386+00:00"
+  },
+  {
+    "id": "29e95ab0-57f7-4032-97b2-e7ad46f1ee70",
+    "journal_entry_id": "c9761512-f6cc-4630-8a22-60ff793f9fa9",
+    "student_id": "257d4dcb-d089-4ce9-bbef-2a4b6af711a0",
+    "print_type": "bw",
+    "side": "single",
+    "num_pages": 2,
+    "description": "Print (BW single, 2 pages)",
+    "discount": 0,
+    "amount": 6,
+    "created_at": "2026-08-15T04:16:14.751621+00:00"
+  },
+  {
+    "id": "fa9fc544-c80a-48ce-91f9-036aa11aecbe",
+    "journal_entry_id": "5e2dd155-9452-444d-a0fe-afe5e78bb641",
+    "student_id": "2bb586d8-7481-4b16-a247-ed8144d3b9e4",
+    "print_type": "bw",
+    "side": "single",
+    "num_pages": 2,
+    "description": "Print (BW single, 2 pages)",
+    "discount": 0,
+    "amount": 6,
+    "created_at": "2026-08-15T04:16:15.320768+00:00"
+  },
+  {
+    "id": "4ffb7f08-5d73-48fe-818e-1c28dd56e4aa",
+    "journal_entry_id": "d2961eca-065c-4b80-9b4c-b982520a894f",
+    "student_id": "db819bf4-15de-4041-8756-98979ec40c2b",
+    "print_type": "bw",
+    "side": "single",
+    "num_pages": 2,
+    "description": "Print (BW single, 2 pages)",
+    "discount": 0,
+    "amount": 6,
+    "created_at": "2026-08-15T04:16:15.960559+00:00"
+  },
+  {
+    "id": "eaa1f88a-c0e8-4d8e-a2c9-30ba5ad403ea",
+    "journal_entry_id": "b9dbd44f-e2e6-4482-aa97-2196a203529f",
+    "student_id": "5c6c7321-f809-4979-b6fb-ed73489da4e9",
+    "print_type": "bw",
+    "side": "single",
+    "num_pages": 2,
+    "description": "Print (BW single, 2 pages)",
+    "discount": 0,
+    "amount": 6,
+    "created_at": "2026-08-15T04:16:16.608984+00:00"
+  }
+]

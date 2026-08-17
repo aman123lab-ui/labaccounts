@@ -1,0 +1,95 @@
+[
+  {
+    "id": "6e7c2d76-c3f8-4480-b5d2-382430e7c988",
+    "journal_entry_id": "4c3bcbfa-2616-401e-a593-5300db55e992",
+    "action": "deleted",
+    "changed_by": "Admin",
+    "changed_at": "2026-08-10T17:20:00.558026+00:00",
+    "before_snapshot": {
+      "id": "4c3bcbfa-2616-401e-a593-5300db55e992",
+      "date": "2026-08-09T12:25:05.22+00:00",
+      "source": "Manual Journal Entry",
+      "voided_at": null,
+      "voided_by": null,
+      "created_at": "2026-08-09T12:25:15.048495+00:00",
+      "created_by": null,
+      "description": "Opening balance for Muhammed Nijad",
+      "is_closing_entry": false,
+      "linked_print_job": null,
+      "financial_year_id": null,
+      "journal_entry_lines": [
+        {
+          "id": "3b4d7fdb-7cc6-4de9-9d4f-af8f194d21ff",
+          "account_id": "b2c78191-48f7-4908-b96f-ac9e04eb2019",
+          "debit_amount": 20,
+          "credit_amount": 0,
+          "journal_entry_id": "4c3bcbfa-2616-401e-a593-5300db55e992"
+        },
+        {
+          "id": "8b528c1a-616c-4692-8806-b4c3aa0e542c",
+          "account_id": "30000000-0000-0000-0000-000000000001",
+          "debit_amount": 0,
+          "credit_amount": 20,
+          "journal_entry_id": "4c3bcbfa-2616-401e-a593-5300db55e992"
+        }
+      ]
+    },
+    "after_snapshot": null
+  },
+  {
+    "id": "3e61ad18-0fb5-4233-9b21-6430336f452e",
+    "journal_entry_id": "8aee49a7-5ff1-4dc1-a0b1-fd307b4b9f52",
+    "action": "edited",
+    "changed_by": "Admin",
+    "changed_at": "2026-08-15T10:01:32.858561+00:00",
+    "before_snapshot": {
+      "id": "8aee49a7-5ff1-4dc1-a0b1-fd307b4b9f52",
+      "date": "2026-08-15T00:00:00+00:00",
+      "source": "Manual Journal Entry",
+      "voided_at": null,
+      "voided_by": null,
+      "created_at": "2026-08-15T10:00:34.400651+00:00",
+      "created_by": "fe3f82f3-2512-427b-8fc2-2294fdbea120",
+      "description": "jh",
+      "is_closing_entry": false,
+      "linked_print_job": null,
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "journal_entry_lines": [
+        {
+          "id": "e4f9eb16-75ec-4288-8df3-d496079bd1f3",
+          "account_id": "78d4b568-d6cb-4595-83b2-862a2e88fda3",
+          "debit_amount": 500,
+          "credit_amount": 0,
+          "journal_entry_id": "8aee49a7-5ff1-4dc1-a0b1-fd307b4b9f52"
+        },
+        {
+          "id": "71cea758-0fb7-4101-b8de-7ac89524e285",
+          "account_id": "10000000-0000-0000-0000-000000000001",
+          "debit_amount": 0,
+          "credit_amount": 500,
+          "journal_entry_id": "8aee49a7-5ff1-4dc1-a0b1-fd307b4b9f52"
+        }
+      ]
+    },
+    "after_snapshot": {
+      "date": "2026-08-15",
+      "lines": [
+        {
+          "id": "e4f9eb16-75ec-4288-8df3-d496079bd1f3",
+          "debit": 500,
+          "credit": 0,
+          "accountId": "50000000-0000-0000-0000-000000000001"
+        },
+        {
+          "id": "71cea758-0fb7-4101-b8de-7ac89524e285",
+          "debit": 0,
+          "credit": 500,
+          "accountId": "10000000-0000-0000-0000-000000000001"
+        }
+      ],
+      "source": "Manual Journal Entry",
+      "description": "jh",
+      "journal_entry_id": "8aee49a7-5ff1-4dc1-a0b1-fd307b4b9f52"
+    }
+  }
+]

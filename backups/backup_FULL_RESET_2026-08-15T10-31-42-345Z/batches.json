@@ -1,0 +1,72 @@
+[
+  {
+    "id": "e9305635-4841-4b66-a94d-7a0edec6a888",
+    "name": "BS 2",
+    "category": "BS",
+    "sort_order": 0,
+    "created_at": "2026-08-07T03:39:04.666168+00:00"
+  },
+  {
+    "id": "22222222-2222-2222-2222-222222222221",
+    "name": "JD 1",
+    "category": "JD",
+    "sort_order": 1,
+    "created_at": "2026-08-06T17:53:48.583907+00:00"
+  },
+  {
+    "id": "22222222-2222-2222-2222-222222222222",
+    "name": "HS 1",
+    "category": "HS",
+    "sort_order": 2,
+    "created_at": "2026-08-06T17:53:48.583907+00:00"
+  },
+  {
+    "id": "22222222-2222-2222-2222-222222222223",
+    "name": "BS 1",
+    "category": "BS",
+    "sort_order": 3,
+    "created_at": "2026-08-06T17:53:48.583907+00:00"
+  },
+  {
+    "id": "1a6a8253-1494-4e9c-aad0-695dfce2825f",
+    "name": "JD 2",
+    "category": "JD",
+    "sort_order": 0,
+    "created_at": "2026-08-07T03:40:56.771778+00:00"
+  },
+  {
+    "id": "64b3a477-b407-4405-b392-3149c806d34d",
+    "name": "JD 3",
+    "category": "JD",
+    "sort_order": 0,
+    "created_at": "2026-08-07T03:41:05.479602+00:00"
+  },
+  {
+    "id": "5d6a5b56-5637-4c9d-ba7a-65f99aecc910",
+    "name": "HS 2",
+    "category": "HS",
+    "sort_order": 0,
+    "created_at": "2026-08-07T03:41:31.867003+00:00"
+  },
+  {
+    "id": "e11506a6-219c-4b5f-bf93-ef6a626244a0",
+    "name": "BS 3",
+    "category": "BS",
+    "sort_order": 0,
+    "created_at": "2026-08-07T03:41:41.676317+00:00"
+  },
+  {
+    "id": "7af5015f-be87-4656-bddc-042ba705be4d",
+    "name": "BS 4",
+    "category": "BS",
+    "sort_order": 0,
+    "created_at": "2026-08-07T03:42:20.555915+00:00"
+  },
+  {
+    "id": "ef0cebb5-08a8-45e1-8d68-e193f80e0652",
+    "name": "BS 5",
+    "category": "BS",
+    "sort_order": 0,
+    "created_at": "2026-08-07T03:42:30.201804+00:00"
+  }
+]

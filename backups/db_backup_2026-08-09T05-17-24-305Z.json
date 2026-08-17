@@ -1,0 +1,2430 @@
+{
+  "students": [
+    {
+      "id": "db0665c2-b707-4428-a80d-242acb08f312",
+      "name": "wadasd",
+      "phone": "6523147890",
+      "password_hash": "456723",
+      "batch_id": "e9305635-4841-4b66-a94d-7a0edec6a888",
+      "status": "active",
+      "created_at": "2026-08-07T18:10:53.82523+00:00"
+    },
+    {
+      "id": "99ae5317-7ab4-4ebd-a08f-539523547108",
+      "name": "safvxd",
+      "phone": "6231457890",
+      "password_hash": "654123",
+      "batch_id": "e11506a6-219c-4b5f-bf93-ef6a626244a0",
+      "status": "active",
+      "created_at": "2026-08-07T18:11:13.790673+00:00"
+    },
+    {
+      "id": "b5a7793e-ab9a-431d-8552-1e7f0a6f06ef",
+      "name": "a€asd",
+      "phone": "6932587410",
+      "password_hash": "456123",
+      "batch_id": "7af5015f-be87-4656-bddc-042ba705be4d",
+      "status": "active",
+      "created_at": "2026-08-07T18:11:41.036685+00:00"
+    },
+    {
+      "id": "b708dec4-875c-4028-a131-e4f35346ea6f",
+      "name": "qwer",
+      "phone": "9874563210",
+      "password_hash": "456123",
+      "batch_id": "ef0cebb5-08a8-45e1-8d68-e193f80e0652",
+      "status": "active",
+      "created_at": "2026-08-07T18:12:04.338189+00:00"
+    },
+    {
+      "id": "8f8d55b0-08c5-4e36-ad50-936acd23ddd5",
+      "name": "qwer",
+      "phone": "1234554321",
+      "password_hash": "123456",
+      "batch_id": "86a59cf1-caee-499e-ad54-3acf22f2a1f4",
+      "status": "active",
+      "created_at": "2026-08-07T18:12:26.338019+00:00"
+    },
+    {
+      "id": "b87f830e-7293-40b5-8d07-b23d6095e5b6",
+      "name": "QWER",
+      "phone": "6541239870",
+      "password_hash": "654789",
+      "batch_id": "22222222-2222-2222-2222-222222222222",
+      "status": "active",
+      "created_at": "2026-08-09T02:46:08.337171+00:00"
+    },
+    {
+      "id": "a3a3f131-86c0-4ea4-ac86-ff03ecd40097",
+      "name": "LP,MN",
+      "phone": "0213654789",
+      "password_hash": "654123",
+      "batch_id": "5d6a5b56-5637-4c9d-ba7a-65f99aecc910",
+      "status": "active",
+      "created_at": "2026-08-09T02:46:33.519558+00:00"
+    },
+    {
+      "id": "7e66a4a3-ce6a-4333-9911-77c0f8874572",
+      "name": "QWER",
+      "phone": "1234432112",
+      "password_hash": "123456",
+      "batch_id": "22222222-2222-2222-2222-222222222223",
+      "status": "active",
+      "created_at": "2026-08-09T02:47:04.682245+00:00"
+    },
+    {
+      "id": "47025876-0833-465c-95bc-28b97beceb68",
+      "name": "shakir",
+      "phone": "7894561230",
+      "password_hash": "qwerty",
+      "batch_id": "92cca5c1-811c-472b-9262-a8b0feb7ea86",
+      "status": "archived",
+      "created_at": "2026-08-07T04:01:14.406592+00:00"
+    },
+    {
+      "id": "b228a91c-b151-4cd7-b1ee-5cd2a0d8ff3a",
+      "name": "ersdf",
+      "phone": "7894562310",
+      "password_hash": "789456",
+      "batch_id": "92cca5c1-811c-472b-9262-a8b0feb7ea86",
+      "status": "archived",
+      "created_at": "2026-08-07T18:10:27.194587+00:00"
+    },
+    {
+      "id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "name": "muhammed anfaz",
+      "phone": "8593971496",
+      "password_hash": "anfaz123",
+      "batch_id": "86a59cf1-caee-499e-ad54-3acf22f2a1f4",
+      "status": "active",
+      "created_at": "2026-08-06T18:24:32.920137+00:00"
+    },
+    {
+      "id": "47bca101-fe23-411f-9e04-41f3130ea490",
+      "name": "swabah",
+      "phone": "5461237890",
+      "password_hash": "123123",
+      "batch_id": "86a59cf1-caee-499e-ad54-3acf22f2a1f4",
+      "status": "active",
+      "created_at": "2026-08-07T17:44:46.159366+00:00"
+    },
+    {
+      "id": "2f62aad0-f371-45dc-89d3-1be1b95712c9",
+      "name": "asdf",
+      "phone": "5487693210",
+      "password_hash": "654123",
+      "batch_id": "d6f053f7-d4d0-49fd-bc99-90d18e4c2a44",
+      "status": "active",
+      "created_at": "2026-08-09T02:45:35.551223+00:00"
+    }
+  ],
+  "journal_entries": [
+    {
+      "id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "date": "2026-08-06T18:36:28.399+00:00",
+      "description": "print",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-06T18:36:35.650409+00:00",
+      "voided_at": "2026-08-07T03:05:59.185+00:00",
+      "voided_by": "Admin",
+      "is_closing_entry": false
+    },
+    {
+      "id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b",
+      "date": "2026-08-07T00:00:00+00:00",
+      "description": "stareted",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-07T09:37:11.614474+00:00",
+      "voided_at": "2026-08-07T09:40:47.642+00:00",
+      "voided_by": "Admin",
+      "is_closing_entry": false
+    },
+    {
+      "id": "b3f59313-534b-4d45-a3de-d8947ffa54b8",
+      "date": "2026-01-02T00:00:00+00:00",
+      "description": "opening",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-07T09:48:52.486336+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "087620de-f387-4608-84aa-dc267043b619",
+      "date": "2026-08-05T00:00:00+00:00",
+      "description": "cash resived from debtors",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-07T09:50:04.892525+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "5c40f4a2-1c19-4fda-8c03-43d4cc860348",
+      "date": "2026-08-07T00:00:00+00:00",
+      "description": "Expence",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-07T17:31:52.299776+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "17ef5421-a650-4e7f-85da-5295f4720425",
+      "date": "2026-08-07T17:37:32.722+00:00",
+      "description": "Print (BW single, 23 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-07T17:37:40.825791+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "48d58087-9e6c-489d-ae74-52da38b6128b",
+      "date": "2026-08-07T17:37:33.133+00:00",
+      "description": "Print (BW single, 23 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-07T17:37:41.207808+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "cf1d6bd9-f0cc-4c06-af99-1a4f37cdb5a9",
+      "date": "2026-08-07T00:00:00+00:00",
+      "description": "purchase a4",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-07T17:42:00.329874+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "2c8574dd-c7cc-4e8b-a123-c16d7162a145",
+      "date": "2026-08-08T07:56:49.977+00:00",
+      "description": "printing",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:56:58.515605+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "c864aa55-bf25-4946-8af0-ce397c3e6462",
+      "date": "2026-08-08T07:56:50.665+00:00",
+      "description": "printing",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:56:58.901487+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "55f1ffe0-76fa-4a50-8935-b72cc83f997a",
+      "date": "2026-08-08T07:56:50.984+00:00",
+      "description": "printing",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:56:59.221888+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "accc91a4-7e65-4b43-be71-317aebef2181",
+      "date": "2026-08-08T07:56:51.3+00:00",
+      "description": "printing",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:56:59.53763+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "1c3910e7-8eca-4781-bb29-1f3b50a9212f",
+      "date": "2026-08-08T07:56:51.619+00:00",
+      "description": "printing",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:56:59.856957+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "5b64cf84-b004-4e48-aa9c-5168690f5569",
+      "date": "2026-08-08T07:56:51.934+00:00",
+      "description": "printing",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:00.170406+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "40022969-05dc-430d-bf49-d68f3dd63d6b",
+      "date": "2026-08-08T07:56:52.247+00:00",
+      "description": "printing",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:00.482476+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "aafe0f87-2b0d-4917-b1a4-9a57eef82fb3",
+      "date": "2026-08-08T07:56:52.559+00:00",
+      "description": "printing",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:00.794445+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "6daffb8c-4dc6-48a4-89e0-fb623880cc8a",
+      "date": "2026-08-08T07:56:52.869+00:00",
+      "description": "printing",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:01.10319+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "1c9a28fe-a173-4380-bc57-efec28090272",
+      "date": "2026-08-08T07:57:27.017+00:00",
+      "description": "Cash payment received",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:35.256661+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "46298994-df5a-4355-ae7b-26cc1477d9a0",
+      "date": "2026-08-08T07:57:27.181+00:00",
+      "description": "Cash payment received",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:35.432042+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "58002863-3a81-4a42-80c5-f6a984450550",
+      "date": "2026-08-08T07:57:27.361+00:00",
+      "description": "Cash payment received",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:35.597451+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "18ecd5b4-932e-41da-86b3-ee9725510433",
+      "date": "2026-08-08T07:57:27.519+00:00",
+      "description": "Cash payment received",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:35.760556+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "648db1eb-fea1-427f-b4bc-62d06b43f37b",
+      "date": "2026-08-08T07:57:27.689+00:00",
+      "description": "Cash payment received",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:35.923057+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "38074df2-da78-4766-bd65-2d80bf2808d0",
+      "date": "2026-08-08T07:57:27.843+00:00",
+      "description": "Cash payment received",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:36.081324+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "42bd2525-71b8-48ca-8ad4-f85c47e0f7a1",
+      "date": "2026-08-08T07:57:28.008+00:00",
+      "description": "Cash payment received",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:36.24632+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "40552c2d-b3c6-4252-85f3-d04a4257c736",
+      "date": "2026-08-08T07:57:28.168+00:00",
+      "description": "Cash payment received",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:36.406456+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "7f7edd5b-b828-412b-84f3-035d39b05bf5",
+      "date": "2026-08-08T07:57:28.332+00:00",
+      "description": "Cash payment received",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T07:57:36.564401+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "94cf9fab-78b7-42df-ac14-4fedc2db21ea",
+      "date": "2026-08-08T13:08:30.174+00:00",
+      "description": "UPI Payment Verified (muhammed anfaz - Ref Claim #57cf71f4)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T13:08:37.945877+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "162614e0-9483-410b-a33f-48ffb535b13b",
+      "date": "2026-08-08T17:37:52.314+00:00",
+      "description": "Print (BW single, 40 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T17:37:59.944658+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "1ca4309d-a978-47b8-8391-c18ce78cf05b",
+      "date": "2026-08-08T17:45:19.678+00:00",
+      "description": "UPI Payment Verified (muhammed anfaz - Ref Claim #f4c2eee3)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-08T17:45:27.269244+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "bde5c722-0f0f-4946-b123-a5291ed9213b",
+      "date": "2026-08-09T01:22:02.672+00:00",
+      "description": "Financial Year Closing Entry (FY 2026-2027 Surplus Transfer to Fund Balance)",
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "created_by": null,
+      "created_at": "2026-08-09T01:22:11.10712+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "f6f77070-68f9-497f-8d0b-2dd76f9134c2",
+      "date": "2026-08-09T02:33:03.102+00:00",
+      "description": "Print (BW single, 23 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:33:11.493733+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "5e6a5c29-ff6d-42cd-b8f0-9c0fa6114c27",
+      "date": "2026-08-09T02:52:34.218+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:42.573192+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "6ff0cfac-a333-47aa-af3a-b89aabb7d708",
+      "date": "2026-08-09T02:52:34.605+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:42.950781+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "776ae44c-8b07-4a5f-9c62-e0e12d3099c8",
+      "date": "2026-08-09T02:52:34.955+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:43.301979+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "21b2b89e-dbfc-408e-9484-f6d79c8290ba",
+      "date": "2026-08-09T02:52:35.308+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:43.653126+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "4457e0b4-7e3d-4eae-abf9-8d322e76b2a0",
+      "date": "2026-08-09T02:52:35.651+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:43.996333+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "fe9325ff-07e1-4dd1-8b59-95f02b3dfb41",
+      "date": "2026-08-09T02:52:36.084+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:44.434522+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "d0a18ed0-9395-457a-9b68-258c4eb63caa",
+      "date": "2026-08-09T02:52:36.436+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:44.781449+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "e58f1c78-2106-479f-a886-13e24e37a253",
+      "date": "2026-08-09T02:52:36.786+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:45.130403+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "0134f580-3bce-4a9f-ac05-5ddfd01f3fe8",
+      "date": "2026-08-09T02:52:37.128+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:45.475934+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "54f5119a-fe73-4e6d-ab41-a8f64d23eac2",
+      "date": "2026-08-09T02:52:37.478+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:45.821255+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "43a56acb-a0c7-44e2-a963-ac3388203ee0",
+      "date": "2026-08-09T02:52:37.82+00:00",
+      "description": "Print (BW single, 20 pages)",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:52:46.165421+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "9cb7ac61-82fa-4026-bc66-b2e75d069067",
+      "date": "2026-08-09T00:00:00+00:00",
+      "description": "ADS",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:54:32.147343+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "36f38154-51b0-4a90-8629-38fc0226e5d5",
+      "date": "2026-08-09T00:00:00+00:00",
+      "description": "AWDA",
+      "financial_year_id": null,
+      "created_by": null,
+      "created_at": "2026-08-09T02:57:36.019598+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "71fe4186-9470-4fc4-a74a-a042749071ab",
+      "date": "2026-12-31T23:59:59+00:00",
+      "description": "Closing Entry for FY 2026-2027 — Transfer Net Surplus to Fund Balance",
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "created_by": null,
+      "created_at": "2026-08-09T04:56:49.536512+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": true
+    },
+    {
+      "id": "2c12a385-1520-4214-b493-a74b99bb17f3",
+      "date": "2026-12-31T23:59:59+00:00",
+      "description": "Closing Entry for FY 2026-2027 — Transfer Net Surplus to Fund Balance",
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "created_by": null,
+      "created_at": "2026-08-09T04:58:08.129311+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": true
+    }
+  ],
+  "journal_entry_lines": [
+    {
+      "id": "58567658-4213-44e9-b6f2-c31a7aa0ac2d",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 9,
+      "credit_amount": 0
+    },
+    {
+      "id": "1f28e7d4-2bbe-4d10-b289-4bff423ce7fd",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 9
+    },
+    {
+      "id": "5a2ca8d3-5136-460b-944d-2848ac683ef2",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 10,
+      "credit_amount": 0
+    },
+    {
+      "id": "142bbe86-b266-44b8-a5fe-c3d19bb0657f",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 10
+    },
+    {
+      "id": "5a42f89f-3887-4bca-806d-2827978542ea",
+      "journal_entry_id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 200,
+      "credit_amount": 0
+    },
+    {
+      "id": "87d05591-fd4f-42dc-9efe-05cfa759d774",
+      "journal_entry_id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b",
+      "account_id": "30000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 200
+    },
+    {
+      "id": "e953cf94-883c-4297-9144-743b8b002552",
+      "journal_entry_id": "b3f59313-534b-4d45-a3de-d8947ffa54b8",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 2556,
+      "credit_amount": 0
+    },
+    {
+      "id": "78558fc0-2e78-4e26-851d-153060b0151e",
+      "journal_entry_id": "b3f59313-534b-4d45-a3de-d8947ffa54b8",
+      "account_id": "10000000-0000-0000-0000-000000000002",
+      "debit_amount": 5017,
+      "credit_amount": 0
+    },
+    {
+      "id": "3157bd7c-0695-47e1-8a72-58e649bbb665",
+      "journal_entry_id": "b3f59313-534b-4d45-a3de-d8947ffa54b8",
+      "account_id": "30000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 7573
+    },
+    {
+      "id": "9566a2cf-dbed-4034-98cd-2b328bf08c44",
+      "journal_entry_id": "087620de-f387-4608-84aa-dc267043b619",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 3601,
+      "credit_amount": 0
+    },
+    {
+      "id": "5913e668-9ec4-4f0b-aba8-7490fd1230d6",
+      "journal_entry_id": "087620de-f387-4608-84aa-dc267043b619",
+      "account_id": "10000000-0000-0000-0000-000000000002",
+      "debit_amount": 0,
+      "credit_amount": 3601
+    },
+    {
+      "id": "a5f48d41-75f0-44ca-b8e9-029b11ed199c",
+      "journal_entry_id": "5c40f4a2-1c19-4fda-8c03-43d4cc860348",
+      "account_id": "50000000-0000-0000-0000-000000000002",
+      "debit_amount": 450,
+      "credit_amount": 0
+    },
+    {
+      "id": "202a86db-b3da-49d6-8277-f1c4afff8a7d",
+      "journal_entry_id": "5c40f4a2-1c19-4fda-8c03-43d4cc860348",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 450
+    },
+    {
+      "id": "3f2618cc-3647-4643-81b6-f1a90fc7f669",
+      "journal_entry_id": "17ef5421-a650-4e7f-85da-5295f4720425",
+      "account_id": "a5bacef3-504e-45a7-9b73-e21c6feb37de",
+      "debit_amount": 59,
+      "credit_amount": 0
+    },
+    {
+      "id": "de1bbc84-406a-4249-980e-09fd9b2c015b",
+      "journal_entry_id": "17ef5421-a650-4e7f-85da-5295f4720425",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 59
+    },
+    {
+      "id": "db47a762-3346-4c3a-b6f3-20745ac5004e",
+      "journal_entry_id": "48d58087-9e6c-489d-ae74-52da38b6128b",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 59,
+      "credit_amount": 0
+    },
+    {
+      "id": "b458dcb2-3eb8-4ff5-a757-3f0a84fac17c",
+      "journal_entry_id": "48d58087-9e6c-489d-ae74-52da38b6128b",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 59
+    },
+    {
+      "id": "563ee6e5-bbe1-465d-8112-c2bfe5aa30b1",
+      "journal_entry_id": "cf1d6bd9-f0cc-4c06-af99-1a4f37cdb5a9",
+      "account_id": "50000000-0000-0000-0000-000000000001",
+      "debit_amount": 245,
+      "credit_amount": 0
+    },
+    {
+      "id": "68136a1d-a3ba-4085-9eb0-ffbf85fd5e2d",
+      "journal_entry_id": "cf1d6bd9-f0cc-4c06-af99-1a4f37cdb5a9",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 245
+    },
+    {
+      "id": "cb44f80a-8290-40a4-8986-2cbc8d5ab064",
+      "journal_entry_id": "2c8574dd-c7cc-4e8b-a123-c16d7162a145",
+      "account_id": "9f89dd9c-aeec-4092-8b4d-89e318731404",
+      "debit_amount": 6,
+      "credit_amount": 0
+    },
+    {
+      "id": "49dc8897-1c58-4063-b3bc-3210ac43258b",
+      "journal_entry_id": "2c8574dd-c7cc-4e8b-a123-c16d7162a145",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 6
+    },
+    {
+      "id": "ff913b12-f7d3-495c-8c2c-d30fb3fd7252",
+      "journal_entry_id": "c864aa55-bf25-4946-8af0-ce397c3e6462",
+      "account_id": "7e1753eb-2728-437a-a6ab-e41c5236bdcf",
+      "debit_amount": 6,
+      "credit_amount": 0
+    },
+    {
+      "id": "c3c65bdd-6fd7-4c38-837b-4f9b300d2389",
+      "journal_entry_id": "c864aa55-bf25-4946-8af0-ce397c3e6462",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 6
+    },
+    {
+      "id": "7e2e2559-89e8-484a-8162-d6350458a6ad",
+      "journal_entry_id": "55f1ffe0-76fa-4a50-8935-b72cc83f997a",
+      "account_id": "99e0f8ba-e5b3-4bfd-92bd-70d2cc04b930",
+      "debit_amount": 6,
+      "credit_amount": 0
+    },
+    {
+      "id": "1c47198c-1096-49f6-827d-9515eac619a9",
+      "journal_entry_id": "55f1ffe0-76fa-4a50-8935-b72cc83f997a",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 6
+    },
+    {
+      "id": "84162a97-cb00-46c5-a846-a7e942f5a603",
+      "journal_entry_id": "accc91a4-7e65-4b43-be71-317aebef2181",
+      "account_id": "5c829478-b73c-4f93-8a18-ce21de947838",
+      "debit_amount": 6,
+      "credit_amount": 0
+    },
+    {
+      "id": "601b993f-c8e0-4674-a7ed-b5ad30f8a0d7",
+      "journal_entry_id": "accc91a4-7e65-4b43-be71-317aebef2181",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 6
+    },
+    {
+      "id": "5a855b8e-afaf-4a38-9d88-57e16d965e7d",
+      "journal_entry_id": "1c3910e7-8eca-4781-bb29-1f3b50a9212f",
+      "account_id": "20779f2d-bfe9-4e5b-9e6e-a8ff4008f0d1",
+      "debit_amount": 6,
+      "credit_amount": 0
+    },
+    {
+      "id": "96d704ed-30ac-4d4f-a4d8-1e00d55dbf08",
+      "journal_entry_id": "1c3910e7-8eca-4781-bb29-1f3b50a9212f",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 6
+    },
+    {
+      "id": "b7669bb0-a0a5-4e6a-b8fc-2eb118f746a9",
+      "journal_entry_id": "5b64cf84-b004-4e48-aa9c-5168690f5569",
+      "account_id": "9cbb82c7-afe2-4922-b3ee-808ffc723d5d",
+      "debit_amount": 6,
+      "credit_amount": 0
+    },
+    {
+      "id": "fbf41495-0ff7-4d3c-aeda-bcb71ca91f12",
+      "journal_entry_id": "5b64cf84-b004-4e48-aa9c-5168690f5569",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 6
+    },
+    {
+      "id": "01eece5d-d933-4afc-8d2a-104fbf45c2cb",
+      "journal_entry_id": "40022969-05dc-430d-bf49-d68f3dd63d6b",
+      "account_id": "1df16d46-c127-4af2-922f-85ccc4879a4f",
+      "debit_amount": 6,
+      "credit_amount": 0
+    },
+    {
+      "id": "ea81dcde-1a9a-4fef-8bc0-143aa3c9c741",
+      "journal_entry_id": "40022969-05dc-430d-bf49-d68f3dd63d6b",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 6
+    },
+    {
+      "id": "373a7555-b0a8-4724-a4c8-4acdcc103e8f",
+      "journal_entry_id": "aafe0f87-2b0d-4917-b1a4-9a57eef82fb3",
+      "account_id": "a5bacef3-504e-45a7-9b73-e21c6feb37de",
+      "debit_amount": 6,
+      "credit_amount": 0
+    },
+    {
+      "id": "c26ab868-1708-4e6d-a351-91d1b59dc79f",
+      "journal_entry_id": "aafe0f87-2b0d-4917-b1a4-9a57eef82fb3",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 6
+    },
+    {
+      "id": "3d67ed5d-799e-4a29-98de-107c363b273e",
+      "journal_entry_id": "6daffb8c-4dc6-48a4-89e0-fb623880cc8a",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 6,
+      "credit_amount": 0
+    },
+    {
+      "id": "4b042c82-4f82-4d65-8bf0-e7fa2ae2828b",
+      "journal_entry_id": "6daffb8c-4dc6-48a4-89e0-fb623880cc8a",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 6
+    },
+    {
+      "id": "409474ba-8956-4805-8140-87bfcf53ce79",
+      "journal_entry_id": "1c9a28fe-a173-4380-bc57-efec28090272",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 5,
+      "credit_amount": 0
+    },
+    {
+      "id": "90d8b42b-a860-43d3-9520-c978c437b7c0",
+      "journal_entry_id": "1c9a28fe-a173-4380-bc57-efec28090272",
+      "account_id": "9f89dd9c-aeec-4092-8b4d-89e318731404",
+      "debit_amount": 0,
+      "credit_amount": 5
+    },
+    {
+      "id": "67af8eb2-c625-4400-9fba-3f41623e3ff7",
+      "journal_entry_id": "46298994-df5a-4355-ae7b-26cc1477d9a0",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 5,
+      "credit_amount": 0
+    },
+    {
+      "id": "013d8ed9-dffb-4640-b806-07fc1a8d807b",
+      "journal_entry_id": "46298994-df5a-4355-ae7b-26cc1477d9a0",
+      "account_id": "7e1753eb-2728-437a-a6ab-e41c5236bdcf",
+      "debit_amount": 0,
+      "credit_amount": 5
+    },
+    {
+      "id": "beb0daa9-daae-4a3c-a934-e5160bfc447e",
+      "journal_entry_id": "58002863-3a81-4a42-80c5-f6a984450550",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 5,
+      "credit_amount": 0
+    },
+    {
+      "id": "dcefd6fc-9c87-4c3b-9789-7f694746de26",
+      "journal_entry_id": "58002863-3a81-4a42-80c5-f6a984450550",
+      "account_id": "99e0f8ba-e5b3-4bfd-92bd-70d2cc04b930",
+      "debit_amount": 0,
+      "credit_amount": 5
+    },
+    {
+      "id": "be0bdca6-a353-4020-a37d-b2162bcc6a3c",
+      "journal_entry_id": "18ecd5b4-932e-41da-86b3-ee9725510433",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 5,
+      "credit_amount": 0
+    },
+    {
+      "id": "2c9068eb-a867-45fb-9b7d-54853df4553a",
+      "journal_entry_id": "18ecd5b4-932e-41da-86b3-ee9725510433",
+      "account_id": "5c829478-b73c-4f93-8a18-ce21de947838",
+      "debit_amount": 0,
+      "credit_amount": 5
+    },
+    {
+      "id": "30ee470b-f467-4d6a-b522-8336385596ea",
+      "journal_entry_id": "648db1eb-fea1-427f-b4bc-62d06b43f37b",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 5,
+      "credit_amount": 0
+    },
+    {
+      "id": "950ebb91-c1df-4ec2-830b-e8047a0d27f7",
+      "journal_entry_id": "648db1eb-fea1-427f-b4bc-62d06b43f37b",
+      "account_id": "20779f2d-bfe9-4e5b-9e6e-a8ff4008f0d1",
+      "debit_amount": 0,
+      "credit_amount": 5
+    },
+    {
+      "id": "75f32519-8852-416b-a0ec-e7e66840dfc9",
+      "journal_entry_id": "38074df2-da78-4766-bd65-2d80bf2808d0",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 5,
+      "credit_amount": 0
+    },
+    {
+      "id": "e21b60c8-202b-4e25-be34-07773d5865d6",
+      "journal_entry_id": "38074df2-da78-4766-bd65-2d80bf2808d0",
+      "account_id": "9cbb82c7-afe2-4922-b3ee-808ffc723d5d",
+      "debit_amount": 0,
+      "credit_amount": 5
+    },
+    {
+      "id": "643b59bc-f4b0-4901-9b8e-a6a8dde3dab3",
+      "journal_entry_id": "42bd2525-71b8-48ca-8ad4-f85c47e0f7a1",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 5,
+      "credit_amount": 0
+    },
+    {
+      "id": "9d0cee2c-4375-4a98-a2f9-f410cf241968",
+      "journal_entry_id": "42bd2525-71b8-48ca-8ad4-f85c47e0f7a1",
+      "account_id": "1df16d46-c127-4af2-922f-85ccc4879a4f",
+      "debit_amount": 0,
+      "credit_amount": 5
+    },
+    {
+      "id": "99e8487a-0bdf-4942-a78b-c966ae7f8a70",
+      "journal_entry_id": "40552c2d-b3c6-4252-85f3-d04a4257c736",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 5,
+      "credit_amount": 0
+    },
+    {
+      "id": "3852a4b7-1916-440c-8ee9-b22546ecfb2b",
+      "journal_entry_id": "40552c2d-b3c6-4252-85f3-d04a4257c736",
+      "account_id": "a5bacef3-504e-45a7-9b73-e21c6feb37de",
+      "debit_amount": 0,
+      "credit_amount": 5
+    },
+    {
+      "id": "62d522d5-32b6-4a65-be08-ab6256303ca0",
+      "journal_entry_id": "7f7edd5b-b828-412b-84f3-035d39b05bf5",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 5,
+      "credit_amount": 0
+    },
+    {
+      "id": "4c9ea182-f30b-49c9-bba3-e1f1156d7202",
+      "journal_entry_id": "7f7edd5b-b828-412b-84f3-035d39b05bf5",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 0,
+      "credit_amount": 5
+    },
+    {
+      "id": "d585475f-d2ea-41df-ad73-137f9bd9a896",
+      "journal_entry_id": "94cf9fab-78b7-42df-ac14-4fedc2db21ea",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "850281c2-54a8-496a-a222-4c42e5ed1ab9",
+      "journal_entry_id": "94cf9fab-78b7-42df-ac14-4fedc2db21ea",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "3b5f9a65-5c60-4c75-9cf2-eff0e4dcbd19",
+      "journal_entry_id": "162614e0-9483-410b-a33f-48ffb535b13b",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 120,
+      "credit_amount": 0
+    },
+    {
+      "id": "b875811a-4c08-4701-923a-9e7f53b1ce6f",
+      "journal_entry_id": "162614e0-9483-410b-a33f-48ffb535b13b",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 120
+    },
+    {
+      "id": "fa8cefff-c5bf-4d0c-bea9-01b376a67ba3",
+      "journal_entry_id": "1ca4309d-a978-47b8-8391-c18ce78cf05b",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 120,
+      "credit_amount": 0
+    },
+    {
+      "id": "a14ff7ed-e553-48c3-976d-51e8de5ddca4",
+      "journal_entry_id": "1ca4309d-a978-47b8-8391-c18ce78cf05b",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 0,
+      "credit_amount": 120
+    },
+    {
+      "id": "84cf753e-cded-4dc8-95d4-7070f3bfa226",
+      "journal_entry_id": "bde5c722-0f0f-4946-b123-a5291ed9213b",
+      "account_id": "50000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 245
+    },
+    {
+      "id": "0512d706-0233-45d8-b4cd-12285918872f",
+      "journal_entry_id": "bde5c722-0f0f-4946-b123-a5291ed9213b",
+      "account_id": "30000000-0000-0000-0000-000000000001",
+      "debit_amount": 245,
+      "credit_amount": 0
+    },
+    {
+      "id": "186f18aa-6c57-4001-92dc-4bcc8f6dfdac",
+      "journal_entry_id": "f6f77070-68f9-497f-8d0b-2dd76f9134c2",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 69,
+      "credit_amount": 0
+    },
+    {
+      "id": "a78158c1-e1c9-4e73-94de-db5adff5261c",
+      "journal_entry_id": "f6f77070-68f9-497f-8d0b-2dd76f9134c2",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 69
+    },
+    {
+      "id": "b68e4b8b-9005-4dd0-b243-a148da95b4e1",
+      "journal_entry_id": "5e6a5c29-ff6d-42cd-b8f0-9c0fa6114c27",
+      "account_id": "3795fcd1-6956-4339-934b-85cf2b12d9ef",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "d2880831-d94d-4a9a-89bc-abb12ea4d5a3",
+      "journal_entry_id": "5e6a5c29-ff6d-42cd-b8f0-9c0fa6114c27",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "4135f189-1cf5-4cba-97d5-406c5627c7ac",
+      "journal_entry_id": "6ff0cfac-a333-47aa-af3a-b89aabb7d708",
+      "account_id": "92884f8e-4708-41e5-9932-7b3b4ca7c400",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "822af549-eec1-4f92-af3e-3bc094f48cd6",
+      "journal_entry_id": "6ff0cfac-a333-47aa-af3a-b89aabb7d708",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "81df85b6-73bb-48a9-b5a0-80fb2e3ec4bf",
+      "journal_entry_id": "776ae44c-8b07-4a5f-9c62-e0e12d3099c8",
+      "account_id": "e91e7a64-e6f5-44b5-9726-89eeef804d40",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "2d711547-8f0b-4354-898c-40d98412306f",
+      "journal_entry_id": "776ae44c-8b07-4a5f-9c62-e0e12d3099c8",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "3ae2e2c1-8abd-4aa0-96e9-5ba79c40250f",
+      "journal_entry_id": "21b2b89e-dbfc-408e-9484-f6d79c8290ba",
+      "account_id": "20779f2d-bfe9-4e5b-9e6e-a8ff4008f0d1",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "bfe6e769-4a34-464e-ab58-3d05c9740018",
+      "journal_entry_id": "21b2b89e-dbfc-408e-9484-f6d79c8290ba",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "b7a1767d-65bb-4c4a-b121-24e8534b6602",
+      "journal_entry_id": "4457e0b4-7e3d-4eae-abf9-8d322e76b2a0",
+      "account_id": "5c829478-b73c-4f93-8a18-ce21de947838",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "a2c88d0d-7dfa-41d5-b233-dab2d100e7e6",
+      "journal_entry_id": "4457e0b4-7e3d-4eae-abf9-8d322e76b2a0",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "28376321-22d6-4dab-aa95-d19a822b9a19",
+      "journal_entry_id": "fe9325ff-07e1-4dd1-8b59-95f02b3dfb41",
+      "account_id": "99e0f8ba-e5b3-4bfd-92bd-70d2cc04b930",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "b642b30d-49c6-4d8d-846d-b568c9330f8b",
+      "journal_entry_id": "fe9325ff-07e1-4dd1-8b59-95f02b3dfb41",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "2a3c31ff-68a0-4c10-8c7c-3197f8d85ac5",
+      "journal_entry_id": "d0a18ed0-9395-457a-9b68-258c4eb63caa",
+      "account_id": "7e1753eb-2728-437a-a6ab-e41c5236bdcf",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "872c7a57-7364-4520-9147-b7ddc9081608",
+      "journal_entry_id": "d0a18ed0-9395-457a-9b68-258c4eb63caa",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "fb807353-61e4-48ee-88fa-07ff943546f2",
+      "journal_entry_id": "e58f1c78-2106-479f-a886-13e24e37a253",
+      "account_id": "9f89dd9c-aeec-4092-8b4d-89e318731404",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "b71aa141-0600-4c8c-be58-f830976aaa57",
+      "journal_entry_id": "e58f1c78-2106-479f-a886-13e24e37a253",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "fc67d980-d30c-412d-8e97-4df6a365ed67",
+      "journal_entry_id": "0134f580-3bce-4a9f-ac05-5ddfd01f3fe8",
+      "account_id": "deacfcbe-22e3-4d5d-be6b-c4478699cb50",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "476bf4e9-5033-481a-88d1-7000bdc2d9d5",
+      "journal_entry_id": "0134f580-3bce-4a9f-ac05-5ddfd01f3fe8",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "e67af363-03be-4c31-a79b-c3c2d7825a1d",
+      "journal_entry_id": "54f5119a-fe73-4e6d-ab41-a8f64d23eac2",
+      "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "ef866b23-6fb1-4988-8e04-75c0178b801d",
+      "journal_entry_id": "54f5119a-fe73-4e6d-ab41-a8f64d23eac2",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "68ce982e-1f41-4d7b-b5ab-ec10aeddd86a",
+      "journal_entry_id": "43a56acb-a0c7-44e2-a963-ac3388203ee0",
+      "account_id": "1df16d46-c127-4af2-922f-85ccc4879a4f",
+      "debit_amount": 60,
+      "credit_amount": 0
+    },
+    {
+      "id": "f2e6c861-212b-4ec5-8964-fee0ce8d1522",
+      "journal_entry_id": "43a56acb-a0c7-44e2-a963-ac3388203ee0",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 60
+    },
+    {
+      "id": "12b7f33c-d8be-4c58-9d30-57f424f0fcc4",
+      "journal_entry_id": "9cb7ac61-82fa-4026-bc66-b2e75d069067",
+      "account_id": "50000000-0000-0000-0000-000000000001",
+      "debit_amount": 200,
+      "credit_amount": 0
+    },
+    {
+      "id": "950b77ee-6526-420b-b3dc-da8aa7514eaa",
+      "journal_entry_id": "9cb7ac61-82fa-4026-bc66-b2e75d069067",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 200
+    },
+    {
+      "id": "c3329dbf-b98a-4103-8aee-6965d63ff917",
+      "journal_entry_id": "36f38154-51b0-4a90-8629-38fc0226e5d5",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 500,
+      "credit_amount": 0
+    },
+    {
+      "id": "fb2c87d9-86c0-4de9-b03e-6759165a20ee",
+      "journal_entry_id": "36f38154-51b0-4a90-8629-38fc0226e5d5",
+      "account_id": "40000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 500
+    },
+    {
+      "id": "6f6ddf48-4700-472e-979e-93a9af9a7069",
+      "journal_entry_id": "71fe4186-9470-4fc4-a74a-a042749071ab",
+      "account_id": "78d4b568-d6cb-4595-83b2-862a2e88fda3",
+      "debit_amount": 626,
+      "credit_amount": 0
+    },
+    {
+      "id": "0de93188-93b1-42de-b1d7-be570f6bb4b8",
+      "journal_entry_id": "71fe4186-9470-4fc4-a74a-a042749071ab",
+      "account_id": "30000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 626
+    },
+    {
+      "id": "02386456-d7e6-43a4-a243-1ec2c3edff6b",
+      "journal_entry_id": "2c12a385-1520-4214-b493-a74b99bb17f3",
+      "account_id": "78d4b568-d6cb-4595-83b2-862a2e88fda3",
+      "debit_amount": 626,
+      "credit_amount": 0
+    },
+    {
+      "id": "596a0e47-ffa8-4b9f-a401-b67e76ed0845",
+      "journal_entry_id": "2c12a385-1520-4214-b493-a74b99bb17f3",
+      "account_id": "30000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 626
+    }
+  ],
+  "print_jobs": [
+    {
+      "id": "e990cd23-3992-433e-94a6-96311bdcdae1",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 3,
+      "description": "print",
+      "discount": 0,
+      "amount": 10,
+      "created_at": "2026-08-06T18:36:35.859008+00:00"
+    },
+    {
+      "id": "c9321cb7-e065-4a28-94ec-8a87c5c67025",
+      "journal_entry_id": "17ef5421-a650-4e7f-85da-5295f4720425",
+      "student_id": "47025876-0833-465c-95bc-28b97beceb68",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 23,
+      "description": "Print (BW single, 23 pages)",
+      "discount": 10,
+      "amount": 59,
+      "created_at": "2026-08-07T17:37:41.038376+00:00"
+    },
+    {
+      "id": "c12506a5-a4e9-4764-8dfc-2993d99f175b",
+      "journal_entry_id": "48d58087-9e6c-489d-ae74-52da38b6128b",
+      "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 23,
+      "description": "Print (BW single, 23 pages)",
+      "discount": 10,
+      "amount": 59,
+      "created_at": "2026-08-07T17:37:41.380331+00:00"
+    },
+    {
+      "id": "473f6034-f31f-4af4-92f0-01b68c6aa0f6",
+      "journal_entry_id": "2c8574dd-c7cc-4e8b-a123-c16d7162a145",
+      "student_id": "8f8d55b0-08c5-4e36-ad50-936acd23ddd5",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 2,
+      "description": "printing",
+      "discount": 0,
+      "amount": 6,
+      "created_at": "2026-08-08T07:56:58.736166+00:00"
+    },
+    {
+      "id": "20d4d694-795b-4a49-9c8c-e8ad06ab5b42",
+      "journal_entry_id": "c864aa55-bf25-4946-8af0-ce397c3e6462",
+      "student_id": "b708dec4-875c-4028-a131-e4f35346ea6f",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 2,
+      "description": "printing",
+      "discount": 0,
+      "amount": 6,
+      "created_at": "2026-08-08T07:56:59.059042+00:00"
+    },
+    {
+      "id": "91baece3-3311-4362-8030-9e4f70f03fee",
+      "journal_entry_id": "55f1ffe0-76fa-4a50-8935-b72cc83f997a",
+      "student_id": "b5a7793e-ab9a-431d-8552-1e7f0a6f06ef",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 2,
+      "description": "printing",
+      "discount": 0,
+      "amount": 6,
+      "created_at": "2026-08-08T07:56:59.37938+00:00"
+    },
+    {
+      "id": "81027ae6-1190-4732-bd59-64b504dbaf5b",
+      "journal_entry_id": "accc91a4-7e65-4b43-be71-317aebef2181",
+      "student_id": "99ae5317-7ab4-4ebd-a08f-539523547108",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 2,
+      "description": "printing",
+      "discount": 0,
+      "amount": 6,
+      "created_at": "2026-08-08T07:56:59.696792+00:00"
+    },
+    {
+      "id": "1097c096-34af-40c5-9e37-7e8878d2760c",
+      "journal_entry_id": "1c3910e7-8eca-4781-bb29-1f3b50a9212f",
+      "student_id": "db0665c2-b707-4428-a80d-242acb08f312",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 2,
+      "description": "printing",
+      "discount": 0,
+      "amount": 6,
+      "created_at": "2026-08-08T07:57:00.0138+00:00"
+    },
+    {
+      "id": "0cee38ad-731b-4f3a-a126-620161463b34",
+      "journal_entry_id": "5b64cf84-b004-4e48-aa9c-5168690f5569",
+      "student_id": "b228a91c-b151-4cd7-b1ee-5cd2a0d8ff3a",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 2,
+      "description": "printing",
+      "discount": 0,
+      "amount": 6,
+      "created_at": "2026-08-08T07:57:00.327268+00:00"
+    },
+    {
+      "id": "2fc4b8a0-d1b4-411a-94c7-cf0951407473",
+      "journal_entry_id": "40022969-05dc-430d-bf49-d68f3dd63d6b",
+      "student_id": "47bca101-fe23-411f-9e04-41f3130ea490",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 2,
+      "description": "printing",
+      "discount": 0,
+      "amount": 6,
+      "created_at": "2026-08-08T07:57:00.639939+00:00"
+    },
+    {
+      "id": "558f726f-4016-4f3d-94bf-b3e02115ae88",
+      "journal_entry_id": "aafe0f87-2b0d-4917-b1a4-9a57eef82fb3",
+      "student_id": "47025876-0833-465c-95bc-28b97beceb68",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 2,
+      "description": "printing",
+      "discount": 0,
+      "amount": 6,
+      "created_at": "2026-08-08T07:57:00.949212+00:00"
+    },
+    {
+      "id": "62ef85d3-16ee-4a49-ae17-fdc858dabacc",
+      "journal_entry_id": "6daffb8c-4dc6-48a4-89e0-fb623880cc8a",
+      "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 2,
+      "description": "printing",
+      "discount": 0,
+      "amount": 6,
+      "created_at": "2026-08-08T07:57:01.265419+00:00"
+    },
+    {
+      "id": "5597f569-caef-4913-a3b6-9d413ff5bb69",
+      "journal_entry_id": "162614e0-9483-410b-a33f-48ffb535b13b",
+      "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 40,
+      "description": "Print (BW single, 40 pages)",
+      "discount": 0,
+      "amount": 120,
+      "created_at": "2026-08-08T17:38:00.207595+00:00"
+    },
+    {
+      "id": "e906563e-8a8f-43f2-a3b9-6df8e7aa1186",
+      "journal_entry_id": "f6f77070-68f9-497f-8d0b-2dd76f9134c2",
+      "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 23,
+      "description": "Print (BW single, 23 pages)",
+      "discount": 0,
+      "amount": 69,
+      "created_at": "2026-08-09T02:33:11.719823+00:00"
+    },
+    {
+      "id": "41426836-3eb5-45a6-98f0-278f268d3d98",
+      "journal_entry_id": "5e6a5c29-ff6d-42cd-b8f0-9c0fa6114c27",
+      "student_id": "b87f830e-7293-40b5-8d07-b23d6095e5b6",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:42.7762+00:00"
+    },
+    {
+      "id": "9d33cc19-3bf5-4390-973a-dfab8a4c366c",
+      "journal_entry_id": "6ff0cfac-a333-47aa-af3a-b89aabb7d708",
+      "student_id": "a3a3f131-86c0-4ea4-ac86-ff03ecd40097",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:43.127715+00:00"
+    },
+    {
+      "id": "66cc3959-b831-459d-9831-ee0c3b935881",
+      "journal_entry_id": "776ae44c-8b07-4a5f-9c62-e0e12d3099c8",
+      "student_id": "7e66a4a3-ce6a-4333-9911-77c0f8874572",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:43.481932+00:00"
+    },
+    {
+      "id": "281c1091-fe2b-4c34-80f7-d9554ad6861d",
+      "journal_entry_id": "21b2b89e-dbfc-408e-9484-f6d79c8290ba",
+      "student_id": "db0665c2-b707-4428-a80d-242acb08f312",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:43.824357+00:00"
+    },
+    {
+      "id": "6285703a-bef8-4a1b-b6ae-d8c5f1873c9a",
+      "journal_entry_id": "4457e0b4-7e3d-4eae-abf9-8d322e76b2a0",
+      "student_id": "99ae5317-7ab4-4ebd-a08f-539523547108",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:44.259706+00:00"
+    },
+    {
+      "id": "41656ed7-6061-4dcc-aaba-8de4d3a2e1e2",
+      "journal_entry_id": "fe9325ff-07e1-4dd1-8b59-95f02b3dfb41",
+      "student_id": "b5a7793e-ab9a-431d-8552-1e7f0a6f06ef",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:44.61033+00:00"
+    },
+    {
+      "id": "791b0321-cc9d-45bb-a677-4e4d5d84bf6a",
+      "journal_entry_id": "d0a18ed0-9395-457a-9b68-258c4eb63caa",
+      "student_id": "b708dec4-875c-4028-a131-e4f35346ea6f",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:44.959622+00:00"
+    },
+    {
+      "id": "957b3b42-efb6-4d22-84e4-af9e0d2ff262",
+      "journal_entry_id": "e58f1c78-2106-479f-a886-13e24e37a253",
+      "student_id": "8f8d55b0-08c5-4e36-ad50-936acd23ddd5",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:45.302517+00:00"
+    },
+    {
+      "id": "db02f72b-5da0-4758-87bd-b0a5678092db",
+      "journal_entry_id": "0134f580-3bce-4a9f-ac05-5ddfd01f3fe8",
+      "student_id": "2f62aad0-f371-45dc-89d3-1be1b95712c9",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:45.653317+00:00"
+    },
+    {
+      "id": "8ded31c8-a2b7-4fd0-85cd-7af95eae2c77",
+      "journal_entry_id": "54f5119a-fe73-4e6d-ab41-a8f64d23eac2",
+      "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:45.994341+00:00"
+    },
+    {
+      "id": "3a805f97-5413-40b4-ad14-376c6a2af36a",
+      "journal_entry_id": "43a56acb-a0c7-44e2-a963-ac3388203ee0",
+      "student_id": "47bca101-fe23-411f-9e04-41f3130ea490",
+      "print_type": "bw",
+      "side": "single",
+      "num_pages": 20,
+      "description": "Print (BW single, 20 pages)",
+      "discount": 0,
+      "amount": 60,
+      "created_at": "2026-08-09T02:52:46.343967+00:00"
+    }
+  ],
+  "payment_claims": [
+    {
+      "id": "57cf71f4-8abf-4b37-9b76-a55901bd4f38",
+      "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "claimed_amount": 60,
+      "claimed_at": "2026-08-08T13:08:22.792459+00:00",
+      "status": "verified",
+      "verified_by": "Admin",
+      "verified_at": "2026-08-08T13:08:30.409+00:00",
+      "admin_note": null,
+      "upi_tn": "muhammed anfaz fee payment"
+    },
+    {
+      "id": "f4c2eee3-3239-4075-83bc-2886d71626a8",
+      "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "claimed_amount": 120,
+      "claimed_at": "2026-08-08T17:45:11.512927+00:00",
+      "status": "verified",
+      "verified_by": "Admin",
+      "verified_at": "2026-08-08T17:45:19.875+00:00",
+      "admin_note": null,
+      "upi_tn": "Print Cash"
+    }
+  ],
+  "journal_entry_audit_log": [
+    {
+      "id": "539f68db-69e8-4611-a8cc-43f3c02031b0",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "action": "deleted",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T02:50:10.971519+00:00",
+      "before_snapshot": {
+        "id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+        "date": "2026-08-06T18:36:28.399+00:00",
+        "source": "Debit Book (Print Job)",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-06T18:36:35.650409+00:00",
+        "created_by": null,
+        "description": "print",
+        "linked_print_job": {
+          "id": "e990cd23-3992-433e-94a6-96311bdcdae1",
+          "num_pages": 3,
+          "print_type": "bw",
+          "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140"
+        },
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "58567658-4213-44e9-b6f2-c31a7aa0ac2d",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 9,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "1f28e7d4-2bbe-4d10-b289-4bff423ce7fd",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 9,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "5a2ca8d3-5136-460b-944d-2848ac683ef2",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 10,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "142bbe86-b266-44b8-a5fe-c3d19bb0657f",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          }
+        ]
+      },
+      "after_snapshot": null
+    },
+    {
+      "id": "68d465ab-f8c5-4071-b364-95734f86d510",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "action": "deleted",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T02:50:19.012504+00:00",
+      "before_snapshot": {
+        "id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+        "date": "2026-08-06T18:36:28.399+00:00",
+        "source": "Debit Book (Print Job)",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-06T18:36:35.650409+00:00",
+        "created_by": null,
+        "description": "print",
+        "linked_print_job": {
+          "id": "e990cd23-3992-433e-94a6-96311bdcdae1",
+          "num_pages": 3,
+          "print_type": "bw",
+          "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140"
+        },
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "58567658-4213-44e9-b6f2-c31a7aa0ac2d",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 9,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "1f28e7d4-2bbe-4d10-b289-4bff423ce7fd",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 9,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "5a2ca8d3-5136-460b-944d-2848ac683ef2",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 10,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "142bbe86-b266-44b8-a5fe-c3d19bb0657f",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          }
+        ]
+      },
+      "after_snapshot": null
+    },
+    {
+      "id": "fcacbe70-9566-45a5-8435-f4d4fc3fa080",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "action": "deleted",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T02:50:21.627177+00:00",
+      "before_snapshot": {
+        "id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+        "date": "2026-08-06T18:36:28.399+00:00",
+        "source": "Debit Book (Print Job)",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-06T18:36:35.650409+00:00",
+        "created_by": null,
+        "description": "print",
+        "linked_print_job": {
+          "id": "e990cd23-3992-433e-94a6-96311bdcdae1",
+          "num_pages": 3,
+          "print_type": "bw",
+          "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140"
+        },
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "58567658-4213-44e9-b6f2-c31a7aa0ac2d",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 9,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "1f28e7d4-2bbe-4d10-b289-4bff423ce7fd",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 9,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "5a2ca8d3-5136-460b-944d-2848ac683ef2",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 10,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "142bbe86-b266-44b8-a5fe-c3d19bb0657f",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          }
+        ]
+      },
+      "after_snapshot": null
+    },
+    {
+      "id": "28633010-9942-455d-b014-a532a0c2a80a",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "action": "deleted",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T02:50:25.651388+00:00",
+      "before_snapshot": {
+        "id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+        "date": "2026-08-06T18:36:28.399+00:00",
+        "source": "Debit Book (Print Job)",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-06T18:36:35.650409+00:00",
+        "created_by": null,
+        "description": "print",
+        "linked_print_job": {
+          "id": "e990cd23-3992-433e-94a6-96311bdcdae1",
+          "num_pages": 3,
+          "print_type": "bw",
+          "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140"
+        },
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "58567658-4213-44e9-b6f2-c31a7aa0ac2d",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 9,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "1f28e7d4-2bbe-4d10-b289-4bff423ce7fd",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 9,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "5a2ca8d3-5136-460b-944d-2848ac683ef2",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 10,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "142bbe86-b266-44b8-a5fe-c3d19bb0657f",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          }
+        ]
+      },
+      "after_snapshot": null
+    },
+    {
+      "id": "c8d52c4f-3238-4e2f-8927-4067bbcc4202",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "action": "deleted",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T02:50:32.491553+00:00",
+      "before_snapshot": {
+        "id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+        "date": "2026-08-06T18:36:28.399+00:00",
+        "source": "Debit Book (Print Job)",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-06T18:36:35.650409+00:00",
+        "created_by": null,
+        "description": "print",
+        "linked_print_job": {
+          "id": "e990cd23-3992-433e-94a6-96311bdcdae1",
+          "num_pages": 3,
+          "print_type": "bw",
+          "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140"
+        },
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "58567658-4213-44e9-b6f2-c31a7aa0ac2d",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 9,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "1f28e7d4-2bbe-4d10-b289-4bff423ce7fd",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 9,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "5a2ca8d3-5136-460b-944d-2848ac683ef2",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 10,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "142bbe86-b266-44b8-a5fe-c3d19bb0657f",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          }
+        ]
+      },
+      "after_snapshot": null
+    },
+    {
+      "id": "b0cc92a6-6d80-4bee-bfa8-151a87e880f8",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "action": "deleted",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T02:50:42.788415+00:00",
+      "before_snapshot": {
+        "id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+        "date": "2026-08-06T18:36:28.399+00:00",
+        "source": "Debit Book (Print Job)",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-06T18:36:35.650409+00:00",
+        "created_by": null,
+        "description": "print",
+        "linked_print_job": {
+          "id": "e990cd23-3992-433e-94a6-96311bdcdae1",
+          "num_pages": 3,
+          "print_type": "bw",
+          "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140"
+        },
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "58567658-4213-44e9-b6f2-c31a7aa0ac2d",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 9,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "1f28e7d4-2bbe-4d10-b289-4bff423ce7fd",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 9,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "5a2ca8d3-5136-460b-944d-2848ac683ef2",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 10,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "142bbe86-b266-44b8-a5fe-c3d19bb0657f",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          }
+        ]
+      },
+      "after_snapshot": null
+    },
+    {
+      "id": "34fca1a6-b023-4c1a-935b-01f56a958ae2",
+      "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+      "action": "deleted",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T03:06:06.43121+00:00",
+      "before_snapshot": {
+        "id": "dc79c739-a068-4849-a71f-b9a9ee9ee922",
+        "date": "2026-08-06T18:36:28.399+00:00",
+        "source": "Debit Book (Print Job)",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-06T18:36:35.650409+00:00",
+        "created_by": null,
+        "description": "print",
+        "linked_print_job": {
+          "id": "e990cd23-3992-433e-94a6-96311bdcdae1",
+          "num_pages": 3,
+          "print_type": "bw",
+          "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140"
+        },
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "58567658-4213-44e9-b6f2-c31a7aa0ac2d",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 9,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "1f28e7d4-2bbe-4d10-b289-4bff423ce7fd",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 9,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "5a2ca8d3-5136-460b-944d-2848ac683ef2",
+            "account_id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+            "debit_amount": 10,
+            "credit_amount": 0,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          },
+          {
+            "id": "142bbe86-b266-44b8-a5fe-c3d19bb0657f",
+            "account_id": "40000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 10,
+            "journal_entry_id": "dc79c739-a068-4849-a71f-b9a9ee9ee922"
+          }
+        ]
+      },
+      "after_snapshot": null
+    },
+    {
+      "id": "423de9f4-096d-4531-ad07-660b3c90e7a2",
+      "journal_entry_id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b",
+      "action": "edited",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T09:40:38.941621+00:00",
+      "before_snapshot": {
+        "id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b",
+        "date": "2026-08-07T00:00:00+00:00",
+        "source": "Manual Journal Entry",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-07T09:37:11.614474+00:00",
+        "created_by": null,
+        "description": "stareted",
+        "linked_print_job": null,
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "5a42f89f-3887-4bca-806d-2827978542ea",
+            "account_id": "10000000-0000-0000-0000-000000000001",
+            "debit_amount": 100,
+            "credit_amount": 0,
+            "journal_entry_id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b"
+          },
+          {
+            "id": "87d05591-fd4f-42dc-9efe-05cfa759d774",
+            "account_id": "30000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 100,
+            "journal_entry_id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b"
+          }
+        ]
+      },
+      "after_snapshot": {
+        "date": "2026-08-07",
+        "lines": [
+          {
+            "id": "5a42f89f-3887-4bca-806d-2827978542ea",
+            "debit": 200,
+            "credit": 0,
+            "accountId": "10000000-0000-0000-0000-000000000001"
+          },
+          {
+            "id": "87d05591-fd4f-42dc-9efe-05cfa759d774",
+            "debit": 0,
+            "credit": 200,
+            "accountId": "30000000-0000-0000-0000-000000000001"
+          }
+        ],
+        "source": "Manual Journal Entry",
+        "description": "stareted",
+        "journal_entry_id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b"
+      }
+    },
+    {
+      "id": "485c61e5-047b-44fc-8778-c66666a86888",
+      "journal_entry_id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b",
+      "action": "deleted",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T09:40:55.268714+00:00",
+      "before_snapshot": {
+        "id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b",
+        "date": "2026-08-07T00:00:00+00:00",
+        "source": "Manual Journal Entry",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-07T09:37:11.614474+00:00",
+        "created_by": null,
+        "description": "stareted",
+        "linked_print_job": null,
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "5a42f89f-3887-4bca-806d-2827978542ea",
+            "account_id": "10000000-0000-0000-0000-000000000001",
+            "debit_amount": 200,
+            "credit_amount": 0,
+            "journal_entry_id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b"
+          },
+          {
+            "id": "87d05591-fd4f-42dc-9efe-05cfa759d774",
+            "account_id": "30000000-0000-0000-0000-000000000001",
+            "debit_amount": 0,
+            "credit_amount": 200,
+            "journal_entry_id": "5d3ffed0-d74d-446b-a7ea-1dd85a49618b"
+          }
+        ]
+      },
+      "after_snapshot": null
+    },
+    {
+      "id": "6ff4e442-594f-4f41-81e1-14edb38c700b",
+      "journal_entry_id": "087620de-f387-4608-84aa-dc267043b619",
+      "action": "edited",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-07T09:50:20.171673+00:00",
+      "before_snapshot": {
+        "id": "087620de-f387-4608-84aa-dc267043b619",
+        "date": "2026-08-07T00:00:00+00:00",
+        "source": "Manual Journal Entry",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-07T09:50:04.892525+00:00",
+        "created_by": null,
+        "description": "cash resived from debtors",
+        "linked_print_job": null,
+        "financial_year_id": null,
+        "journal_entry_lines": [
+          {
+            "id": "9566a2cf-dbed-4034-98cd-2b328bf08c44",
+            "account_id": "10000000-0000-0000-0000-000000000001",
+            "debit_amount": 3601,
+            "credit_amount": 0,
+            "journal_entry_id": "087620de-f387-4608-84aa-dc267043b619"
+          },
+          {
+            "id": "5913e668-9ec4-4f0b-aba8-7490fd1230d6",
+            "account_id": "10000000-0000-0000-0000-000000000002",
+            "debit_amount": 0,
+            "credit_amount": 3601,
+            "journal_entry_id": "087620de-f387-4608-84aa-dc267043b619"
+          }
+        ]
+      },
+      "after_snapshot": {
+        "date": "2026-08-05",
+        "lines": [
+          {
+            "id": "9566a2cf-dbed-4034-98cd-2b328bf08c44",
+            "debit": 3601,
+            "credit": 0,
+            "accountId": "10000000-0000-0000-0000-000000000001"
+          },
+          {
+            "id": "5913e668-9ec4-4f0b-aba8-7490fd1230d6",
+            "debit": 0,
+            "credit": 3601,
+            "accountId": "10000000-0000-0000-0000-000000000002"
+          }
+        ],
+        "source": "Manual Journal Entry",
+        "description": "cash resived from debtors",
+        "journal_entry_id": "087620de-f387-4608-84aa-dc267043b619"
+      }
+    }
+  ],
+  "financial_years": [
+    {
+      "id": "3087e9b2-0a1f-40d2-a955-3972a20cdae0",
+      "name": "FY 2027",
+      "start_date": "2027-01-01",
+      "end_date": "2027-12-31",
+      "is_current": true,
+      "closed_at": null,
+      "created_at": "2026-08-09T01:24:09.993943+00:00"
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "FY 2026-2027",
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31",
+      "is_current": true,
+      "closed_at": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    }
+  ],
+  "batches": [
+    {
+      "id": "e9305635-4841-4b66-a94d-7a0edec6a888",
+      "name": "BS 2",
+      "category": "BS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:39:04.666168+00:00"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222221",
+      "name": "JD 1",
+      "category": "JD",
+      "sort_order": 1,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "name": "HS 1",
+      "category": "HS",
+      "sort_order": 2,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222223",
+      "name": "BS 1",
+      "category": "BS",
+      "sort_order": 3,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "1a6a8253-1494-4e9c-aad0-695dfce2825f",
+      "name": "JD 2",
+      "category": "JD",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:40:56.771778+00:00"
+    },
+    {
+      "id": "64b3a477-b407-4405-b392-3149c806d34d",
+      "name": "JD 3",
+      "category": "JD",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:41:05.479602+00:00"
+    },
+    {
+      "id": "5d6a5b56-5637-4c9d-ba7a-65f99aecc910",
+      "name": "HS 2",
+      "category": "HS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:41:31.867003+00:00"
+    },
+    {
+      "id": "e11506a6-219c-4b5f-bf93-ef6a626244a0",
+      "name": "BS 3",
+      "category": "BS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:41:41.676317+00:00"
+    },
+    {
+      "id": "7af5015f-be87-4656-bddc-042ba705be4d",
+      "name": "BS 4",
+      "category": "BS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:42:20.555915+00:00"
+    },
+    {
+      "id": "ef0cebb5-08a8-45e1-8d68-e193f80e0652",
+      "name": "BS 5",
+      "category": "BS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:42:30.201804+00:00"
+    },
+    {
+      "id": "92cca5c1-811c-472b-9262-a8b0feb7ea86",
+      "name": "Alumni",
+      "category": "BS",
+      "sort_order": 99,
+      "created_at": "2026-08-09T01:24:09.315063+00:00"
+    },
+    {
+      "id": "86a59cf1-caee-499e-ad54-3acf22f2a1f4",
+      "name": "Alumni 2026",
+      "category": "BS",
+      "sort_order": 99,
+      "created_at": "2026-08-09T04:56:50.319422+00:00"
+    },
+    {
+      "id": "d6f053f7-d4d0-49fd-bc99-90d18e4c2a44",
+      "name": "Alumni 2027",
+      "category": "BS",
+      "sort_order": 99,
+      "created_at": "2026-08-09T04:56:54.597976+00:00"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "10000000-0000-0000-0000-000000000001",
+      "name": "Cash Account",
+      "type": "asset",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000002",
+      "name": "Student Accounts Receivable",
+      "type": "asset",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000001",
+      "name": "Fund Balance / Net Assets Account",
+      "type": "equity",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000001",
+      "name": "Service Income Account",
+      "type": "revenue",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "50000000-0000-0000-0000-000000000002",
+      "name": "Equipment Maintenance Expense",
+      "type": "expense",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "bbac51fd-78b7-4d48-bb38-66136346703f",
+      "name": "muhammed anfaz - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "e03dd9ef-6975-4337-b451-77b5c35dc140",
+      "created_at": "2026-08-06T18:24:34.699761+00:00"
+    },
+    {
+      "id": "a5bacef3-504e-45a7-9b73-e21c6feb37de",
+      "name": "shakir - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "47025876-0833-465c-95bc-28b97beceb68",
+      "created_at": "2026-08-07T04:01:16.282908+00:00"
+    },
+    {
+      "id": "50000000-0000-0000-0000-000000000001",
+      "name": "Paper & Ink Expense",
+      "type": "expense",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "78d4b568-d6cb-4595-83b2-862a2e88fda3",
+      "name": "A4 supply",
+      "type": "revenue",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-07T05:25:11.607225+00:00"
+    },
+    {
+      "id": "1df16d46-c127-4af2-922f-85ccc4879a4f",
+      "name": "swabah - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "47bca101-fe23-411f-9e04-41f3130ea490",
+      "created_at": "2026-08-07T17:44:48.05249+00:00"
+    },
+    {
+      "id": "9cbb82c7-afe2-4922-b3ee-808ffc723d5d",
+      "name": "ersdf - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "b228a91c-b151-4cd7-b1ee-5cd2a0d8ff3a",
+      "created_at": "2026-08-07T18:10:28.839268+00:00"
+    },
+    {
+      "id": "20779f2d-bfe9-4e5b-9e6e-a8ff4008f0d1",
+      "name": "wadasd - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "db0665c2-b707-4428-a80d-242acb08f312",
+      "created_at": "2026-08-07T18:10:54.493656+00:00"
+    },
+    {
+      "id": "5c829478-b73c-4f93-8a18-ce21de947838",
+      "name": "safvxd - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "99ae5317-7ab4-4ebd-a08f-539523547108",
+      "created_at": "2026-08-07T18:11:14.370005+00:00"
+    },
+    {
+      "id": "99e0f8ba-e5b3-4bfd-92bd-70d2cc04b930",
+      "name": "a€asd - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "b5a7793e-ab9a-431d-8552-1e7f0a6f06ef",
+      "created_at": "2026-08-07T18:11:41.612337+00:00"
+    },
+    {
+      "id": "7e1753eb-2728-437a-a6ab-e41c5236bdcf",
+      "name": "qwer - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "b708dec4-875c-4028-a131-e4f35346ea6f",
+      "created_at": "2026-08-07T18:12:04.92751+00:00"
+    },
+    {
+      "id": "9f89dd9c-aeec-4092-8b4d-89e318731404",
+      "name": "qwer - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "8f8d55b0-08c5-4e36-ad50-936acd23ddd5",
+      "created_at": "2026-08-07T18:12:26.92163+00:00"
+    },
+    {
+      "id": "deacfcbe-22e3-4d5d-be6b-c4478699cb50",
+      "name": "asdf - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "2f62aad0-f371-45dc-89d3-1be1b95712c9",
+      "created_at": "2026-08-09T02:45:37.334391+00:00"
+    },
+    {
+      "id": "3795fcd1-6956-4339-934b-85cf2b12d9ef",
+      "name": "QWER - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "b87f830e-7293-40b5-8d07-b23d6095e5b6",
+      "created_at": "2026-08-09T02:46:09.710776+00:00"
+    },
+    {
+      "id": "92884f8e-4708-41e5-9932-7b3b4ca7c400",
+      "name": "LP,MN - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "a3a3f131-86c0-4ea4-ac86-ff03ecd40097",
+      "created_at": "2026-08-09T02:46:34.118919+00:00"
+    },
+    {
+      "id": "e91e7a64-e6f5-44b5-9726-89eeef804d40",
+      "name": "QWER - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "7e66a4a3-ce6a-4333-9911-77c0f8874572",
+      "created_at": "2026-08-09T02:47:05.277694+00:00"
+    }
+  ]
+}

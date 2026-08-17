@@ -1,0 +1,114 @@
+[
+  {
+    "id": "10000000-0000-0000-0000-000000000001",
+    "name": "Cash Account",
+    "type": "asset",
+    "is_student_account": false,
+    "student_id": null,
+    "created_at": "2026-08-06T17:53:48.583907+00:00"
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000002",
+    "name": "Student Accounts Receivable",
+    "type": "asset",
+    "is_student_account": false,
+    "student_id": null,
+    "created_at": "2026-08-06T17:53:48.583907+00:00"
+  },
+  {
+    "id": "50000000-0000-0000-0000-000000000001",
+    "name": "Paper & Ink Expense",
+    "type": "expense",
+    "is_student_account": false,
+    "student_id": null,
+    "created_at": "2026-08-06T17:53:48.583907+00:00"
+  },
+  {
+    "id": "78d4b568-d6cb-4595-83b2-862a2e88fda3",
+    "name": "A4 supply",
+    "type": "revenue",
+    "is_student_account": false,
+    "student_id": null,
+    "created_at": "2026-08-07T05:25:11.607225+00:00"
+  },
+  {
+    "id": "30000000-0000-0000-0000-000000000001",
+    "name": "Equity Fund",
+    "type": "equity",
+    "is_student_account": false,
+    "student_id": null,
+    "created_at": "2026-08-06T17:53:48.583907+00:00"
+  },
+  {
+    "id": "40000000-0000-0000-0000-000000000001",
+    "name": "Printing Revenue",
+    "type": "revenue",
+    "is_student_account": false,
+    "student_id": null,
+    "created_at": "2026-08-06T17:53:48.583907+00:00"
+  },
+  {
+    "id": "50000000-0000-0000-0000-000000000002",
+    "name": "Equipment Maintenance Expense",
+    "type": "expense",
+    "is_student_account": false,
+    "student_id": null,
+    "created_at": "2026-08-06T17:53:48.583907+00:00"
+  },
+  {
+    "id": "f86d7c08-1b12-4121-94a6-3a683b49b72b",
+    "name": "Muhammed Anfaz - Accounts Receivable",
+    "type": "asset",
+    "is_student_account": true,
+    "student_id": "641fa5d6-4c94-487b-a3c1-db82f0f2689f",
+    "created_at": "2026-08-09T12:16:36.576737+00:00"
+  },
+  {
+    "id": "b2c78191-48f7-4908-b96f-ac9e04eb2019",
+    "name": "Muhammed Nijad - Accounts Receivable",
+    "type": "asset",
+    "is_student_account": true,
+    "student_id": "5afb3ca0-5526-426b-bc00-d2c9607ab61c",
+    "created_at": "2026-08-09T12:25:14.357057+00:00"
+  },
+  {
+    "id": "7c2652fd-5d8a-4acb-a571-7e55d973511d",
+    "name": "nashid - Accounts Receivable",
+    "type": "asset",
+    "is_student_account": true,
+    "student_id": "257d4dcb-d089-4ce9-bbef-2a4b6af711a0",
+    "created_at": "2026-08-09T12:25:16.554034+00:00"
+  },
+  {
+    "id": "4b1bcb3f-8594-4530-8e64-9e7a60f62467",
+    "name": "shakir - Accounts Receivable",
+    "type": "asset",
+    "is_student_account": true,
+    "student_id": "2bb586d8-7481-4b16-a247-ed8144d3b9e4",
+    "created_at": "2026-08-09T12:25:17.969874+00:00"
+  },
+  {
+    "id": "df5918e9-f65a-4b4d-8d00-8d3452ffd93a",
+    "name": "muhsin - Accounts Receivable",
+    "type": "asset",
+    "is_student_account": true,
+    "student_id": "db819bf4-15de-4041-8756-98979ec40c2b",
+    "created_at": "2026-08-09T12:25:19.378595+00:00"
+  },
+  {
+    "id": "6c8c5bbb-87c2-415c-9662-cf60e63a823c",
+    "name": "shammas - Accounts Receivable",
+    "type": "asset",
+    "is_student_account": true,
+    "student_id": "5c6c7321-f809-4979-b6fb-ed73489da4e9",
+    "created_at": "2026-08-09T12:25:20.742853+00:00"
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000003",
+    "name": "Cash in Hand (In-Charge)",
+    "type": "asset",
+    "is_student_account": false,
+    "student_id": null,
+    "created_at": "2026-08-14T03:00:51.528694+00:00"
+  }
+]
