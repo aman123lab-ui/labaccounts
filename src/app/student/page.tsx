@@ -116,7 +116,7 @@ export default function StudentDashboard() {
       <main className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-12 flex flex-col justify-between">
       <div className="max-w-4xl mx-auto space-y-8 w-full flex-1">
         {/* Top Navigation Bar with Notification Bell */}
-        <div className="flex justify-between items-center border-b border-slate-800 pb-6">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-800 pb-6">
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
               Student Statement View
@@ -137,7 +137,7 @@ export default function StudentDashboard() {
             <button
               type="button"
               onClick={handleLogout}
-              className="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold px-4 py-2 rounded-xl transition-colors whitespace-nowrap flex-shrink-0"
+              className="hidden sm:block bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold px-4 py-2 rounded-xl transition-colors whitespace-nowrap flex-shrink-0"
             >
               Log Out
             </button>
@@ -285,6 +285,15 @@ export default function StudentDashboard() {
         )}
       </div>
 
+      <div className="mt-8 flex justify-center sm:hidden">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="bg-slate-900 hover:bg-red-950/80 text-slate-300 hover:text-red-400 border border-slate-800 hover:border-red-900/60 text-xs font-semibold px-6 py-3 rounded-xl transition-all shadow-md w-full max-w-xs"
+        >
+          Log Out
+        </button>
+      </div>
       <StudentPortalFooter />
     </main>
     </>

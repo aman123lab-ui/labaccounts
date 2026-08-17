@@ -617,14 +617,14 @@ export default function AdminInchargeManagementPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="pt-2 border-t border-slate-800/80 flex items-center justify-end gap-2">
+                    <div className="pt-2 border-t border-slate-800/80 flex items-stretch justify-end gap-2">
                       <button
                         type="button"
                         onClick={() => {
                           setEditStaff(staff);
                           setEditName(staff.name);
                         }}
-                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold py-1.5 px-2 rounded-lg transition-colors text-center"
+                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center text-center"
                       >
                         Edit
                       </button>
@@ -636,15 +636,15 @@ export default function AdminInchargeManagementPage() {
                           setResetPassword('');
                           setResetError(null);
                         }}
-                        className="flex-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 text-xs font-semibold py-1.5 px-2 rounded-lg transition-colors text-center"
+                        className="flex-[1.2] bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 text-xs font-semibold py-1.5 px-2 rounded-lg transition-colors flex items-center justify-center text-center leading-tight"
                       >
-                        Reset Password
+                        Reset<br />Password
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setDeletingStaff(staff)}
-                        className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 text-xs font-semibold py-1.5 px-2.5 rounded-lg transition-colors text-center shrink-0"
+                        className="flex-1 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 text-xs font-semibold py-1.5 px-2.5 rounded-lg transition-colors flex items-center justify-center text-center shrink-0"
                       >
                         Delete
                       </button>

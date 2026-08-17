@@ -276,7 +276,7 @@ export default function AllStudentsPage() {
                         </div>
                       </td>
                       <td className="p-4 text-slate-300">
-                        <span className="px-2.5 py-1 rounded-md bg-slate-950 border border-slate-800 text-slate-300 text-xs">
+                        <span className="px-2.5 py-1 rounded-md bg-slate-950 border border-slate-800 text-slate-300 text-xs whitespace-nowrap inline-flex">
                           {student.batch_name}
                         </span>
                       </td>

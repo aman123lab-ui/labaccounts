@@ -42,8 +42,8 @@ export default function GuestModeRoleSelectionPage() {
           </p>
         </div>
 
-        {/* 3 Role Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* 2 Role Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           {/* ── STUDENT ── */}
           <div
@@ -98,62 +98,10 @@ export default function GuestModeRoleSelectionPage() {
             </div>
           </div>
 
-          {/* ── WORKFORCE ── */}
-          <div
-            onClick={() => handleSelectRole('incharge')}
-            className="group relative bg-gradient-to-b from-slate-900/90 to-slate-950 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 sm:p-7 shadow-xl hover:shadow-2xl hover:shadow-indigo-950/40 transition-all duration-300 cursor-pointer flex flex-col justify-between"
-          >
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="w-12 h-12 rounded-xl bg-indigo-950 border border-indigo-800/60 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-900/60 transition-all shadow-md">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-indigo-950/80 text-indigo-300 border border-indigo-800/80 px-2.5 py-1 rounded-full">
-                  Counter Staff
-                </span>
-              </div>
-
-              <div>
-                <h2 className="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">
-                  Workforce Portal
-                </h2>
-                <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                  Explore counter staff experience — logging print jobs, collecting cash, and handing over to admin.
-                </p>
-              </div>
-
-              <div className="pt-3 border-t border-slate-800/80 space-y-2 text-xs font-mono text-slate-400">
-                <div className="flex items-center gap-2 text-slate-300">
-                  <span className="text-indigo-400">✓</span> Log print jobs (Cash or Receivable)
-                </div>
-                <div className="flex items-center gap-2 text-slate-300">
-                  <span className="text-indigo-400">✓</span> Group/bulk student print logging
-                </div>
-                <div className="flex items-center gap-2 text-slate-300">
-                  <span className="text-indigo-400">✓</span> Cash in Hand &amp; handover claims
-                </div>
-              </div>
-
-
-            </div>
-
-            <div className="mt-6">
-              <button
-                type="button"
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-3 px-4 rounded-xl shadow-lg shadow-indigo-950/50 transition-all flex items-center justify-center gap-2 group-hover:gap-3"
-              >
-                <span>Enter Workforce Demo</span>
-                <span>→</span>
-              </button>
-            </div>
-          </div>
-
           {/* ── ADMIN ── */}
           <div
             onClick={() => handleSelectRole('admin')}
-            className="group relative bg-gradient-to-b from-slate-900/90 to-slate-950 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-6 sm:p-7 shadow-xl hover:shadow-2xl hover:shadow-amber-950/40 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+            className="group relative bg-gradient-to-b from-slate-900/90 to-slate-950 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-6 sm:p-7 shadow-xl hover:shadow-2xl hover:shadow-amber-950/40 transition-all duration-300 cursor-pointer flex flex-col justify-between md:col-span-1"
           >
             <div className="space-y-4">
               <div className="flex justify-between items-start">

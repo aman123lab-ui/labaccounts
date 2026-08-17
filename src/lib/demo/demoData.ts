@@ -308,28 +308,7 @@ export function createInitialDemoDataset(): DemoDataSet {
   ];
 
   // ── CASH HANDOVER CLAIMS ───────────────────────────────────────────────────
-  // Yaseen collected ₹50 from Priya (matches incharge cash = 50)
-  const cashHandoverClaims: DemoCashHandoverClaim[] = [
-    {
-      id: 'handover-001',
-      incharge_id: 'incharge-demo-01',
-      incharge_name: 'Yaseen',
-      claimed_amount: 50,
-      claimed_at: `${d2}T16:30:00Z`,
-      status: 'pending',
-    },
-    {
-      id: 'handover-002',
-      incharge_id: 'incharge-demo-01',
-      incharge_name: 'Yaseen',
-      claimed_amount: 120,
-      claimed_at: `${d7}T17:00:00Z`,
-      status: 'verified',
-      verified_by: 'admin@lab.com',
-      verified_at: `${d5}T18:00:00Z`,
-      admin_note: 'Verified and deposited to main cash account.',
-    },
-  ];
+  const cashHandoverClaims: DemoCashHandoverClaim[] = [];
 
   // ── FINANCIAL YEARS ────────────────────────────────────────────────────────
   const financialYears: DemoFinancialYear[] = [
@@ -354,17 +333,7 @@ export function createInitialDemoDataset(): DemoDataSet {
   ];
 
   // ── INCHARGE STAFF ─────────────────────────────────────────────────────────
-  const inchargeStaff: DemoInchargeStaff[] = [
-    {
-      id: 'incharge-demo-01',
-      user_id: 'incharge-demo-user',
-      name: 'Yaseen',
-      email: 'incharge@lab.com',
-      staff_id: '4821',
-      status: 'active',
-      created_at: '2026-08-01T00:00:00Z',
-    },
-  ];
+  const inchargeStaff: DemoInchargeStaff[] = [];
 
   return { batches, students, accounts, journalEntries, paymentClaims, cashHandoverClaims, financialYears, inchargeStaff };
 }

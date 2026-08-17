@@ -416,7 +416,7 @@ export default function LoginPage() {
               <span>Try Guest Mode (Select Demo View)</span>
             </button>
             <p className="text-[11px] text-slate-400 text-center">
-              Explore Student, Workforce, or Admin views with mock data. Zero DB writes.
+              Explore Student or Admin views with mock data. Zero DB writes.
             </p>
           </div>
         )}

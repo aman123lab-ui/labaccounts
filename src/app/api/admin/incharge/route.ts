@@ -229,6 +229,10 @@ export async function POST(req: NextRequest) {
 
     let authUserId: string;
 
+    // Find if user already exists
+    const { data: userListData } = await adminSupabase.auth.admin.listUsers();
+    const existingUser = userListData?.users?.find((u) => u.email?.toLowerCase() === cleanEmail);
+
     if (existingUser) {
       const { error: updateErr } = await adminSupabase.auth.admin.updateUserById(existingUser.id, {
         password,

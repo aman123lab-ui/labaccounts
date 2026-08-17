@@ -456,7 +456,7 @@ export default function LedgerAccountsPage() {
               </div>
 
               {/* Top Action Buttons: Add Account + Export CSV */}
-              <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+              <div className="flex items-center gap-2 w-full sm:w-auto self-start sm:self-auto">
                 <button
                   type="button"
                   onClick={() => {
@@ -465,9 +465,9 @@ export default function LedgerAccountsPage() {
                     setNewAccountTypeInput('expense');
                     setAddAccountError(null);
                   }}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2"
+                  className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-2.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   Add Account
@@ -476,12 +476,12 @@ export default function LedgerAccountsPage() {
                 <button
                   type="button"
                   onClick={handleExportAllCSV}
-                  className="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2"
+                  className="flex-[1.5] sm:flex-initial bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold text-xs px-3 py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  Export All Accounts (CSV)
+                  Export All (CSV)
                 </button>
               </div>
             </div>
