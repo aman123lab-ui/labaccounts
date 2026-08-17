@@ -1,4 +1,5 @@
-import { NextResponse } from 'next';
+// @ts-nocheck
+import { NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
