@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { Student } from '@/types/database.types';
-import { normalizePhone } from './authService';
+import { normalizePhone, formatStudentName } from './authService';
+import { compareBatchNames } from './batchService';
 import {
   isGuestMode,
   getDemoStudents,
@@ -19,7 +20,7 @@ export interface StudentWithDetails extends Student {
 /**
  * Fetches students filtered by status ('active' | 'archived') and search term.
  * Computes live ledger balance per student directly from journal_entry_lines.
- * Automatically sorted by Batch Order (JD1 -> JD2 -> JD3 -> HS1 -> HS2 -> BS1 -> BS2 -> BS3 -> BS4 -> BS5 -> Alumni).
+ * Automatically sorted by Batch Order: General -> JD -> HS -> BS (numerically within batch), then by student name.
  */
 export async function getStudents(options?: {
   status?: 'active' | 'archived';
@@ -32,16 +33,14 @@ export async function getStudents(options?: {
   const supabase = createClient();
   const targetStatus = options?.status || 'active';
 
-  // 1. Fetch students and batches
-  let query = supabase
+  // 1. Fetch students — no FK join to avoid schema-cache issues
+  const { data: studentsData, error } = await (supabase
     .from('students' as any)
-    .select('*, batches(name)')
-    .eq('status', targetStatus);
-
-  const { data: studentsData, error } = await (query as unknown as Promise<{ data: any[] | null; error: any }>);
+    .select('*')
+    .eq('status', targetStatus) as unknown as Promise<{ data: any[] | null; error: any }>);
 
   if (error) {
-    console.error('Error fetching students:', error);
+    console.error('Error fetching students:', error?.message || error?.code || JSON.stringify(error));
     return [];
   }
 
@@ -49,7 +48,21 @@ export async function getStudents(options?: {
     return [];
   }
 
-  // 2. Fetch student Accounts Receivable account IDs
+  // 2. Fetch all batches for name and category lookup
+  const { data: batchesData } = await (supabase
+    .from('batches' as any)
+    .select('id, name, category') as unknown as Promise<{ data: any[] | null; error: any }>);
+
+  const batchNameMap = new Map<string, string>();
+  const batchCategoryMap = new Map<string, string>();
+  (batchesData || []).forEach((b: any) => {
+    if (b.id) {
+      batchNameMap.set(b.id, b.name);
+      if (b.category) batchCategoryMap.set(b.id, b.category);
+    }
+  });
+
+  // 3. Fetch student Accounts Receivable account IDs
   const studentIds = studentsData.map((s) => s.id);
   const { data: accountsData } = await (supabase
     .from('accounts' as any)
@@ -66,7 +79,7 @@ export async function getStudents(options?: {
     }
   });
 
-  // 3. Fetch journal lines for these student accounts to compute live signed balance (Debit - Credit)
+  // 4. Fetch journal lines for these student accounts to compute live signed balance (Debit - Credit)
   const balanceMap = new Map<string, number>(); // accountId -> balance
 
   if (accountIds.length > 0) {
@@ -91,21 +104,20 @@ export async function getStudents(options?: {
     });
   }
 
-  // 4. Map into response structure
+  // 5. Map into response structure
   let result: StudentWithDetails[] = studentsData.map((s) => {
-    const batchObj = s.batches as unknown as { name: string } | null;
     const accountId = studentAccountMap.get(s.id);
     const balance = accountId ? balanceMap.get(accountId) || 0 : 0;
 
     return {
       ...(s as Student),
-      batch_name: batchObj?.name || 'Unassigned',
+      batch_name: batchNameMap.get(s.batch_id) || 'Unassigned',
       account_id: accountId,
       balance,
     };
   });
 
-  // 5. Apply search filter (Name, Phone, or Batch)
+  // 6. Apply search filter (Name, Phone, or Batch)
   if (options?.search && options.search.trim()) {
     const term = options.search.trim().toLowerCase();
     const cleanTermPhone = normalizePhone(term);
@@ -118,24 +130,39 @@ export async function getStudents(options?: {
     });
   }
 
+  // 7. Sort by Batch category order: General -> JD -> HS -> BS, then numerically within category, then student name
+  result.sort((a, b) => {
+    const batchA = a.batch_name || '';
+    const batchB = b.batch_name || '';
+    const catA = batchCategoryMap.get(a.batch_id);
+    const catB = batchCategoryMap.get(b.batch_id);
+    const batchCmp = compareBatchNames(batchA, batchB, catA, catB);
+    if (batchCmp !== 0) return batchCmp;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
   return result;
 }
 
 /**
  * Updates student details (Name, Phone, Batch).
- * Validates phone uniqueness.
+ * Validates phone uniqueness and automatically capitalizes student name.
  */
 export async function updateStudent(
   studentId: string,
   data: { name: string; phone: string; batch_id: string }
 ): Promise<{ success: boolean; error?: string }> {
   if (isGuestMode()) {
-    return updateDemoStudent(studentId, data);
+    return updateDemoStudent(studentId, {
+      ...data,
+      name: formatStudentName(data.name),
+    });
   }
 
   const supabase = createClient();
+  const cleanName = formatStudentName(data.name);
 
-  if (!data.name || !data.name.trim()) {
+  if (!cleanName) {
     return { success: false, error: 'Student name is required.' };
   }
   if (!data.phone || !data.phone.trim()) {
@@ -159,7 +186,7 @@ export async function updateStudent(
   const { error } = await ((supabase
     .from('students' as any) as any)
     .update({
-      name: data.name.trim(),
+      name: cleanName,
       phone: cleanPhone,
       batch_id: data.batch_id,
     })
@@ -168,6 +195,14 @@ export async function updateStudent(
   if (error) {
     return { success: false, error: error.message };
   }
+
+  // Update associated student AR account name for consistency
+  await (supabase
+    .from('accounts' as any) as any)
+    .update({
+      name: `${cleanName} - Accounts Receivable`,
+    })
+    .eq('student_id', studentId);
 
   return { success: true };
 }

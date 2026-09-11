@@ -143,22 +143,22 @@ export default function EditJournalEntryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-2xl overflow-visible">
-        <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
+      <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 space-y-4 shadow-2xl overflow-visible text-slate-900">
+        <div className="flex justify-between items-center border-b border-slate-200 pb-3">
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-white">Edit Journal Entry (With Audit Log)</h3>
-            <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">Edit Journal Entry (With Audit Log)</h3>
+            <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
               Changes will be validated for balanced debits/credits and audited before saving.
             </p>
           </div>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-white p-1">
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1">
             ✕
           </button>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-950/80 border border-red-800/80 rounded-xl text-xs text-red-300 font-semibold">
+          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-semibold">
             {error}
           </div>
         )}
@@ -166,18 +166,18 @@ export default function EditJournalEntryModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Description</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Description</label>
               <input
                 type="text"
                 required
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-600"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Transaction Date</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Transaction Date</label>
               <CustomDateInput
                 value={date}
                 onChange={(val) => setDate(val)}
@@ -188,21 +188,21 @@ export default function EditJournalEntryModal({
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Journal Lines ({lines.length})
               </label>
               <button
                 type="button"
                 onClick={handleAddLine}
-                className="text-xs font-semibold text-emerald-400 hover:underline"
+                className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
               >
                 + Add Line
               </button>
             </div>
 
-            <div className="space-y-2 border border-slate-800 rounded-xl p-2.5 sm:p-3 bg-slate-950 max-h-48 sm:max-h-56 overflow-y-auto">
+            <div className="space-y-2 border border-slate-200 rounded-xl p-2.5 sm:p-3 bg-slate-50 max-h-48 sm:max-h-56 overflow-y-auto">
               {lines.map((line, idx) => (
-                <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center pb-2 border-b border-slate-800/60 last:border-0 last:pb-0">
+                <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center pb-2 border-b border-slate-200 last:border-0 last:pb-0">
                   <div className="sm:col-span-6 min-w-0">
                     <SearchableAccountSelect
                       accounts={accounts}
@@ -219,7 +219,7 @@ export default function EditJournalEntryModal({
                       placeholder="Debit (₹)"
                       value={line.debit}
                       onChange={(e) => handleLineChange(idx, 'debit', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-emerald-700 font-mono font-semibold focus:outline-none focus:border-emerald-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
 
@@ -230,12 +230,12 @@ export default function EditJournalEntryModal({
                       placeholder="Credit (₹)"
                       value={line.credit}
                       onChange={(e) => handleLineChange(idx, 'credit', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-blue-400 font-mono min-w-0 focus:outline-none focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-mono font-semibold min-w-0 focus:outline-none focus:border-emerald-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveLine(idx)}
-                      className="text-slate-500 hover:text-red-400 p-1 text-xs shrink-0"
+                      className="text-slate-400 hover:text-red-600 p-1 text-xs shrink-0"
                       title="Remove Line"
                     >
                       ✕
@@ -246,27 +246,27 @@ export default function EditJournalEntryModal({
             </div>
 
             {/* Debits vs Credits Totals Guard */}
-            <div className="bg-slate-950 border border-slate-800 p-3 rounded-xl flex flex-wrap justify-between items-center gap-2 text-xs font-mono">
-              <span className="text-emerald-400 font-bold">Total Debits: ₹{totalDebit.toFixed(2)}</span>
-              <span className="text-blue-400 font-bold">Total Credits: ₹{totalCredit.toFixed(2)}</span>
-              <span className={isBalanced ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>
+            <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex flex-wrap justify-between items-center gap-2 text-xs font-mono">
+              <span className="text-emerald-700 font-bold">Total Debits: ₹{totalDebit.toFixed(2)}</span>
+              <span className="text-slate-800 font-bold">Total Credits: ₹{totalCredit.toFixed(2)}</span>
+              <span className={isBalanced ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}>
                 {isBalanced ? '✓ Balanced' : `✕ Imbalance: ₹${Math.abs(totalDebit - totalCredit).toFixed(2)}`}
               </span>
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-slate-800">
+          <div className="flex gap-3 pt-4 border-t border-slate-200">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl text-xs"
+              className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-xs transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving || !isBalanced}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg disabled:opacity-50"
+              className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs shadow-xs disabled:opacity-50 transition-all"
             >
               {saving ? 'Saving & Auditing...' : 'Save & Update Entry'}
             </button>

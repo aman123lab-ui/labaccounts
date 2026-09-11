@@ -28,13 +28,13 @@ export default function CustomMonthInput({
     <div className="relative inline-flex items-center group cursor-pointer w-full sm:w-auto">
       {/* Visual Input Display Box */}
       <div
-        className={`w-full sm:w-auto bg-slate-900 border border-slate-800 rounded-xl pl-3.5 pr-9 py-2 sm:py-1.5 text-xs text-slate-100 font-mono flex items-center justify-between gap-3 group-hover:border-emerald-500/70 transition-colors shadow-sm ${className}`}
+        className={`w-full sm:w-auto bg-white border border-slate-300 rounded-xl pl-3.5 pr-9 py-2 sm:py-1.5 text-xs text-slate-900 font-mono flex items-center justify-between gap-3 group-hover:border-emerald-600 transition-colors shadow-xs ${className}`}
       >
         <span>{getDisplayLabel(value)}</span>
       </div>
 
-      {/* Bright, High-Contrast Emerald Calendar SVG Icon */}
-      <div className="absolute right-2.5 pointer-events-none flex items-center justify-center text-emerald-400 group-hover:text-emerald-300 transition-colors">
+      {/* Calendar SVG Icon */}
+      <div className="absolute right-2.5 pointer-events-none flex items-center justify-center text-emerald-600 group-hover:text-emerald-700 transition-colors">
         <svg
           className="w-4 h-4"
           fill="none"
@@ -55,7 +55,7 @@ export default function CustomMonthInput({
         type="month"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer pointer-events-auto [color-scheme:dark]"
+        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer pointer-events-auto [color-scheme:light]"
       />
     </div>
   );

@@ -18,8 +18,10 @@ export default function InchargeAuthGuard({ children }: { children: React.ReactN
         return;
       }
 
-      if (sessionUser.role !== 'incharge' && sessionUser.role !== 'admin') {
-        if (sessionUser.role === 'student') {
+      if (sessionUser.role !== 'incharge') {
+        if (sessionUser.role === 'admin') {
+          router.replace('/admin');
+        } else if (sessionUser.role === 'student') {
           router.replace('/student');
         } else {
           router.replace('/incharge/login');
@@ -36,9 +38,9 @@ export default function InchargeAuthGuard({ children }: { children: React.ReactN
 
   if (loading || !authorized) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-sm text-slate-400 font-mono">
-          <span className="inline-block w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-sm text-slate-600 font-mono">
+          <span className="inline-block w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
           <span>Verifying Workforce personnel session...</span>
         </div>
       </div>

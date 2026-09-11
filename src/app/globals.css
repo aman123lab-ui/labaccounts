@@ -2,11 +2,11 @@
 
 @layer base {
   :root {
-    --background: #0b0f19;
-    --foreground: #f3f4f6;
-    --card: #111827;
-    --card-border: #1f2937;
-    --primary: #3b82f6;
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-border: #e2e8f0;
+    --primary: #059669;
     --accent: #10b981;
   }
 }
@@ -61,23 +61,23 @@ input[type='number'] {
   appearance: textfield;
 }
 
-/* Dark theme support for native date and month picker controls & calendar icons */
+/* Light theme native date and month picker controls */
 input[type='date'],
 input[type='month'] {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 input[type='date']::-webkit-calendar-picker-indicator,
 input[type='month']::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  filter: invert(0.9) sepia(100%) hue-rotate(100deg) saturate(300%);
-  opacity: 0.95;
+  opacity: 0.7;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 input[type='date']::-webkit-calendar-picker-indicator:hover,
 input[type='month']::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
+
 

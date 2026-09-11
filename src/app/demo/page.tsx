@@ -27,7 +27,7 @@ export default function GuestModeRoleSelectionPage() {
       <div className="absolute bottom-10 right-1/3 w-[450px] h-[450px] bg-indigo-600/10 blur-[140px] rounded-full pointer-events-none" />
       <div className="absolute top-10 right-10 w-[350px] h-[350px] bg-amber-600/10 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="w-full max-w-5xl z-10 space-y-10">
+      <div className="w-full max-w-6xl z-10 space-y-10">
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 bg-amber-950/80 border border-amber-500/40 text-amber-300 px-3.5 py-1.5 rounded-full text-xs font-bold font-mono shadow-lg shadow-amber-950/50">
@@ -42,8 +42,8 @@ export default function GuestModeRoleSelectionPage() {
           </p>
         </div>
 
-        {/* 2 Role Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 3 Role Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* ── STUDENT ── */}
           <div
@@ -83,8 +83,6 @@ export default function GuestModeRoleSelectionPage() {
                   <span className="text-emerald-400">✓</span> UPI Pay Now &amp; claim tracking
                 </div>
               </div>
-
-
             </div>
 
             <div className="mt-6">
@@ -98,10 +96,60 @@ export default function GuestModeRoleSelectionPage() {
             </div>
           </div>
 
+          {/* ── WORKFORCE / IN-CHARGE ── */}
+          <div
+            onClick={() => handleSelectRole('incharge')}
+            className="group relative bg-gradient-to-b from-slate-900/90 to-slate-950 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 sm:p-7 shadow-xl hover:shadow-2xl hover:shadow-indigo-950/40 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+          >
+            <div className="space-y-4">
+              <div className="flex justify-between items-start">
+                <div className="w-12 h-12 rounded-xl bg-indigo-950 border border-indigo-800/60 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-900/60 transition-all shadow-md">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-indigo-950/80 text-indigo-300 border border-indigo-800/80 px-2.5 py-1 rounded-full">
+                  Workforce
+                </span>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">
+                  Workforce Portal
+                </h2>
+                <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                  Collection In-Charge staff — log debits, collect cash, and submit handovers.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 space-y-2 text-xs font-mono text-slate-400">
+                <div className="flex items-center gap-2 text-slate-300">
+                  <span className="text-indigo-400">✓</span> Log student print jobs &amp; cash credits
+                </div>
+                <div className="flex items-center gap-2 text-slate-300">
+                  <span className="text-indigo-400">✓</span> Real-time cash-on-hand tracking
+                </div>
+                <div className="flex items-center gap-2 text-slate-300">
+                  <span className="text-indigo-400">✓</span> Verify claims &amp; submit cash handovers
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <button
+                type="button"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-3 px-4 rounded-xl shadow-lg shadow-indigo-950/50 transition-all flex items-center justify-center gap-2 group-hover:gap-3"
+              >
+                <span>Enter Workforce Demo</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+
           {/* ── ADMIN ── */}
           <div
             onClick={() => handleSelectRole('admin')}
-            className="group relative bg-gradient-to-b from-slate-900/90 to-slate-950 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-6 sm:p-7 shadow-xl hover:shadow-2xl hover:shadow-amber-950/40 transition-all duration-300 cursor-pointer flex flex-col justify-between md:col-span-1"
+            className="group relative bg-gradient-to-b from-slate-900/90 to-slate-950 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-6 sm:p-7 shadow-xl hover:shadow-2xl hover:shadow-amber-950/40 transition-all duration-300 cursor-pointer flex flex-col justify-between"
           >
             <div className="space-y-4">
               <div className="flex justify-between items-start">
@@ -126,17 +174,15 @@ export default function GuestModeRoleSelectionPage() {
 
               <div className="pt-3 border-t border-slate-800/80 space-y-2 text-xs font-mono text-slate-400">
                 <div className="flex items-center gap-2 text-slate-300">
-                  <span className="text-amber-400">✓</span> Double-Entry Ledger &amp; Financial Reports
+                  <span className="text-amber-400">✓</span> Double-Entry Ledger &amp; Reports
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
                   <span className="text-amber-400">✓</span> Financial Year Rollover &amp; Undo
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
-                  <span className="text-amber-400">✓</span> Workforce Management &amp; Cash Handovers
+                  <span className="text-amber-400">✓</span> Workforce Management &amp; Handovers
                 </div>
               </div>
-
-
             </div>
 
             <div className="mt-6">

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/client';
 import { postJournalEntry } from './accountingService';
 import { calculatePrintAmount, PrintTypeOption, PrintSideOption } from '@/config/printingRates';
 import { isGuestMode, getDemoAccounts, postDemoJournalEntry } from '@/lib/demo/demoStore';
+import { getValidSessionUser } from './authService';
 
 export interface PostDebitInput {
   studentIds: string[];
@@ -31,6 +32,22 @@ export interface LedgerEntryResult {
 }
 
 /**
+ * Helper to determine whether to debit Cash in Hand (Workforce) vs Lab Cash Account.
+ * If explicitly provided, uses the boolean. Otherwise, checks active user role.
+ */
+async function resolveUseInchargeCash(explicit?: boolean): Promise<boolean> {
+  if (typeof explicit === 'boolean') {
+    return explicit;
+  }
+  try {
+    const session = await getValidSessionUser();
+    return session.role === 'incharge';
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Helper to fetch Service Income Account ID (Revenue)
  */
 async function getServiceIncomeAccountId(): Promise<string> {
@@ -55,6 +72,7 @@ async function getCashAccountId(): Promise<string> {
     .eq('type', 'asset')
     .eq('is_student_account', false)
     .not('name', 'ilike', '%In-Charge%')
+    .not('name', 'ilike', '%Workforce%')
     .limit(1)
     .maybeSingle();
 
@@ -63,18 +81,20 @@ async function getCashAccountId(): Promise<string> {
 }
 
 /**
- * Helper to fetch Cash in Hand (In-Charge) Account ID (Asset)
+ * Helper to fetch Cash in Hand (Workforce / In-Charge) Account ID (Asset)
  */
 export async function getCashInHandInchargeAccountId(): Promise<string> {
   const supabase = createClient();
   const { data } = await (supabase.from('accounts') as any)
-    .select('id')
+    .select('id, name')
     .eq('type', 'asset')
-    .ilike('name', '%Cash in Hand (In-Charge)%')
-    .limit(1)
-    .maybeSingle();
+    .or('name.ilike.%Cash in Hand (In-Charge)%,name.ilike.%Cash in Hand (Workforce)%,name.ilike.%Cash in Hand%');
 
-  if (data?.id) return data.id;
+  if (data && data.length > 0) {
+    const nonMain = data.find((a: any) => a.id !== '10000000-0000-0000-0000-000000000001');
+    if (nonMain) return nonMain.id;
+  }
+
   return '10000000-0000-0000-0000-000000000003';
 }
 
@@ -102,7 +122,8 @@ export async function postDebitEntries(input: PostDebitInput): Promise<{
 
     let guestCashAccountId = '';
     if (input.paidImmediately) {
-      guestCashAccountId = input.useInchargeCashAccount
+      const useIncharge = await resolveUseInchargeCash(input.useInchargeCashAccount);
+      guestCashAccountId = useIncharge
         ? '10000000-0000-0000-0000-000000000003'
         : '10000000-0000-0000-0000-000000000001';
     }
@@ -147,7 +168,8 @@ export async function postDebitEntries(input: PostDebitInput): Promise<{
 
   let cashDebitAccountId = '';
   if (input.paidImmediately) {
-    cashDebitAccountId = input.useInchargeCashAccount
+    const useIncharge = await resolveUseInchargeCash(input.useInchargeCashAccount);
+    cashDebitAccountId = useIncharge
       ? await getCashInHandInchargeAccountId()
       : await getCashAccountId();
   }
@@ -242,7 +264,8 @@ export async function postCreditEntries(input: PostCreditInput): Promise<{
   error?: string;
 }> {
   if (isGuestMode()) {
-    const cashAccountId = input.useInchargeCashAccount
+    const useIncharge = await resolveUseInchargeCash(input.useInchargeCashAccount);
+    const cashAccountId = useIncharge
       ? '10000000-0000-0000-0000-000000000003'
       : '10000000-0000-0000-0000-000000000001';
     const demoAccounts = getDemoAccounts();
@@ -281,7 +304,8 @@ export async function postCreditEntries(input: PostCreditInput): Promise<{
     return { success: false, totalPosted: 0, results: [], error: 'Payment credit amount must be greater than zero.' };
   }
 
-  const cashAccountId = input.useInchargeCashAccount
+  const useIncharge = await resolveUseInchargeCash(input.useInchargeCashAccount);
+  const cashAccountId = useIncharge
     ? await getCashInHandInchargeAccountId()
     : await getCashAccountId();
 

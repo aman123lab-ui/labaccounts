@@ -77,19 +77,19 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 py-12 px-4 sm:px-8 flex flex-col items-center justify-between">
+    <main className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-8 flex flex-col items-center justify-between">
       <div className="w-full max-w-xl flex-1">
         {/* Header Navigation */}
-        <div className="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+        <div className="flex justify-between items-center mb-8 border-b border-slate-200 pb-4">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 font-mono">
               Student Portal
             </span>
-            <h1 className="text-2xl font-black text-white tracking-tight">Student Self-Registration</h1>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Student Self-Registration</h1>
           </div>
           <Link
             href="/"
-            className="text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg"
+            className="text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-2 rounded-xl shadow-xs"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -99,23 +99,23 @@ export default function RegisterPage() {
         </div>
 
         {/* SINGLE REGISTRATION FORM */}
-        <div className="bg-slate-900/90 border border-slate-800 p-8 rounded-2xl shadow-xl space-y-6">
+        <div className="bg-white border border-slate-200 p-8 rounded-2xl shadow-xs space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-100">Create Student Account</h2>
-            <p className="text-xs text-slate-400 mt-1">
+            <h2 className="text-lg font-bold text-slate-900">Create Student Account</h2>
+            <p className="text-xs text-slate-500 mt-1">
               Enter your details to register as a student and provision your dedicated ledger account.
             </p>
           </div>
 
           {regError && (
-            <div className="p-3.5 bg-red-950/60 border border-red-800/60 rounded-xl text-xs text-red-300">
+            <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-semibold">
               {regError}
             </div>
           )}
 
           {regSuccess && (
-            <div className="p-3.5 bg-emerald-950/60 border border-emerald-800/60 rounded-xl text-xs text-emerald-300 font-semibold flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-semibold flex items-center gap-2">
+              <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               Student registered successfully! Redirecting to student dashboard...
@@ -125,7 +125,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Field 1: Full Name */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Full Name
               </label>
               <input
@@ -134,13 +134,13 @@ export default function RegisterPage() {
                 placeholder="Enter your name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
+                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600 transition-all"
               />
             </div>
 
             {/* Field 2: Phone Number */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Phone Number
               </label>
               <input
@@ -149,13 +149,13 @@ export default function RegisterPage() {
                 placeholder="Enter your phone number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
+                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600 transition-all"
               />
             </div>
 
             {/* Field 3: Password */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Password
               </label>
               <PasswordInput
@@ -164,17 +164,18 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 focusColor="emerald"
+                variant="light"
                 className="py-3"
               />
             </div>
 
             {/* Field 4: Batch */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Batch
               </label>
               {loadingBatches ? (
-                <div className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 animate-pulse">
+                <div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-500 animate-pulse">
                   Loading available batches...
                 </div>
               ) : (
@@ -191,6 +192,7 @@ export default function RegisterPage() {
                     const list = await getBatches();
                     setBatches(list);
                   }}
+                  variant="light"
                 />
               )}
             </div>
@@ -198,7 +200,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={submitting || loadingBatches}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-emerald-950 disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-xs disabled:opacity-50 flex items-center justify-center gap-2 mt-4 text-sm"
             >
               {submitting ? (
                 <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

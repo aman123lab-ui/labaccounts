@@ -24,6 +24,7 @@ interface SearchableBatchSelectProps {
   allowManagement?: boolean; // Default: false. Set to true ONLY for admin forms
   allowManage?: boolean; // Alias for allowManagement
   size?: 'sm' | 'md'; // Default: 'md'
+  variant?: 'light' | 'dark'; // Default: 'light'
 }
 
 export default function SearchableBatchSelect({
@@ -37,6 +38,7 @@ export default function SearchableBatchSelect({
   allowManagement = false,
   allowManage,
   size = 'md',
+  variant = 'light',
 }: SearchableBatchSelectProps) {
   const canManage = allowManage ?? allowManagement;
   const [isOpen, setIsOpen] = useState(false);
@@ -263,6 +265,34 @@ export default function SearchableBatchSelect({
     }
   };
 
+  // DELETE BATCH HANDLER WITH CONFIRMATION
+  const handleDeleteClick = async (batch: Batch, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const ok = window.confirm(`Are you sure you want to delete batch "${batch.name}"? This action cannot be undone.`);
+    if (!ok) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const res = await deleteBatch(batch.id);
+      if (res.success) {
+        if (onBatchDeleted) onBatchDeleted(batch.id);
+        if (onBatchesUpdated) onBatchesUpdated();
+        if (selectedBatchId === batch.id) onChange('');
+        setConfirmDeleteId(null);
+      } else {
+        alert(res.error || 'Cannot delete batch.');
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Error deleting batch.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // INLINE DELETE BATCH HANDLER
   const handleConfirmDelete = async (batchId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -288,6 +318,8 @@ export default function SearchableBatchSelect({
     }
   };
 
+  const isDark = variant === 'dark';
+
   return (
     <div className="relative w-full">
       {/* Selected Batch Trigger Button */}
@@ -295,11 +327,13 @@ export default function SearchableBatchSelect({
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full bg-slate-900 border border-slate-700 text-slate-100 rounded-lg text-left font-medium focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all flex items-center justify-between shadow-sm hover:border-slate-600 ${
-          size === 'sm' ? 'px-2.5 py-1.5 text-xs' : 'px-4 py-2.5 text-xs sm:text-sm'
-        }`}
+        className={`${
+          isDark
+            ? 'w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl text-left font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-all flex items-center justify-between hover:border-slate-700'
+            : 'w-full bg-white border border-slate-300 text-slate-900 rounded-lg text-left font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-600 transition-all flex items-center justify-between shadow-xs hover:border-slate-400'
+        } ${size === 'sm' ? 'px-2.5 py-1.5 text-xs' : 'px-4 py-2.5 text-xs sm:text-sm'}`}
       >
-        <span className={`truncate ${selectedBatch ? 'text-slate-100 font-semibold' : 'text-slate-400'}`}>
+        <span className={`truncate ${selectedBatch ? (isDark ? 'text-slate-100 font-semibold' : 'text-slate-900 font-semibold') : 'text-slate-400'}`}>
           {selectedBatch ? selectedBatch.name : placeholder}
         </span>
         <svg
@@ -329,22 +363,30 @@ export default function SearchableBatchSelect({
               maxHeight: `${coords.maxHeight}px`,
               zIndex: 99999,
             }}
-            className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col"
+            className={
+              isDark
+                ? 'bg-slate-900 border border-slate-800 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col font-sans text-slate-100'
+                : 'bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl flex flex-col font-sans'
+            }
           >
             {/* 1. TOP PINNED SEARCH BAR */}
-            <div className="p-2 border-b border-slate-800 bg-slate-900 shrink-0">
+            <div className={isDark ? 'p-2 border-b border-slate-800 bg-slate-950 shrink-0' : 'p-2 border-b border-slate-200 bg-slate-50 shrink-0'}>
               <input
                 type="text"
                 placeholder="Search batch..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-md px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                className={
+                  isDark
+                    ? 'w-full bg-slate-900 border border-slate-800 rounded-md px-3 py-2 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                    : 'w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-500'
+                }
                 autoFocus
               />
             </div>
 
             {/* 2. MIDDLE SCROLLABLE OPTIONS LIST */}
-            <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar divide-y divide-slate-800/50">
+            <div className={`flex-1 min-h-0 overflow-y-auto no-scrollbar divide-y ${isDark ? 'divide-slate-800' : 'divide-slate-100'}`}>
               {filtered.length === 0 ? (
                 <div className="p-4 text-xs text-slate-400 text-center">No batches found</div>
               ) : (
@@ -370,13 +412,17 @@ export default function SearchableBatchSelect({
                       key={b.id}
                       className={`w-full transition-colors flex flex-col ${
                         isSelected
-                          ? 'bg-emerald-950/60 text-emerald-300'
-                          : 'text-slate-300 hover:bg-slate-800/60'
+                          ? isDark
+                            ? 'bg-emerald-950/80 text-emerald-300 font-bold'
+                            : 'bg-emerald-50 text-emerald-950 font-bold'
+                          : isDark
+                          ? 'text-slate-200 hover:bg-slate-800'
+                          : 'text-slate-800 hover:bg-slate-50'
                       }`}
                     >
                       {/* INLINE EDIT FORM ROW */}
                       {isEditingThis ? (
-                        <div className="p-2 bg-slate-950 space-y-2">
+                        <div className="p-2 bg-slate-50 space-y-2 border-b border-slate-200">
                           <div className="flex items-center gap-2">
                             <input
                               type="text"
@@ -385,13 +431,13 @@ export default function SearchableBatchSelect({
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') handleSaveEdit(b.id, e);
                               }}
-                              className="flex-1 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-emerald-500"
+                              className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-emerald-600"
                               autoFocus
                             />
                             <select
                               value={editCategory}
                               onChange={(e) => setEditCategory(e.target.value)}
-                              className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-emerald-500"
+                              className="bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-emerald-600"
                             >
                               <option value="JD">JD</option>
                               <option value="HS">HS</option>
@@ -415,18 +461,18 @@ export default function SearchableBatchSelect({
                                 setEditingBatchId(null);
                                 setEditError(null);
                               }}
-                              className="bg-slate-800 text-slate-300 hover:bg-slate-700 px-2 py-1 text-[11px] rounded"
+                              className="bg-slate-200 text-slate-700 hover:bg-slate-300 px-2 py-1 text-[11px] rounded"
                             >
                               Cancel
                             </button>
                           </div>
-                          {editError && <p className="text-[10px] text-red-400">{editError}</p>}
+                          {editError && <p className="text-[10px] text-red-600">{editError}</p>}
                         </div>
                       ) : isDeletingThis ? (
                         /* INLINE DELETE CONFIRMATION ROW */
-                        <div className="p-2.5 bg-red-950/80 border border-red-800/80 rounded-lg flex flex-col gap-2 m-1">
+                        <div className="p-2.5 bg-red-50 border border-red-200 rounded-lg flex flex-col gap-2 m-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-red-200 font-semibold">Delete "{b.name}"?</span>
+                            <span className="text-xs text-red-900 font-semibold">Delete "{b.name}"?</span>
                             <div className="flex items-center gap-1.5">
                               <button
                                 type="button"
@@ -443,14 +489,14 @@ export default function SearchableBatchSelect({
                                   setConfirmDeleteId(null);
                                   setDeleteError(null);
                                 }}
-                                className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs transition-colors"
+                                className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded text-xs transition-colors"
                               >
                                 Cancel
                               </button>
                             </div>
                           </div>
                           {deleteError && (
-                            <div className="text-[11px] text-red-300 bg-red-900/50 p-2 rounded border border-red-800/60 leading-tight">
+                            <div className="text-[11px] text-red-800 bg-red-100 p-2 rounded border border-red-200 leading-tight">
                               {deleteError}
                             </div>
                           )}
@@ -468,7 +514,7 @@ export default function SearchableBatchSelect({
                             className="flex-1 text-left font-medium text-sm flex items-center justify-between pr-2"
                           >
                             <span>{b.name}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono border border-slate-200">
                               {b.category}
                             </span>
                           </button>
@@ -481,7 +527,7 @@ export default function SearchableBatchSelect({
                                 type="button"
                                 title="Edit / Rename batch"
                                 onClick={(e) => startEditing(b, e)}
-                                className="p-1 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded transition-colors"
+                                className="p-1 text-slate-400 hover:text-emerald-600 hover:bg-slate-100 rounded transition-colors"
                               >
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path
@@ -499,7 +545,7 @@ export default function SearchableBatchSelect({
                                   type="button"
                                   disabled
                                   title={disabledTitle}
-                                  className="p-1 text-slate-600 cursor-not-allowed"
+                                  className="p-1 text-slate-300 cursor-not-allowed"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path
@@ -514,12 +560,8 @@ export default function SearchableBatchSelect({
                                 <button
                                   type="button"
                                   title="Delete batch"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setConfirmDeleteId(b.id);
-                                  }}
-                                  className="p-1 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded transition-colors"
+                                  onClick={(e) => handleDeleteClick(b, e)}
+                                  className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path
@@ -543,7 +585,7 @@ export default function SearchableBatchSelect({
 
             {/* 3. PINNED "+ ADD BATCH" FOOTER (Only when canManage is true) */}
             {canManage && (
-              <div className="border-t border-slate-800 p-2 bg-slate-950 shrink-0">
+              <div className="border-t border-slate-200 p-2 bg-slate-50 shrink-0">
                 {!isAddingInline ? (
                   <button
                     type="button"
@@ -552,7 +594,7 @@ export default function SearchableBatchSelect({
                       e.stopPropagation();
                       setIsAddingInline(true);
                     }}
-                    className="w-full flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold text-emerald-400 hover:text-emerald-300 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-800/50 rounded-md transition-all shadow-sm"
+                    className="w-full flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold text-emerald-800 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md transition-all shadow-xs"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -560,8 +602,8 @@ export default function SearchableBatchSelect({
                     Add Batch
                   </button>
                 ) : (
-                  <div className="space-y-2 bg-slate-950 p-1 rounded">
-                    <div className="text-xs font-semibold text-slate-300">Create New Batch:</div>
+                  <div className="space-y-2 bg-slate-50 p-1 rounded">
+                    <div className="text-xs font-semibold text-slate-700">Create New Batch:</div>
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -574,13 +616,13 @@ export default function SearchableBatchSelect({
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') handleCreateNewBatch(e);
                         }}
-                        className="flex-1 bg-slate-900 border border-slate-700 rounded-md px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="flex-1 bg-white border border-slate-300 rounded-md px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600"
                         autoFocus
                       />
                       <select
                         value={newBatchCategory}
                         onChange={(e) => setNewBatchCategory(e.target.value)}
-                        className="bg-slate-900 border border-slate-700 rounded-md px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                        className="bg-white border border-slate-300 rounded-md px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600"
                       >
                         <option value="JD">JD</option>
                         <option value="HS">HS</option>
@@ -606,12 +648,12 @@ export default function SearchableBatchSelect({
                           setNewBatchName('');
                           setAddError(null);
                         }}
-                        className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 text-xs rounded transition-colors"
+                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 text-xs rounded transition-colors"
                       >
                         Cancel
                       </button>
                     </div>
-                    {addError && <p className="text-[11px] text-red-400">{addError}</p>}
+                    {addError && <p className="text-[11px] text-red-600">{addError}</p>}
                   </div>
                 )}
               </div>

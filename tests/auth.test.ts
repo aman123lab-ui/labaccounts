@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { sortBatches } from '../src/services/batchService';
 import { Batch } from '../src/types/database.types';
-import { normalizePhone, studentPhoneToEmail, clearLocalSession } from '../src/services/authService';
+import { normalizePhone, studentPhoneToEmail, clearLocalSession, formatStudentName } from '../src/services/authService';
 import { validateJournalEntryLines } from '../src/lib/accounting/ledger';
 
 describe('Phase 2 Authentication & Student Registration Logic', () => {
   // Test 1: Batch Sorting Requirement
   describe('1. Batch Sorting Order', () => {
-    it('should sort batches: JD... first, then HS..., then BS..., then others', () => {
+    it('should sort batches: General first, then JD..., then HS..., then BS...', () => {
       const sampleBatches: Batch[] = [
         { id: '1', name: 'BS 2026', category: 'BS', sort_order: 0, created_at: '' },
         { id: '2', name: 'JD2', category: 'JD', sort_order: 0, created_at: '' },
@@ -20,7 +20,7 @@ describe('Phase 2 Authentication & Student Registration Logic', () => {
       const sorted = sortBatches(sampleBatches);
       const names = sorted.map((b) => b.name);
 
-      expect(names).toEqual(['JD1', 'JD2', 'HS1', 'BS1', 'BS 2026', 'MSc 2026']);
+      expect(names).toEqual(['MSc 2026', 'JD1', 'JD2', 'HS1', 'BS 2026', 'BS1']);
     });
   });
 
@@ -33,6 +33,13 @@ describe('Phase 2 Authentication & Student Registration Logic', () => {
 
     it('should format student phone into student auth email', () => {
       expect(studentPhoneToEmail('9876543210')).toBe('9876543210@student.lab');
+    });
+
+    it('should automatically capitalize student names to Title Case', () => {
+      expect(formatStudentName('muhammed anfaz')).toBe('Muhammed Anfaz');
+      expect(formatStudentName('JOHN DOE')).toBe('John Doe');
+      expect(formatStudentName('  ali   hasan  ')).toBe('Ali Hasan');
+      expect(formatStudentName('')).toBe('');
     });
   });
 
@@ -103,6 +110,30 @@ describe('Phase 2 Authentication & Student Registration Logic', () => {
       expect(storage['other_key']).toBe('keep_me');
 
       globalThis.window = originalWindow;
+    });
+  });
+
+  // Test 5: Role-Specific Login Access Control
+  describe('5. Role-Specific Login Protection', () => {
+    it('loginIncharge should reject admin email credentials', async () => {
+      const { loginIncharge } = await import('../src/services/authService');
+      const res = await loginIncharge('admin@lab.com', 'somepassword');
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('Admin credentials cannot be used to log in to the Workforce portal');
+    });
+
+    it('loginIncharge should reject student email credentials', async () => {
+      const { loginIncharge } = await import('../src/services/authService');
+      const res = await loginIncharge('1234567890@student.lab', 'somepassword');
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('Student credentials cannot be used to log in to the Workforce portal');
+    });
+
+    it('loginAdmin should reject student credentials', async () => {
+      const { loginAdmin } = await import('../src/services/authService');
+      const res = await loginAdmin('student123@student.lab', 'somepassword');
+      expect(res.success).toBe(false);
+      expect(res.error).toContain('Access denied');
     });
   });
 });

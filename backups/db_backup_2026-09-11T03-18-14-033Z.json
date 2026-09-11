@@ -1,0 +1,479 @@
+{
+  "students": [
+    {
+      "id": "8566d162-8e6d-4bcc-af7c-92325d63ba5f",
+      "name": "Muhammed Anfaz",
+      "phone": "8593971496",
+      "password_hash": "123456",
+      "batch_id": "e9305635-4841-4b66-a94d-7a0edec6a888",
+      "status": "active",
+      "created_at": "2026-09-11T01:27:28.334444+00:00"
+    },
+    {
+      "id": "19608c25-91d6-47fa-a9b6-0c2e52f8b392",
+      "name": "Asdh",
+      "phone": "8596741230",
+      "password_hash": "123456",
+      "batch_id": "22222222-2222-2222-2222-222222222221",
+      "status": "active",
+      "created_at": "2026-09-11T01:28:04.716679+00:00"
+    }
+  ],
+  "journal_entries": [
+    {
+      "id": "3d46f63b-0879-47d2-a942-08ecca5ee777",
+      "date": "2026-02-01T00:00:00+00:00",
+      "description": "opening academic year",
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "created_by": "fe3f82f3-2512-427b-8fc2-2294fdbea120",
+      "created_at": "2026-08-19T17:53:30.58797+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "25521a51-6df2-4dd7-92b5-a55312ea4c9e",
+      "date": "2026-02-18T00:00:00+00:00",
+      "description": "cash recived from debtores",
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "created_by": "fe3f82f3-2512-427b-8fc2-2294fdbea120",
+      "created_at": "2026-08-19T17:54:32.394124+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "622450f4-42ab-41ec-91b0-689097c6193e",
+      "date": "2026-04-19T00:00:00+00:00",
+      "description": "cash recived debtors (muhammd kannur)",
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "created_by": "fe3f82f3-2512-427b-8fc2-2294fdbea120",
+      "created_at": "2026-08-19T17:55:55.071077+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "date": "2026-08-01T00:00:00+00:00",
+      "description": "total expence",
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "created_by": "fe3f82f3-2512-427b-8fc2-2294fdbea120",
+      "created_at": "2026-08-19T17:59:27.411744+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "2b392aeb-9edb-4c51-a371-f26d77d181cc",
+      "date": "2026-08-21T00:00:00+00:00",
+      "description": "purchase a4 ,stapler ,stapler pin",
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "created_by": "fe3f82f3-2512-427b-8fc2-2294fdbea120",
+      "created_at": "2026-08-26T06:02:03.669111+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    },
+    {
+      "id": "8ef479a2-01ab-46c6-8cf6-5150cd1c7a06",
+      "date": "2026-08-25T00:00:00+00:00",
+      "description": "cash resived from nijad (old account reciveble)",
+      "financial_year_id": "11111111-1111-1111-1111-111111111111",
+      "created_by": "fe3f82f3-2512-427b-8fc2-2294fdbea120",
+      "created_at": "2026-08-26T06:03:57.345601+00:00",
+      "voided_at": null,
+      "voided_by": null,
+      "is_closing_entry": false
+    }
+  ],
+  "journal_entry_lines": [
+    {
+      "id": "868fe032-cfc4-4077-a1bf-df0b4399a0c5",
+      "journal_entry_id": "3d46f63b-0879-47d2-a942-08ecca5ee777",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 2556,
+      "credit_amount": 0
+    },
+    {
+      "id": "e68bfa3c-4fe0-4740-b1b9-aec5d1604342",
+      "journal_entry_id": "3d46f63b-0879-47d2-a942-08ecca5ee777",
+      "account_id": "10000000-0000-0000-0000-000000000002",
+      "debit_amount": 5017,
+      "credit_amount": 0
+    },
+    {
+      "id": "8edd0c8c-60da-4041-9253-fe3c485de550",
+      "journal_entry_id": "3d46f63b-0879-47d2-a942-08ecca5ee777",
+      "account_id": "30000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 7573
+    },
+    {
+      "id": "85446e1f-de64-453b-966d-fab480abbf9b",
+      "journal_entry_id": "25521a51-6df2-4dd7-92b5-a55312ea4c9e",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 3601,
+      "credit_amount": 0
+    },
+    {
+      "id": "0355543e-de9f-4389-b79a-2344b4004b95",
+      "journal_entry_id": "25521a51-6df2-4dd7-92b5-a55312ea4c9e",
+      "account_id": "10000000-0000-0000-0000-000000000002",
+      "debit_amount": 0,
+      "credit_amount": 3601
+    },
+    {
+      "id": "73cf6b77-6806-4989-9c9c-f4a308adf6a5",
+      "journal_entry_id": "622450f4-42ab-41ec-91b0-689097c6193e",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 100,
+      "credit_amount": 0
+    },
+    {
+      "id": "0b276bca-1b5a-42fe-883a-4d845f58d620",
+      "journal_entry_id": "622450f4-42ab-41ec-91b0-689097c6193e",
+      "account_id": "10000000-0000-0000-0000-000000000002",
+      "debit_amount": 0,
+      "credit_amount": 100
+    },
+    {
+      "id": "4757c40c-9d69-440e-acdb-b73703bb7070",
+      "journal_entry_id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "account_id": "50000000-0000-0000-0000-000000000001",
+      "debit_amount": 226,
+      "credit_amount": 0
+    },
+    {
+      "id": "904926b5-4739-446d-a228-810b13d092c7",
+      "journal_entry_id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "account_id": "50000000-0000-0000-0000-000000000002",
+      "debit_amount": 10,
+      "credit_amount": 0
+    },
+    {
+      "id": "94929ae7-62be-4dbb-b804-679334b78f79",
+      "journal_entry_id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "account_id": "50000000-0000-0000-0000-000000000001",
+      "debit_amount": 245,
+      "credit_amount": 0
+    },
+    {
+      "id": "fb4bd6be-987a-44dc-a99f-39a89c57007d",
+      "journal_entry_id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "account_id": "50000000-0000-0000-0000-000000000001",
+      "debit_amount": 245,
+      "credit_amount": 0
+    },
+    {
+      "id": "a18620f3-c0ae-44b2-a3d6-783ac1aea7de",
+      "journal_entry_id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "account_id": "50000000-0000-0000-0000-000000000002",
+      "debit_amount": 50,
+      "credit_amount": 0
+    },
+    {
+      "id": "43c09db3-83fb-4f2b-bca0-d6bdc69f0ed2",
+      "journal_entry_id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "account_id": "50000000-0000-0000-0000-000000000002",
+      "debit_amount": 950,
+      "credit_amount": 0
+    },
+    {
+      "id": "42b3f7be-5bd7-4662-842c-8ae265a34d50",
+      "journal_entry_id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "account_id": "50000000-0000-0000-0000-000000000001",
+      "debit_amount": 245,
+      "credit_amount": 0
+    },
+    {
+      "id": "1dcd5de0-1167-458e-bc93-e22b7ca87b1f",
+      "journal_entry_id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "account_id": "50000000-0000-0000-0000-000000000001",
+      "debit_amount": 245,
+      "credit_amount": 0
+    },
+    {
+      "id": "9eb47850-26fa-4ce6-958c-748bf0b853b9",
+      "journal_entry_id": "ce4b6e5d-9772-4101-9081-1ab1d2cac1a5",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 2216
+    },
+    {
+      "id": "1d619e05-76f6-480d-b58f-25b6dac30482",
+      "journal_entry_id": "2b392aeb-9edb-4c51-a371-f26d77d181cc",
+      "account_id": "50000000-0000-0000-0000-000000000001",
+      "debit_amount": 250,
+      "credit_amount": 0
+    },
+    {
+      "id": "52f82fdd-0d89-4c9a-b195-424d66a83ac8",
+      "journal_entry_id": "2b392aeb-9edb-4c51-a371-f26d77d181cc",
+      "account_id": "50000000-0000-0000-0000-000000000002",
+      "debit_amount": 75,
+      "credit_amount": 0
+    },
+    {
+      "id": "9e995b2e-e759-46b8-aca3-dae4656fd907",
+      "journal_entry_id": "2b392aeb-9edb-4c51-a371-f26d77d181cc",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 0,
+      "credit_amount": 325
+    },
+    {
+      "id": "7e4c3acb-4a36-47a9-af3e-7e80fe69b4ef",
+      "journal_entry_id": "8ef479a2-01ab-46c6-8cf6-5150cd1c7a06",
+      "account_id": "10000000-0000-0000-0000-000000000001",
+      "debit_amount": 4,
+      "credit_amount": 0
+    },
+    {
+      "id": "74494873-f51e-4b44-be33-2b8ed146aa7b",
+      "journal_entry_id": "8ef479a2-01ab-46c6-8cf6-5150cd1c7a06",
+      "account_id": "10000000-0000-0000-0000-000000000002",
+      "debit_amount": 0,
+      "credit_amount": 4
+    }
+  ],
+  "print_jobs": [],
+  "payment_claims": [],
+  "journal_entry_audit_log": [
+    {
+      "id": "de8493f5-aa29-44a5-9ef0-0242dd8a58ac",
+      "journal_entry_id": "8ef479a2-01ab-46c6-8cf6-5150cd1c7a06",
+      "action": "edited",
+      "changed_by": "Admin",
+      "changed_at": "2026-08-26T06:06:02.815261+00:00",
+      "before_snapshot": {
+        "id": "8ef479a2-01ab-46c6-8cf6-5150cd1c7a06",
+        "date": "2026-08-25T00:00:00+00:00",
+        "source": "Manual Journal Entry",
+        "voided_at": null,
+        "voided_by": null,
+        "created_at": "2026-08-26T06:03:57.345601+00:00",
+        "created_by": "fe3f82f3-2512-427b-8fc2-2294fdbea120",
+        "description": "cash resived from nijad (old account reciveble)",
+        "is_closing_entry": false,
+        "linked_print_job": null,
+        "financial_year_id": "11111111-1111-1111-1111-111111111111",
+        "journal_entry_lines": [
+          {
+            "id": "7e4c3acb-4a36-47a9-af3e-7e80fe69b4ef",
+            "account_id": "10000000-0000-0000-0000-000000000001",
+            "debit_amount": 4,
+            "credit_amount": 0,
+            "journal_entry_id": "8ef479a2-01ab-46c6-8cf6-5150cd1c7a06"
+          },
+          {
+            "id": "74494873-f51e-4b44-be33-2b8ed146aa7b",
+            "account_id": "10000000-0000-0000-0000-000000000004",
+            "debit_amount": 0,
+            "credit_amount": 4,
+            "journal_entry_id": "8ef479a2-01ab-46c6-8cf6-5150cd1c7a06"
+          }
+        ]
+      },
+      "after_snapshot": {
+        "date": "2026-08-25",
+        "lines": [
+          {
+            "id": "7e4c3acb-4a36-47a9-af3e-7e80fe69b4ef",
+            "debit": 4,
+            "credit": 0,
+            "accountId": "10000000-0000-0000-0000-000000000001"
+          },
+          {
+            "id": "74494873-f51e-4b44-be33-2b8ed146aa7b",
+            "debit": 0,
+            "credit": 4,
+            "accountId": "10000000-0000-0000-0000-000000000002"
+          }
+        ],
+        "source": "Manual Journal Entry",
+        "description": "cash resived from nijad (old account reciveble)",
+        "journal_entry_id": "8ef479a2-01ab-46c6-8cf6-5150cd1c7a06"
+      }
+    }
+  ],
+  "financial_years": [
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "FY 2026-2027",
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31",
+      "is_current": true,
+      "closed_at": null,
+      "created_at": "2026-08-09T05:20:31.815327+00:00"
+    }
+  ],
+  "batches": [
+    {
+      "id": "e9305635-4841-4b66-a94d-7a0edec6a888",
+      "name": "BS 2",
+      "category": "BS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:39:04.666168+00:00"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222221",
+      "name": "JD 1",
+      "category": "JD",
+      "sort_order": 1,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "name": "HS 1",
+      "category": "HS",
+      "sort_order": 2,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222223",
+      "name": "BS 1",
+      "category": "BS",
+      "sort_order": 3,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "1a6a8253-1494-4e9c-aad0-695dfce2825f",
+      "name": "JD 2",
+      "category": "JD",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:40:56.771778+00:00"
+    },
+    {
+      "id": "64b3a477-b407-4405-b392-3149c806d34d",
+      "name": "JD 3",
+      "category": "JD",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:41:05.479602+00:00"
+    },
+    {
+      "id": "5d6a5b56-5637-4c9d-ba7a-65f99aecc910",
+      "name": "HS 2",
+      "category": "HS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:41:31.867003+00:00"
+    },
+    {
+      "id": "e11506a6-219c-4b5f-bf93-ef6a626244a0",
+      "name": "BS 3",
+      "category": "BS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:41:41.676317+00:00"
+    },
+    {
+      "id": "7af5015f-be87-4656-bddc-042ba705be4d",
+      "name": "BS 4",
+      "category": "BS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:42:20.555915+00:00"
+    },
+    {
+      "id": "ef0cebb5-08a8-45e1-8d68-e193f80e0652",
+      "name": "BS 5",
+      "category": "BS",
+      "sort_order": 0,
+      "created_at": "2026-08-07T03:42:30.201804+00:00"
+    },
+    {
+      "id": "9b7b49fd-2df0-491e-a6ab-e170d1fa6be3",
+      "name": "G1",
+      "category": "General",
+      "sort_order": 0,
+      "created_at": "2026-09-04T18:59:54.862537+00:00"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "10000000-0000-0000-0000-000000000001",
+      "name": "Cash Account",
+      "type": "asset",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000002",
+      "name": "Student Accounts Receivable",
+      "type": "asset",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "50000000-0000-0000-0000-000000000001",
+      "name": "Paper & Ink Expense",
+      "type": "expense",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "78d4b568-d6cb-4595-83b2-862a2e88fda3",
+      "name": "A4 supply",
+      "type": "revenue",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-07T05:25:11.607225+00:00"
+    },
+    {
+      "id": "30000000-0000-0000-0000-000000000001",
+      "name": "Equity Fund",
+      "type": "equity",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "40000000-0000-0000-0000-000000000001",
+      "name": "Printing Revenue",
+      "type": "revenue",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "50000000-0000-0000-0000-000000000002",
+      "name": "Equipment Maintenance Expense",
+      "type": "expense",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-06T17:53:48.583907+00:00"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000003",
+      "name": "Cash in Hand (In-Charge)",
+      "type": "asset",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-14T03:00:51.528694+00:00"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000004",
+      "name": "Accounts Receivable (Other)",
+      "type": "asset",
+      "is_student_account": false,
+      "student_id": null,
+      "created_at": "2026-08-25T01:11:32.70014+00:00"
+    },
+    {
+      "id": "7d71c6b3-7eec-4080-814e-317c32b17540",
+      "name": "Muhammed Anfaz - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "8566d162-8e6d-4bcc-af7c-92325d63ba5f",
+      "created_at": "2026-09-11T01:27:29.57133+00:00"
+    },
+    {
+      "id": "2dd7368c-95da-4a14-9e6f-c1f5c251ccee",
+      "name": "Asdh - Accounts Receivable",
+      "type": "asset",
+      "is_student_account": true,
+      "student_id": "19608c25-91d6-47fa-a9b6-0c2e52f8b392",
+      "created_at": "2026-09-11T01:28:05.435651+00:00"
+    }
+  ]
+}

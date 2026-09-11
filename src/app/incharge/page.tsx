@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import InchargeAuthGuard from '@/components/InchargeAuthGuard';
 import GuestModeBanner from '@/components/GuestModeBanner';
 import { getValidSessionUser, logoutUser, SessionUserInfo } from '@/services/authService';
@@ -734,38 +735,34 @@ export default function InchargeDashboardPage() {
   return (
     <InchargeAuthGuard>
       <GuestModeBanner />
-      <main className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-6 lg:p-8 font-sans selection:bg-indigo-500 selection:text-slate-950">
+      <main className="min-h-screen bg-white text-slate-900 p-4 sm:p-6 lg:p-8 font-sans selection:bg-indigo-500 selection:text-slate-950">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* HEADER BAR */}
-          <header className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-5">
+          <header className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-5">
             {/* Top Row: User Profile Info & Logout */}
             <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
               <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 p-0.5 shadow-lg shadow-indigo-950 shrink-0">
-                  <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center border border-indigo-500/30">
-                    <span className="text-lg font-black tracking-wider bg-gradient-to-r from-indigo-400 to-cyan-200 bg-clip-text text-transparent">
-                      LAB
-                    </span>
-                  </div>
+                <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black tracking-wider text-base shadow-md shadow-indigo-500/20 border border-indigo-500 shrink-0">
+                  LAB
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="text-xl font-black text-white tracking-tight break-words">
+                    <h1 className="text-xl font-black text-slate-900 tracking-tight break-words">
                       {sessionUser?.inchargeName || 'Workforce Member'}
                     </h1>
                     {sessionUser?.staffId && (
-                      <span className="bg-indigo-950 text-indigo-300 border border-indigo-800/80 font-mono text-xs font-bold px-2.5 py-0.5 rounded-md shadow-sm shrink-0">
+                      <span className="bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-mono text-xs font-bold px-2.5 py-0.5 rounded-md shadow-sm shrink-0">
                         ID: #{sessionUser.staffId}
                       </span>
                     )}
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950 border border-emerald-800/60 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full shrink-0">
                       Workforce Portal
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5 font-mono flex items-center gap-2 flex-wrap">
-                    <span className="break-all">{sessionUser?.inchargeEmail || 'incharge@lab.com'}</span>
+                  <p className="text-xs text-slate-500 mt-0.5 font-mono flex items-center gap-2 flex-wrap">
+                    <span className="break-all">{sessionUser?.inchargeEmail || ''}</span>
                     {sessionUser?.staffId ? (
-                      <span className="text-[11px] text-indigo-300/80 font-mono">
+                      <span className="text-[11px] text-indigo-700/80 font-mono">
                         (Workforce ID: #{sessionUser.staffId})
                       </span>
                     ) : sessionUser?.userId ? (
@@ -777,21 +774,34 @@ export default function InchargeDashboardPage() {
                 </div>
               </div>
 
-              {/* Logout Button */}
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="bg-slate-800/90 hover:bg-red-950/70 hover:border-red-800/80 text-slate-300 hover:text-red-300 border border-slate-700/80 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-2 shrink-0 self-start sm:self-center group"
-              >
-                <svg className="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                <span>Logout</span>
-              </button>
+              {/* Action Buttons: Debit Book & Logout */}
+              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                <Link
+                  href="/admin/ledger"
+                  className="bg-emerald-50 hover:bg-emerald-100/90 text-emerald-800 border border-emerald-200/90 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-2 group"
+                  title="Open Debit Book to record or view student transactions"
+                >
+                  <svg className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  <span>Debit Book</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="bg-slate-100/90 hover:bg-red-50/70 hover:border-red-200/80 text-slate-700 hover:text-red-700 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-2 group"
+                >
+                  <svg className="w-4 h-4 text-slate-500 group-hover:text-red-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Logout</span>
+                </button>
+              </div>
             </div>
 
             {/* Subtle Divider Line */}
-            <div className="border-t border-slate-800/90" />
+            <div className="border-t border-slate-200/90" />
 
             {/* Bottom Row: Tab Navigation Bar */}
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none">
@@ -802,10 +812,10 @@ export default function InchargeDashboardPage() {
                 className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 border ${
                   activeTab === 'students'
                     ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-950/60 border-indigo-400/30'
-                    : 'bg-slate-950/60 hover:bg-slate-800/80 text-slate-400 hover:text-slate-200 border-slate-800/80'
+                    : 'bg-slate-50 hover:bg-slate-100/80 text-slate-500 hover:text-slate-900 border-slate-200'
                 }`}
               >
-                <svg className={`w-4 h-4 shrink-0 ${activeTab === 'students' ? 'text-white' : 'text-slate-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className={`w-4 h-4 shrink-0 ${activeTab === 'students' ? 'text-white' : 'text-slate-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 <span>Student Debits & Cash</span>
@@ -818,10 +828,10 @@ export default function InchargeDashboardPage() {
                 className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 border ${
                   activeTab === 'paymentClaims'
                     ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-950/60 border-indigo-400/30'
-                    : 'bg-slate-950/60 hover:bg-slate-800/80 text-slate-400 hover:text-slate-200 border-slate-800/80'
+                    : 'bg-slate-50 hover:bg-slate-100/80 text-slate-500 hover:text-slate-900 border-slate-200'
                 }`}
               >
-                <svg className={`w-4 h-4 shrink-0 ${activeTab === 'paymentClaims' ? 'text-white' : 'text-slate-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className={`w-4 h-4 shrink-0 ${activeTab === 'paymentClaims' ? 'text-white' : 'text-slate-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span>Student Payment Claims</span>
@@ -839,10 +849,10 @@ export default function InchargeDashboardPage() {
                 className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 border ${
                   activeTab === 'cashSummary'
                     ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-950/60 border-indigo-400/30'
-                    : 'bg-slate-950/60 hover:bg-slate-800/80 text-slate-400 hover:text-slate-200 border-slate-800/80'
+                    : 'bg-slate-50 hover:bg-slate-100/80 text-slate-500 hover:text-slate-900 border-slate-200'
                 }`}
               >
-                <svg className={`w-4 h-4 shrink-0 ${activeTab === 'cashSummary' ? 'text-white' : 'text-slate-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className={`w-4 h-4 shrink-0 ${activeTab === 'cashSummary' ? 'text-white' : 'text-slate-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 <span>My Cash Collection Summary</span>
@@ -855,19 +865,19 @@ export default function InchargeDashboardPage() {
             <div className="space-y-6">
               {/* Group Action Success Alert */}
               {groupActionSuccess && (
-                <div className="bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 text-xs font-medium p-4 rounded-xl flex items-center justify-between shadow-lg">
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium p-4 rounded-xl flex items-center justify-between shadow-lg">
                   <div className="flex items-center gap-2.5">
-                    <svg className="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 text-emerald-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>{groupActionSuccess}</span>
                   </div>
-                  <button type="button" onClick={() => setGroupActionSuccess(null)} className="text-emerald-400 hover:text-emerald-200 text-sm">×</button>
+                  <button type="button" onClick={() => setGroupActionSuccess(null)} className="text-emerald-700 hover:text-emerald-900 text-sm">×</button>
                 </div>
               )}
 
               {/* Controls & Filters */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto flex-1">
                   {/* Search Input */}
                   <div className="relative w-full sm:w-64">
@@ -879,7 +889,7 @@ export default function InchargeDashboardPage() {
                       placeholder="Search student by name, phone..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                     />
                   </div>
 
@@ -887,7 +897,7 @@ export default function InchargeDashboardPage() {
                   <select
                     value={selectedBatch}
                     onChange={(e) => setSelectedBatch(e.target.value)}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-all w-full sm:w-auto font-mono"
+                    className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all w-full sm:w-auto shadow-sm"
                   >
                     <option value="all">All Batches ({students.length})</option>
                     {batches.map((b) => (
@@ -900,8 +910,8 @@ export default function InchargeDashboardPage() {
 
                 {/* DEDICATED TOOLBAR BUTTONS */}
                 <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
-                  <div className="text-xs text-slate-400 font-mono hidden lg:block mr-1">
-                    Showing <strong className="text-white">{filteredStudents.length}</strong> students
+                  <div className="text-xs text-slate-500 font-mono hidden lg:block mr-1">
+                    Showing <strong className="text-slate-900 font-bold">{filteredStudents.length}</strong> students
                   </div>
 
                   {/* Button 1: Individual Action */}
@@ -931,9 +941,9 @@ export default function InchargeDashboardPage() {
               </div>
 
               {/* Student Table */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
                 {loading ? (
-                  <div className="p-12 text-center text-xs text-slate-400 font-mono flex items-center justify-center gap-2">
+                  <div className="p-12 text-center text-xs text-slate-500 font-mono flex items-center justify-center gap-2">
                     <span className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
                     <span>Loading student records...</span>
                   </div>
@@ -943,8 +953,8 @@ export default function InchargeDashboardPage() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs text-slate-300">
-                      <thead className="bg-slate-950 text-slate-400 uppercase font-mono text-[10px] tracking-wider border-b border-slate-800">
+                    <table className="w-full text-left text-xs text-slate-700">
+                      <thead className="bg-white text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
                           <th className="px-4 py-3.5 font-bold">Student Name</th>
                           <th className="px-4 py-3.5 font-bold">Batch</th>
@@ -953,16 +963,16 @@ export default function InchargeDashboardPage() {
                           <th className="px-4 py-3.5 font-bold text-center">Workforce Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60">
+                      <tbody className="divide-y divide-slate-200/80 bg-white">
                         {filteredStudents.map((stud) => {
                           const isOverdue = stud.balance > 0;
                           return (
-                            <tr key={stud.id} className="hover:bg-slate-800/40 transition-colors">
-                              <td className="px-4 py-4 font-bold text-white">{stud.name}</td>
-                              <td className="px-4 py-4 font-mono text-slate-400">{stud.batch_name}</td>
-                              <td className="px-4 py-4 font-mono text-slate-400">{stud.phone}</td>
+                            <tr key={stud.id} className="hover:bg-slate-50 transition-colors">
+                              <td className="px-4 py-4 font-bold text-slate-900">{stud.name}</td>
+                              <td className="px-4 py-4 font-mono text-slate-500">{stud.batch_name}</td>
+                              <td className="px-4 py-4 font-mono text-slate-500">{stud.phone}</td>
                               <td className="px-4 py-4 font-mono font-bold text-right text-base">
-                                <span className={isOverdue ? 'text-red-400' : 'text-emerald-400'}>
+                                <span className={isOverdue ? 'text-rose-600' : 'text-emerald-700'}>
                                   ₹{Math.abs(stud.balance).toFixed(2)}
                                 </span>
                               </td>
@@ -987,7 +997,7 @@ export default function InchargeDashboardPage() {
                                       href={generateWhatsAppLink(stud.phone, stud.name, stud.balance)}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/60 px-2.5 py-1.5 rounded-lg text-xs transition-all font-semibold"
+                                      className="bg-emerald-50/90 hover:bg-emerald-100 text-emerald-800 border border-emerald-300/80 px-2.5 py-1.5 rounded-lg text-xs transition-all font-semibold shadow-sm"
                                       title="Send WhatsApp payment reminder"
                                     >
                                       WhatsApp
@@ -1011,37 +1021,37 @@ export default function InchargeDashboardPage() {
             <div className="space-y-6">
               {/* Handover Success Alert */}
               {handoverSuccess && (
-                <div className="bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 text-xs font-medium p-4 rounded-xl flex items-center justify-between shadow-lg">
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium p-4 rounded-xl flex items-center justify-between shadow-lg">
                   <div className="flex items-center gap-2.5">
-                    <svg className="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 text-emerald-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>{handoverSuccess}</span>
                   </div>
-                  <button type="button" onClick={() => setHandoverSuccess(null)} className="text-emerald-400 hover:text-emerald-200 text-sm">×</button>
+                  <button type="button" onClick={() => setHandoverSuccess(null)} className="text-emerald-700 hover:text-emerald-900 text-sm">×</button>
                 </div>
               )}
 
               {/* Pending Handover Status Card */}
               {latestHandoverClaim && latestHandoverClaim.status === 'pending' && (
-                <div className="bg-amber-950/40 border border-amber-800/60 rounded-2xl p-5 shadow-xl space-y-2">
+                <div className="bg-amber-50/40 border border-amber-200/60 rounded-2xl p-5 shadow-xl space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold uppercase text-amber-400 tracking-wider">
+                    <span className="text-[10px] font-mono font-bold uppercase text-amber-800 tracking-wider">
                       Handover Pending Admin Verification
                     </span>
-                    <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold uppercase font-mono px-2.5 py-0.5 rounded-full animate-pulse">
+                    <span className="bg-amber-500/20 text-amber-800 border border-amber-200 text-[10px] font-bold uppercase font-mono px-2.5 py-0.5 rounded-full animate-pulse">
                       Awaiting Admin
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-amber-300 font-mono">
+                    <span className="text-2xl font-black text-amber-800 font-mono">
                       ₹{Number(latestHandoverClaim.claimed_amount).toFixed(2)}
                     </span>
-                    <span className="text-xs text-amber-200/80">
+                    <span className="text-xs text-amber-900/80">
                       submitted on {new Date(latestHandoverClaim.claimed_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
                     </span>
                   </div>
-                  <p className="text-xs text-amber-200/70">
+                  <p className="text-xs text-amber-900/70">
                     Your physical cash handover request is currently awaiting admin verification. Once verified, cash will transfer to the organization's main cash account.
                   </p>
                 </div>
@@ -1049,19 +1059,19 @@ export default function InchargeDashboardPage() {
 
               {/* Rejected Handover Status Card */}
               {latestHandoverClaim && latestHandoverClaim.status === 'rejected' && (
-                <div className="bg-red-950/40 border border-red-800/60 rounded-2xl p-5 shadow-xl space-y-2">
+                <div className="bg-red-50/40 border border-red-200/60 rounded-2xl p-5 shadow-xl space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono font-bold uppercase text-red-400 tracking-wider">
                       Previous Handover Claim Rejected
                     </span>
-                    <span className="bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-bold uppercase font-mono px-2.5 py-0.5 rounded-full">
+                    <span className="bg-red-500/20 text-red-700 border border-red-500/30 text-[10px] font-bold uppercase font-mono px-2.5 py-0.5 rounded-full">
                       Rejected by Admin
                     </span>
                   </div>
-                  <div className="text-sm font-semibold text-red-200">
+                  <div className="text-sm font-semibold text-red-900">
                     Reason: {latestHandoverClaim.admin_note || 'Physical cash mismatch detected by admin.'}
                   </div>
-                  <p className="text-xs text-red-300/70">
+                  <p className="text-xs text-red-700/70">
                     Please count your physical cash in hand and submit a corrected handover claim below.
                   </p>
                 </div>
@@ -1075,43 +1085,43 @@ export default function InchargeDashboardPage() {
                   const availableCashOnHand = Math.max(0, cashSummary.totalCashOnHand - pendingClaimAmount);
 
                   return (
-                    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group flex flex-col justify-between space-y-4">
+                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl relative overflow-hidden group flex flex-col justify-between space-y-4">
                       <div>
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                               My Cash On Hand
                             </span>
-                            <span className="text-[10px] text-indigo-400 font-mono">
+                            <span className="text-[10px] text-indigo-700 font-mono">
                               Cash in Hand (Workforce clearing balance)
                             </span>
                           </div>
-                          <div className="w-10 h-10 rounded-xl bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-400">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           </div>
                         </div>
-                        <div className="text-3xl font-black text-emerald-400 font-mono mt-2">
+                        <div className="text-3xl font-black text-emerald-700 font-mono mt-2">
                           ₹{availableCashOnHand.toFixed(2)}
                           <span className="text-xs text-emerald-500 font-sans font-semibold ml-2">Available</span>
                         </div>
 
                         {pendingClaimAmount > 0 && (
-                          <div className="mt-3 bg-amber-950/40 border border-amber-800/40 rounded-xl p-2.5 text-xs font-mono space-y-1">
-                            <div className="flex justify-between text-amber-300">
+                          <div className="mt-3 bg-amber-50/40 border border-amber-200/40 rounded-xl p-2.5 text-xs font-mono space-y-1">
+                            <div className="flex justify-between text-amber-800">
                               <span>Pending Verification:</span>
                               <span className="font-bold">₹{pendingClaimAmount.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between text-slate-400 text-[11px]">
+                            <div className="flex justify-between text-slate-500 text-[11px]">
                               <span>Total Ledger Balance:</span>
-                              <span>₹{cashSummary.totalCashOnHand.toFixed(2)}</span>
+                              <span><span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{cashSummary.totalCashOnHand.toFixed(2)}</span></span>
                             </div>
                           </div>
                         )}
                       </div>
 
-                      <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-3">
+                      <div className="pt-2 border-t border-slate-200 flex items-center justify-between gap-3">
                         <p className="text-[11px] text-slate-500">
                           Un-handed-over physical cash in your custody.
                         </p>
@@ -1136,23 +1146,23 @@ export default function InchargeDashboardPage() {
                 })()}
 
                 {/* Total Transactions Card */}
-                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                         Cash Transactions Count
                       </span>
-                      <span className="text-[10px] text-slate-400 font-mono">
+                      <span className="text-[10px] text-slate-500 font-mono">
                         Personal cash collection entries
                       </span>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-indigo-950 border border-indigo-800 flex items-center justify-center text-indigo-400">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
                     </div>
                   </div>
-                  <div className="text-3xl font-black text-white font-mono mt-2">
+                  <div className="text-3xl font-black text-slate-900 font-mono mt-2">
                     {cashSummary.totalTransactionsCount}
                   </div>
                   <p className="text-[11px] text-slate-500 mt-2">
@@ -1162,9 +1172,9 @@ export default function InchargeDashboardPage() {
               </div>
 
               {/* Search Filter & Table */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl overflow-hidden space-y-4 p-5">
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden space-y-4 p-5">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <h2 className="text-base font-bold text-white">Cash Receipts Breakdown</h2>
+                  <h2 className="text-base font-bold text-slate-900">Cash Receipts Breakdown</h2>
                   <div className="relative w-full sm:w-72">
                     <svg className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1174,19 +1184,19 @@ export default function InchargeDashboardPage() {
                       placeholder="Filter collections by student or description..."
                       value={cashSearch}
                       onChange={(e) => setCashSearch(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                     />
                   </div>
                 </div>
 
                 {filteredCollections.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-slate-500 font-mono bg-slate-950/60 rounded-xl border border-slate-800">
+                  <div className="p-8 text-center text-xs text-slate-500 font-mono bg-slate-50 rounded-xl border border-slate-200">
                     No cash collection records matching your filter.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-xl border border-slate-800">
-                    <table className="w-full text-left text-xs text-slate-300">
-                      <thead className="bg-slate-950 text-slate-400 uppercase font-mono text-[10px] tracking-wider border-b border-slate-800">
+                  <div className="overflow-x-auto rounded-xl border border-slate-200">
+                    <table className="w-full text-left text-xs text-slate-700">
+                      <thead className="bg-white text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
                           <th className="px-5 py-3.5 font-bold">Date & Time</th>
                           <th className="px-5 py-3.5 font-bold">Student Name</th>
@@ -1194,19 +1204,19 @@ export default function InchargeDashboardPage() {
                           <th className="px-5 py-3.5 font-bold text-right">Cash Received</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60">
+                      <tbody className="divide-y divide-slate-200">
                         {filteredCollections.map((item) => (
-                          <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                            <td className="px-5 py-3.5 font-mono text-slate-400">
+                          <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-5 py-3.5 font-mono text-slate-500">
                               {new Date(item.date).toLocaleString('en-IN', {
                                 dateStyle: 'medium',
                                 timeStyle: 'short',
                               })}
                             </td>
-                            <td className="px-5 py-3.5 font-bold text-white">{item.studentName || 'Student'}</td>
-                            <td className="px-5 py-3.5 text-slate-300">{item.description}</td>
-                            <td className="px-5 py-3.5 font-mono font-bold text-right text-emerald-400 text-sm">
-                              ₹{item.amount.toFixed(2)}
+                            <td className="px-5 py-3.5 font-bold text-slate-900">{item.studentName || 'Student'}</td>
+                            <td className="px-5 py-3.5 text-slate-700">{item.description}</td>
+                            <td className="px-5 py-3.5 font-mono font-bold text-right text-emerald-700 text-sm">
+                              <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{item.amount.toFixed(2)}</span>
                             </td>
                           </tr>
                         ))}
@@ -1217,22 +1227,22 @@ export default function InchargeDashboardPage() {
               </div>
 
               {/* My Cash Handover History Section */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl overflow-hidden space-y-4 p-5">
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden space-y-4 p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-base font-bold text-white">My Cash Handover History</h2>
-                    <p className="text-xs text-slate-400">Past cash transfer claims submitted to admin for physical verification.</p>
+                    <h2 className="text-base font-bold text-slate-900">My Cash Handover History</h2>
+                    <p className="text-xs text-slate-500">Past cash transfer claims submitted to admin for physical verification.</p>
                   </div>
                 </div>
 
                 {handoverHistory.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-slate-500 font-mono bg-slate-950/60 rounded-xl border border-slate-800">
+                  <div className="p-8 text-center text-xs text-slate-500 font-mono bg-slate-50 rounded-xl border border-slate-200">
                     No cash handover claims submitted yet.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-xl border border-slate-800">
-                    <table className="w-full text-left text-xs text-slate-300">
-                      <thead className="bg-slate-950 text-slate-400 uppercase font-mono text-[10px] tracking-wider border-b border-slate-800">
+                  <div className="overflow-x-auto rounded-xl border border-slate-200">
+                    <table className="w-full text-left text-xs text-slate-700">
+                      <thead className="bg-white text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
                           <th className="px-5 py-3.5 font-bold">Submission Date & Time</th>
                           <th className="px-5 py-3.5 font-bold">Claimed Amount</th>
@@ -1240,44 +1250,44 @@ export default function InchargeDashboardPage() {
                           <th className="px-5 py-3.5 font-bold">Verification Details</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/60">
+                      <tbody className="divide-y divide-slate-200">
                         {handoverHistory.map((item) => (
-                          <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                            <td className="px-5 py-3.5 font-mono text-slate-400">
+                          <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-5 py-3.5 font-mono text-slate-500">
                               {new Date(item.claimed_at).toLocaleString('en-IN', {
                                 dateStyle: 'medium',
                                 timeStyle: 'short',
                               })}
                             </td>
-                            <td className="px-5 py-3.5 font-mono font-bold text-white text-sm">
+                            <td className="px-5 py-3.5 font-mono font-bold text-slate-900 text-sm">
                               ₹{Number(item.claimed_amount).toFixed(2)}
                             </td>
                             <td className="px-5 py-3.5">
                               {item.status === 'pending' && (
-                                <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold uppercase font-mono px-2.5 py-1 rounded-full">
+                                <span className="bg-amber-500/20 text-amber-800 border border-amber-200 text-[10px] font-bold uppercase font-mono px-2.5 py-1 rounded-full">
                                   Pending Verification
                                 </span>
                               )}
                               {item.status === 'verified' && (
-                                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold uppercase font-mono px-2.5 py-1 rounded-full">
+                                <span className="bg-emerald-500/20 text-emerald-800 border border-emerald-500/30 text-[10px] font-bold uppercase font-mono px-2.5 py-1 rounded-full">
                                   Verified & Transferred
                                 </span>
                               )}
                               {item.status === 'rejected' && (
-                                <span className="bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-bold uppercase font-mono px-2.5 py-1 rounded-full">
+                                <span className="bg-red-500/20 text-red-700 border border-red-500/30 text-[10px] font-bold uppercase font-mono px-2.5 py-1 rounded-full">
                                   Claim Rejected
                                 </span>
                               )}
                             </td>
-                            <td className="px-5 py-3.5 text-slate-400 text-xs">
+                            <td className="px-5 py-3.5 text-slate-500 text-xs">
                               {item.status === 'verified' && (
                                 <span>Verified by {item.verified_by || 'Admin'} on {item.verified_at ? new Date(item.verified_at).toLocaleDateString('en-IN') : 'N/A'}</span>
                               )}
                               {item.status === 'rejected' && (
-                                <span className="text-red-300 font-semibold">Reason: {item.admin_note || 'Physical cash mismatch detected.'}</span>
+                                <span className="text-red-700 font-semibold">Reason: {item.admin_note || 'Physical cash mismatch detected.'}</span>
                               )}
                               {item.status === 'pending' && (
-                                <span className="text-amber-400/80 italic">Awaiting admin physical cash count verification</span>
+                                <span className="text-amber-800/80 italic">Awaiting admin physical cash count verification</span>
                               )}
                             </td>
                           </tr>
@@ -1293,21 +1303,21 @@ export default function InchargeDashboardPage() {
           {/* TAB 3: STUDENT PAYMENT CLAIMS */}
           {activeTab === 'paymentClaims' && (
             <div className="space-y-6">
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xl space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                      <span className="text-[10px] font-mono font-bold text-emerald-700 uppercase tracking-wider">
                         UPI Payment Verification Queue
                       </span>
                       {paymentClaims.filter((c) => c.status === 'pending').length > 0 && (
-                        <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full animate-pulse">
+                        <span className="bg-amber-500/20 text-amber-800 border border-amber-200 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full animate-pulse">
                           {paymentClaims.filter((c) => c.status === 'pending').length} Pending
                         </span>
                       )}
                     </div>
-                    <h2 className="text-xl font-black text-white mt-1">Student Payment Claims</h2>
-                    <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+                    <h2 className="text-xl font-black text-slate-900 mt-1">Student Payment Claims</h2>
+                    <p className="text-xs text-slate-500 mt-1 max-w-2xl">
                       Review UPI payment claims submitted by students. Verifying a claim credits the student&apos;s account balance and automatically adds the funds to your personal Cash-on-Hand balance.
                     </p>
                   </div>
@@ -1316,9 +1326,9 @@ export default function InchargeDashboardPage() {
                     type="button"
                     onClick={loadDashboardData}
                     disabled={loading}
-                    className="bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2 self-start sm:self-auto"
+                    className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2 self-start sm:self-auto"
                   >
-                    <svg className={`w-3.5 h-3.5 text-emerald-400 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className={`w-3.5 h-3.5 text-emerald-700 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Refresh Claims Queue
@@ -1330,15 +1340,15 @@ export default function InchargeDashboardPage() {
                   <div
                     className={`p-4 rounded-2xl border text-xs flex items-center justify-between shadow-lg ${
                       claimsNotice.type === 'success'
-                        ? 'bg-emerald-950/80 border-emerald-800 text-emerald-300'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                         : claimsNotice.type === 'warning'
-                        ? 'bg-amber-950/80 border-amber-800 text-amber-300'
-                        : 'bg-red-950/80 border-red-800 text-red-300'
+                        ? 'bg-amber-50 border-amber-200 text-amber-800'
+                        : 'bg-red-50 border-red-200 text-red-700'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       {claimsNotice.type === 'warning' && (
-                        <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-amber-800 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                       )}
@@ -1347,7 +1357,7 @@ export default function InchargeDashboardPage() {
                     <button
                       type="button"
                       onClick={() => setClaimsNotice(null)}
-                      className="text-slate-400 hover:text-white font-bold text-sm ml-4"
+                      className="text-slate-400 hover:text-slate-700 font-bold text-sm ml-4"
                     >
                       &times;
                     </button>
@@ -1355,18 +1365,18 @@ export default function InchargeDashboardPage() {
                 )}
 
                 {/* Sub-tabs */}
-                <div className="flex bg-slate-950 p-1.5 rounded-xl border border-slate-800 w-fit gap-1 text-xs font-semibold">
+                <div className="flex bg-white p-1.5 rounded-xl border border-slate-200 w-fit gap-1 text-xs font-semibold">
                   <button
                     type="button"
                     onClick={() => setClaimsSubTab('pending')}
                     className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                       claimsSubTab === 'pending'
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-amber-500/20 text-amber-800 border border-amber-200 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-900'
                     }`}
                   >
                     Pending Queue
-                    <span className="bg-amber-500/30 text-amber-300 font-mono text-[10px] px-2 py-0.5 rounded-full">
+                    <span className="bg-amber-500/30 text-amber-800 font-mono text-[10px] px-2 py-0.5 rounded-full">
                       {paymentClaims.filter((c) => c.status === 'pending').length}
                     </span>
                   </button>
@@ -1375,12 +1385,12 @@ export default function InchargeDashboardPage() {
                     onClick={() => setClaimsSubTab('history')}
                     className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                       claimsSubTab === 'history'
-                        ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shadow-sm'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-indigo-500/20 text-indigo-700 border border-indigo-500/30 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-900'
                     }`}
                   >
                     Processed History
-                    <span className="bg-indigo-500/30 text-indigo-300 font-mono text-[10px] px-2 py-0.5 rounded-full">
+                    <span className="bg-indigo-500/30 text-indigo-700 font-mono text-[10px] px-2 py-0.5 rounded-full">
                       {paymentClaims.filter((c) => c.status !== 'pending').length}
                     </span>
                   </button>
@@ -1389,16 +1399,16 @@ export default function InchargeDashboardPage() {
                 {/* PENDING CLAIMS TABLE */}
                 {claimsSubTab === 'pending' && (
                   paymentClaims.filter((c) => c.status === 'pending').length === 0 ? (
-                    <div className="p-12 text-center space-y-2 bg-slate-950/60 rounded-2xl border border-slate-800/80">
-                      <span className="text-emerald-400 font-bold text-sm block">✓ No Pending Payment Claims</span>
-                      <p className="text-xs text-slate-400">
+                    <div className="p-12 text-center space-y-2 bg-slate-50 rounded-2xl border border-slate-200">
+                      <span className="text-emerald-700 font-bold text-sm block">✓ No Pending Payment Claims</span>
+                      <p className="text-xs text-slate-500">
                         All student UPI payment submissions have been verified or processed.
                       </p>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto rounded-2xl border border-slate-800/80 bg-slate-950/40">
+                    <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50">
                       <table className="w-full text-left text-xs font-mono">
-                        <thead className="bg-slate-950 text-slate-400 uppercase font-mono text-[10px] tracking-wider border-b border-slate-800">
+                        <thead className="bg-white text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
                           <tr>
                             <th className="p-4 font-bold font-sans">Student Name</th>
                             <th className="p-4 font-bold">Batch</th>
@@ -1408,7 +1418,7 @@ export default function InchargeDashboardPage() {
                             <th className="p-4 font-bold text-center font-sans">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800/60">
+                        <tbody className="divide-y divide-slate-200">
                           {paymentClaims
                             .filter((c) => c.status === 'pending')
                             .map((claim) => {
@@ -1417,23 +1427,23 @@ export default function InchargeDashboardPage() {
                               const batchName = claim.students?.batches?.name || 'Unassigned';
 
                               return (
-                                <tr key={claim.id} className="hover:bg-slate-800/40 transition-colors">
+                                <tr key={claim.id} className="hover:bg-slate-50 transition-colors">
                                   <td className="p-4 font-sans">
-                                    <div className="font-bold text-white text-sm">{studentName}</div>
-                                    {studentPhone && <div className="text-emerald-400 text-xs font-mono">{studentPhone}</div>}
+                                    <div className="font-bold text-slate-900 text-sm">{studentName}</div>
+                                    {studentPhone && <div className="text-emerald-700 text-xs font-mono">{studentPhone}</div>}
                                   </td>
-                                  <td className="p-4 text-slate-300">
-                                    <span className="bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-lg text-xs">
+                                  <td className="p-4 text-slate-700">
+                                    <span className="bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-xs">
                                       {batchName}
                                     </span>
                                   </td>
-                                  <td className="p-4 font-black text-emerald-400 text-base text-right">
-                                    ₹{Number(claim.claimed_amount).toFixed(2)}
+                                  <td className="p-4 font-black text-emerald-700 text-base text-right">
+                                    <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Number(claim.claimed_amount).toFixed(2)}</span>
                                   </td>
-                                  <td className="p-4 text-slate-400 text-[11px]">
+                                  <td className="p-4 text-slate-500 text-[11px]">
                                     {formatDate(claim.claimed_at)}
                                   </td>
-                                  <td className="p-4 text-slate-300 font-sans text-xs max-w-xs truncate">
+                                  <td className="p-4 text-slate-700 font-sans text-xs max-w-xs truncate">
                                     {claim.upi_tn || '-'}
                                   </td>
                                   <td className="p-4 text-center font-sans">
@@ -1463,7 +1473,7 @@ export default function InchargeDashboardPage() {
                                           setRejectNote('');
                                         }}
                                         disabled={verifyingClaimId === claim.id}
-                                        className="bg-slate-800 hover:bg-red-950 text-slate-300 hover:text-red-300 border border-slate-700 font-semibold text-xs px-3 py-2 rounded-xl transition-all"
+                                        className="bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-700 border border-slate-200 font-semibold text-xs px-3 py-2 rounded-xl transition-all"
                                       >
                                         Reject
                                       </button>
@@ -1481,13 +1491,13 @@ export default function InchargeDashboardPage() {
                 {/* HISTORY CLAIMS TABLE */}
                 {claimsSubTab === 'history' && (
                   paymentClaims.filter((c) => c.status !== 'pending').length === 0 ? (
-                    <div className="p-12 text-center text-xs text-slate-400 font-mono bg-slate-950/60 rounded-2xl border border-slate-800/80">
+                    <div className="p-12 text-center text-xs text-slate-500 font-mono bg-slate-50 rounded-2xl border border-slate-200">
                       No processed payment claim history available.
                     </div>
                   ) : (
-                    <div className="overflow-x-auto rounded-2xl border border-slate-800/80 bg-slate-950/40">
+                    <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50">
                       <table className="w-full text-left text-xs font-mono">
-                        <thead className="bg-slate-950 text-slate-400 uppercase font-mono text-[10px] tracking-wider border-b border-slate-800">
+                        <thead className="bg-white text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
                           <tr>
                             <th className="p-4 font-bold font-sans">Student Name</th>
                             <th className="p-4 font-bold text-right">Claimed Amount</th>
@@ -1496,32 +1506,32 @@ export default function InchargeDashboardPage() {
                             <th className="p-4 font-bold">Processed At</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800/60">
+                        <tbody className="divide-y divide-slate-200">
                           {paymentClaims
                             .filter((c) => c.status !== 'pending')
                             .map((claim) => (
-                              <tr key={claim.id} className="hover:bg-slate-800/40 transition-colors">
-                                <td className="p-4 font-sans font-bold text-white text-sm">
+                              <tr key={claim.id} className="hover:bg-slate-50 transition-colors">
+                                <td className="p-4 font-sans font-bold text-slate-900 text-sm">
                                   {claim.students?.name || 'Student'}
                                 </td>
-                                <td className="p-4 font-bold text-emerald-400 text-right text-sm">
-                                  ₹{Number(claim.claimed_amount).toFixed(2)}
+                                <td className="p-4 font-bold text-emerald-700 text-right text-sm">
+                                  <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Number(claim.claimed_amount).toFixed(2)}</span>
                                 </td>
                                 <td className="p-4 text-center">
                                   <span
                                     className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
                                       claim.status === 'verified'
-                                        ? 'bg-emerald-950 border border-emerald-800 text-emerald-300'
-                                        : 'bg-red-950 border border-red-800 text-red-300'
+                                        ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                                        : 'bg-red-50 border border-red-200 text-red-700'
                                     }`}
                                   >
                                     {claim.status}
                                   </span>
                                 </td>
-                                <td className="p-4 text-slate-300 font-sans text-xs">
+                                <td className="p-4 text-slate-700 font-sans text-xs">
                                   {claim.verified_by || '-'}
                                 </td>
-                                <td className="p-4 text-slate-400 text-[11px]">
+                                <td className="p-4 text-slate-500 text-[11px]">
                                   {claim.verified_at ? formatDate(claim.verified_at) : '-'}
                                 </td>
                               </tr>
@@ -1538,19 +1548,19 @@ export default function InchargeDashboardPage() {
 
         {/* MODAL 1: LOG PRINT JOB (DEBIT ENTRY) */}
         {isDebitModalOpen && targetStudentForDebit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-100 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-mono block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 font-mono block">
                     Workforce Action
                   </span>
-                  <h3 className="text-lg font-bold text-white">Log Print Job (Debit Entry)</h3>
+                  <h3 className="text-lg font-bold text-slate-900">Log Print Job (Debit Entry)</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsDebitModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-200 bg-slate-800 p-1.5 rounded-lg"
+                  className="text-slate-500 hover:text-slate-900 bg-slate-100 p-1.5 rounded-lg"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1558,16 +1568,16 @@ export default function InchargeDashboardPage() {
                 </button>
               </div>
 
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Target Student</span>
-                <span className="text-white font-bold text-sm">{targetStudentForDebit.name}</span>
-                <span className="text-slate-400 font-mono block text-[11px] mt-0.5">
-                  Current Balance: ₹{Math.abs(targetStudentForDebit.balance).toFixed(2)}
+              <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Target Student</span>
+                <span className="text-slate-900 font-bold text-sm">{targetStudentForDebit.name}</span>
+                <span className="text-slate-500 font-mono block text-[11px] mt-0.5">
+                  Current Balance: <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Math.abs(targetStudentForDebit.balance).toFixed(2)}</span>
                 </span>
               </div>
 
               {debitError && (
-                <div className="p-3 bg-red-950/60 border border-red-800 rounded-xl text-xs text-red-300">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                   {debitError}
                 </div>
               )}
@@ -1575,13 +1585,13 @@ export default function InchargeDashboardPage() {
               <form onSubmit={handleDebitSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                       Print Type
                     </label>
                     <select
                       value={printType}
                       onChange={(e) => setPrintType(e.target.value as PrintTypeOption)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     >
                       <option value="bw">B/W (₹1/page)</option>
                       <option value="color">Color (₹5/page)</option>
@@ -1589,13 +1599,13 @@ export default function InchargeDashboardPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                       Side
                     </label>
                     <select
                       value={printSide}
                       onChange={(e) => setPrintSide(e.target.value as PrintSideOption)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     >
                       <option value="single">Single Sided</option>
                       <option value="double">Double Sided</option>
@@ -1605,7 +1615,7 @@ export default function InchargeDashboardPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                       Number of Pages
                     </label>
                     <input
@@ -1613,12 +1623,12 @@ export default function InchargeDashboardPage() {
                       min="1"
                       value={numPages}
                       onChange={(e) => setNumPages(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                       Discount (₹)
                     </label>
                     <input
@@ -1627,20 +1637,20 @@ export default function InchargeDashboardPage() {
                       step="0.01"
                       value={discount}
                       onChange={(e) => setDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                     Entry Description
                   </label>
                   <input
                     type="text"
                     value={debitDesc}
                     onChange={(e) => setDebitDesc(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -1649,8 +1659,8 @@ export default function InchargeDashboardPage() {
                   onClick={() => setPaidImmediately(!paidImmediately)}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer select-none flex items-center justify-between gap-3 ${
                     paidImmediately
-                      ? 'bg-emerald-950/40 border-emerald-500/50 shadow-lg shadow-emerald-950/30'
-                      : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                      ? 'bg-emerald-50 border-emerald-300 shadow-lg shadow-emerald-950/30'
+                      : 'bg-slate-50 border-slate-200 hover:border-slate-200'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -1658,7 +1668,7 @@ export default function InchargeDashboardPage() {
                       className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 ${
                         paidImmediately
                           ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm shadow-emerald-500/50'
-                          : 'bg-slate-900 border-slate-700 text-transparent'
+                          : 'bg-slate-900 border-slate-200 text-transparent'
                       }`}
                     >
                       <svg className="w-3.5 h-3.5 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1666,10 +1676,10 @@ export default function InchargeDashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <span className={`text-xs font-bold transition-colors ${paidImmediately ? 'text-emerald-300' : 'text-slate-200'}`}>
+                      <span className={`text-xs font-bold transition-colors ${paidImmediately ? 'text-emerald-800' : 'text-slate-600'}`}>
                         Paid in Cash Immediately
                       </span>
-                      <span className="text-[11px] text-slate-400 block font-mono">
+                      <span className="text-[11px] text-slate-500 block font-mono">
                         {paidImmediately
                           ? 'Posts to Cash in Hand (Workforce). Balance unaffected.'
                           : 'Posts as Accounts Receivable due from student.'}
@@ -1680,8 +1690,8 @@ export default function InchargeDashboardPage() {
                   <span
                     className={`text-[10px] font-bold px-2.5 py-1 rounded-lg font-mono uppercase tracking-wider shrink-0 transition-colors ${
                       paidImmediately
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80'
-                        : 'bg-slate-900 text-slate-400 border border-slate-800'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        : 'bg-slate-900 text-slate-500 border border-slate-200'
                     }`}
                   >
                     {paidImmediately ? 'Cash Sale' : 'On Credit'}
@@ -1689,10 +1699,10 @@ export default function InchargeDashboardPage() {
                 </div>
 
                 {/* Computed Total Amount Display */}
-                <div className="bg-indigo-950/60 border border-indigo-800/60 p-3 rounded-xl flex items-center justify-between">
-                  <span className="text-xs font-semibold text-indigo-300">Total Debit Amount:</span>
-                  <span className="text-base font-black text-white font-mono">
-                    ₹{computedPrintCalc.totalAmount.toFixed(2)}
+                <div className="bg-indigo-50 border border-indigo-200 p-3 rounded-xl flex items-center justify-between">
+                  <span className="text-xs font-semibold text-indigo-700">Total Debit Amount:</span>
+                  <span className="text-base font-black text-slate-900 font-mono">
+                    <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{computedPrintCalc.totalAmount.toFixed(2)}</span>
                   </span>
                 </div>
 
@@ -1701,7 +1711,7 @@ export default function InchargeDashboardPage() {
                     type="button"
                     onClick={() => setIsDebitModalOpen(false)}
                     disabled={submittingDebit}
-                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-semibold"
+                    className="bg-slate-100 hover:bg-slate-700 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
                   >
                     Cancel
                   </button>
@@ -1720,19 +1730,19 @@ export default function InchargeDashboardPage() {
 
         {/* MODAL 2: RECEIVE CASH PAYMENT (CREDIT ENTRY) */}
         {isCreditModalOpen && targetStudentForCredit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-100 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-mono block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 font-mono block">
                     Counter Cash Entry
                   </span>
-                  <h3 className="text-lg font-bold text-white">Receive Cash Payment</h3>
+                  <h3 className="text-lg font-bold text-slate-900">Receive Cash Payment</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsCreditModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-200 bg-slate-800 p-1.5 rounded-lg"
+                  className="text-slate-500 hover:text-slate-900 bg-slate-100 p-1.5 rounded-lg"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1740,23 +1750,23 @@ export default function InchargeDashboardPage() {
                 </button>
               </div>
 
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Target Student</span>
-                <span className="text-white font-bold text-sm">{targetStudentForCredit.name}</span>
-                <span className="text-slate-400 font-mono block text-[11px] mt-0.5">
-                  Current Receivable Due: ₹{Math.abs(targetStudentForCredit.balance).toFixed(2)}
+              <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Target Student</span>
+                <span className="text-slate-900 font-bold text-sm">{targetStudentForCredit.name}</span>
+                <span className="text-slate-500 font-mono block text-[11px] mt-0.5">
+                  Current Receivable Due: <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Math.abs(targetStudentForCredit.balance).toFixed(2)}</span>
                 </span>
               </div>
 
               {creditError && (
-                <div className="p-3 bg-red-950/60 border border-red-800 rounded-xl text-xs text-red-300">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                   {creditError}
                 </div>
               )}
 
               <form onSubmit={handleCreditSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                     Cash Amount Received (₹)
                   </label>
                   <input
@@ -1767,19 +1777,19 @@ export default function InchargeDashboardPage() {
                     placeholder="0.00"
                     value={creditAmount}
                     onChange={(e) => setCreditAmount(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-base font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-base font-mono font-bold text-emerald-700 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                     Description / Note
                   </label>
                   <input
                     type="text"
                     value={creditDesc}
                     onChange={(e) => setCreditDesc(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -1788,7 +1798,7 @@ export default function InchargeDashboardPage() {
                     type="button"
                     onClick={() => setIsCreditModalOpen(false)}
                     disabled={submittingCredit}
-                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-semibold"
+                    className="bg-slate-100 hover:bg-slate-700 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
                   >
                     Cancel
                   </button>
@@ -1807,19 +1817,19 @@ export default function InchargeDashboardPage() {
 
         {/* MODAL 3: HAND OVER CASH TO ADMIN */}
         {isHandoverModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-100 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-mono block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 font-mono block">
                     Cash Custody Handover
                   </span>
-                  <h3 className="text-lg font-bold text-white">Hand Over Cash to Admin</h3>
+                  <h3 className="text-lg font-bold text-slate-900">Hand Over Cash to Admin</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsHandoverModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-200 bg-slate-800 p-1.5 rounded-lg"
+                  className="text-slate-500 hover:text-slate-900 bg-slate-100 p-1.5 rounded-lg"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1827,25 +1837,25 @@ export default function InchargeDashboardPage() {
                 </button>
               </div>
 
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1 text-xs">
-                <span className="text-slate-400 block text-[10px] uppercase font-bold">Current Cash in Hand</span>
-                <span className="text-emerald-400 font-mono font-black text-xl block">
-                  ₹{cashSummary.totalCashOnHand.toFixed(2)}
+              <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-1 text-xs">
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Current Cash in Hand</span>
+                <span className="text-emerald-700 font-mono font-black text-xl block">
+                  <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{cashSummary.totalCashOnHand.toFixed(2)}</span>
                 </span>
-                <span className="text-slate-400 text-[11px] block pt-1 border-t border-slate-800/80">
+                <span className="text-slate-500 text-[11px] block pt-1 border-t border-slate-200">
                   Submitting creates a handover claim. Upon admin physical verification, cash will transfer into the organization's main cash account.
                 </span>
               </div>
 
               {handoverError && (
-                <div className="p-3 bg-red-950/60 border border-red-800 rounded-xl text-xs text-red-300">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                   {handoverError}
                 </div>
               )}
 
               <form onSubmit={handleHandoverSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                     Cash Amount to Hand Over (₹)
                   </label>
                   <input
@@ -1857,9 +1867,9 @@ export default function InchargeDashboardPage() {
                     placeholder="0.00"
                     value={handoverAmount}
                     onChange={(e) => setHandoverAmount(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-base font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-base font-mono font-bold text-emerald-700 focus:outline-none focus:border-emerald-500"
                   />
-                  <span className="text-[10px] text-slate-400 mt-1 block">
+                  <span className="text-[10px] text-slate-500 mt-1 block">
                     Pre-filled with your current total cash on hand. You can edit this for partial handovers.
                   </span>
                 </div>
@@ -1869,7 +1879,7 @@ export default function InchargeDashboardPage() {
                     type="button"
                     onClick={() => setIsHandoverModalOpen(false)}
                     disabled={submittingHandover}
-                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-semibold"
+                    className="bg-slate-100 hover:bg-slate-700 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
                   >
                     Cancel
                   </button>
@@ -1888,19 +1898,19 @@ export default function InchargeDashboardPage() {
 
         {/* MODAL 4: BULK PRINT DEBIT (GROUP ACTION) */}
         {isBulkDebitModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-slate-100 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-slate-900 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-mono block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 font-mono block">
                     Group Action • Bulk Debit
                   </span>
-                  <h3 className="text-lg font-bold text-white">Log Bulk Print Job</h3>
+                  <h3 className="text-lg font-bold text-slate-900">Log Bulk Print Job</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsBulkDebitModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-200 bg-slate-800 p-1.5 rounded-lg"
+                  className="text-slate-500 hover:text-slate-900 bg-slate-100 p-1.5 rounded-lg"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1908,15 +1918,15 @@ export default function InchargeDashboardPage() {
                 </button>
               </div>
 
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-400">Target Students:</span>
-                <span className="bg-indigo-900/60 text-indigo-300 font-bold px-2.5 py-0.5 rounded-full border border-indigo-700">
+              <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-500">Target Students:</span>
+                <span className="bg-indigo-50 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full border border-indigo-200">
                   {selectedStudentIds.size} Students Selected
                 </span>
               </div>
 
               {bulkDebitError && (
-                <div className="p-3 bg-red-950/60 border border-red-800 rounded-xl text-xs text-red-300">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                   {bulkDebitError}
                 </div>
               )}
@@ -1924,11 +1934,11 @@ export default function InchargeDashboardPage() {
               <form onSubmit={handleBulkDebitSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">Print Type</label>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">Print Type</label>
                     <select
                       value={bulkPrintType}
                       onChange={(e) => setBulkPrintType(e.target.value as PrintTypeOption)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     >
                       <option value="bw">Black & White (B/W)</option>
                       <option value="color">Color</option>
@@ -1936,11 +1946,11 @@ export default function InchargeDashboardPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">Side</label>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">Side</label>
                     <select
                       value={bulkPrintSide}
                       onChange={(e) => setBulkPrintSide(e.target.value as PrintSideOption)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                     >
                       <option value="single">Single-Sided</option>
                       <option value="double">Double-Sided</option>
@@ -1950,38 +1960,38 @@ export default function InchargeDashboardPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">Pages per Student</label>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">Pages per Student</label>
                     <input
                       type="number"
                       min={1}
                       required
                       value={bulkNumPages}
                       onChange={(e) => setBulkNumPages(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">Discount per Student (₹)</label>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">Discount per Student (₹)</label>
                     <input
                       type="number"
                       step="0.01"
                       min={0}
                       value={bulkDiscount}
                       onChange={(e) => setBulkDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">Description / Memo</label>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">Description / Memo</label>
                   <input
                     type="text"
                     required
                     value={bulkDebitDesc}
                     onChange={(e) => setBulkDebitDesc(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -1990,8 +2000,8 @@ export default function InchargeDashboardPage() {
                   onClick={() => setBulkPaidImmediately(!bulkPaidImmediately)}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer select-none flex items-center justify-between gap-3 ${
                     bulkPaidImmediately
-                      ? 'bg-emerald-950/40 border-emerald-500/50 shadow-lg shadow-emerald-950/30'
-                      : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                      ? 'bg-emerald-50 border-emerald-300 shadow-lg shadow-emerald-950/30'
+                      : 'bg-slate-50 border-slate-200 hover:border-slate-200'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -1999,7 +2009,7 @@ export default function InchargeDashboardPage() {
                       className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 ${
                         bulkPaidImmediately
                           ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm shadow-emerald-500/50'
-                          : 'bg-slate-900 border-slate-700 text-transparent'
+                          : 'bg-slate-900 border-slate-200 text-transparent'
                       }`}
                     >
                       <svg className="w-3.5 h-3.5 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2007,10 +2017,10 @@ export default function InchargeDashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <span className={`text-xs font-bold transition-colors ${bulkPaidImmediately ? 'text-emerald-300' : 'text-slate-200'}`}>
+                      <span className={`text-xs font-bold transition-colors ${bulkPaidImmediately ? 'text-emerald-800' : 'text-slate-600'}`}>
                         Paid in Cash Immediately
                       </span>
-                      <span className="text-[11px] text-slate-400 block font-mono">
+                      <span className="text-[11px] text-slate-500 block font-mono">
                         {bulkPaidImmediately
                           ? 'Batch posted to Cash in Hand (Workforce). Balances unaffected.'
                           : 'Batch posted as Accounts Receivable due from students.'}
@@ -2021,8 +2031,8 @@ export default function InchargeDashboardPage() {
                   <span
                     className={`text-[10px] font-bold px-2.5 py-1 rounded-lg font-mono uppercase tracking-wider shrink-0 transition-colors ${
                       bulkPaidImmediately
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80'
-                        : 'bg-slate-900 text-slate-400 border border-slate-800'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        : 'bg-slate-900 text-slate-500 border border-slate-200'
                     }`}
                   >
                     {bulkPaidImmediately ? 'Cash Sale' : 'On Credit'}
@@ -2030,19 +2040,19 @@ export default function InchargeDashboardPage() {
                 </div>
 
                 {/* Price Summary Calculation */}
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-2 text-xs font-mono">
-                  <div className="flex justify-between text-slate-400">
+                <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-2 text-xs font-mono">
+                  <div className="flex justify-between text-slate-500">
                     <span>Charge per Student:</span>
-                    <span className="text-white font-bold">₹{computedBulkPrintCalc.totalAmount.toFixed(2)}</span>
+                    <span className="text-slate-900 font-bold"><span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{computedBulkPrintCalc.totalAmount.toFixed(2)}</span></span>
                   </div>
-                  <div className="flex justify-between text-slate-400">
+                  <div className="flex justify-between text-slate-500">
                     <span>Selected Students:</span>
-                    <span className="text-white font-bold">{selectedStudentIds.size}</span>
+                    <span className="text-slate-900 font-bold">{selectedStudentIds.size}</span>
                   </div>
-                  <div className="pt-2 border-t border-slate-800 flex justify-between text-sm">
-                    <span className="font-bold text-slate-200">Total Group Debit:</span>
-                    <span className="font-black text-indigo-400 font-mono">
-                      ₹{(computedBulkPrintCalc.totalAmount * selectedStudentIds.size).toFixed(2)}
+                  <div className="pt-2 border-t border-slate-200 flex justify-between text-sm">
+                    <span className="font-bold text-slate-900">Total Group Debit:</span>
+                    <span className="font-black text-indigo-700 font-mono">
+                      <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{(computedBulkPrintCalc.totalAmount * selectedStudentIds.size).toFixed(2)}</span>
                     </span>
                   </div>
                 </div>
@@ -2052,7 +2062,7 @@ export default function InchargeDashboardPage() {
                     type="button"
                     onClick={() => setIsBulkDebitModalOpen(false)}
                     disabled={submittingBulkDebit}
-                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-semibold"
+                    className="bg-slate-100 hover:bg-slate-700 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
                   >
                     Cancel
                   </button>
@@ -2071,19 +2081,19 @@ export default function InchargeDashboardPage() {
 
         {/* MODAL 5: BULK CASH PAYMENT (GROUP ACTION) */}
         {isBulkCreditModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-slate-100 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-slate-900 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-mono block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 font-mono block">
                     Group Action • Cash Collection
                   </span>
-                  <h3 className="text-lg font-bold text-white">Bulk Cash Payment Collection</h3>
+                  <h3 className="text-lg font-bold text-slate-900">Bulk Cash Payment Collection</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsBulkCreditModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-200 bg-slate-800 p-1.5 rounded-lg"
+                  className="text-slate-500 hover:text-slate-900 bg-slate-100 p-1.5 rounded-lg"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2092,14 +2102,14 @@ export default function InchargeDashboardPage() {
               </div>
 
               {/* Mode Selector */}
-              <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1">
+              <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
                 <button
                   type="button"
                   onClick={() => setBulkCreditMode('uniform')}
                   className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     bulkCreditMode === 'uniform'
                       ? 'bg-emerald-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-slate-200'
+                      : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
                   Uniform Amount per Student
@@ -2110,7 +2120,7 @@ export default function InchargeDashboardPage() {
                   className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     bulkCreditMode === 'custom'
                       ? 'bg-emerald-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-slate-200'
+                      : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
                   Custom Amount per Student
@@ -2118,7 +2128,7 @@ export default function InchargeDashboardPage() {
               </div>
 
               {bulkCreditError && (
-                <div className="p-3 bg-red-950/60 border border-red-800 rounded-xl text-xs text-red-300">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                   {bulkCreditError}
                 </div>
               )}
@@ -2126,7 +2136,7 @@ export default function InchargeDashboardPage() {
               <form onSubmit={handleBulkCreditSubmit} className="space-y-4">
                 {bulkCreditMode === 'uniform' ? (
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                       Cash Amount Collected per Student (₹)
                     </label>
                     <input
@@ -2137,25 +2147,25 @@ export default function InchargeDashboardPage() {
                       placeholder="e.g. 500.00"
                       value={bulkUniformAmount}
                       onChange={(e) => setBulkUniformAmount(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-base font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-base font-mono font-bold text-emerald-700 focus:outline-none focus:border-emerald-500"
                     />
-                    <span className="text-[10px] text-slate-400 mt-1 block">
+                    <span className="text-[10px] text-slate-500 mt-1 block">
                       Applies ₹{Number(bulkUniformAmount || 0).toFixed(2)} cash credit to each of the {selectedStudentIds.size} selected students.
                     </span>
                   </div>
                 ) : (
                   /* Custom amounts table */
-                  <div className="space-y-2 max-h-56 overflow-y-auto border border-slate-800 rounded-xl p-3 bg-slate-950">
-                    <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block mb-2">
+                  <div className="space-y-2 max-h-56 overflow-y-auto border border-slate-200 rounded-xl p-3 bg-white">
+                    <span className="text-[10px] font-mono uppercase text-slate-500 font-bold block mb-2">
                       Set Custom Payment Amount per Student
                     </span>
                     {students
                       .filter((s) => selectedStudentIds.has(s.id))
                       .map((stud) => (
-                        <div key={stud.id} className="flex items-center justify-between gap-3 text-xs border-b border-slate-800/60 pb-2">
+                        <div key={stud.id} className="flex items-center justify-between gap-3 text-xs border-b border-slate-200 pb-2">
                           <div className="min-w-0 flex-1">
-                            <span className="font-bold text-white block truncate">{stud.name}</span>
-                            <span className="text-[10px] font-mono text-slate-400">
+                            <span className="font-bold text-slate-900 block truncate">{stud.name}</span>
+                            <span className="text-[10px] font-mono text-slate-500">
                               Due: ₹{Math.abs(stud.balance).toFixed(2)}
                             </span>
                           </div>
@@ -2168,7 +2178,7 @@ export default function InchargeDashboardPage() {
                               setBulkCustomAmounts((prev) => ({ ...prev, [stud.id]: e.target.value }))
                             }
                             placeholder="0.00"
-                            className="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 text-right"
+                            className="w-28 bg-slate-900 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 text-right"
                           />
                         </div>
                       ))}
@@ -2176,20 +2186,20 @@ export default function InchargeDashboardPage() {
                 )}
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">Description / Memo</label>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">Description / Memo</label>
                   <input
                     type="text"
                     required
                     value={bulkCreditDesc}
                     onChange={(e) => setBulkCreditDesc(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 {/* Total Calculation */}
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/80 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300">Total Cash Collected:</span>
-                  <span className="text-xl font-black text-emerald-400 font-mono">
+                <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700">Total Cash Collected:</span>
+                  <span className="text-xl font-black text-emerald-700 font-mono">
                     ₹
                     {bulkCreditMode === 'uniform'
                       ? (Number(bulkUniformAmount || 0) * selectedStudentIds.size).toFixed(2)
@@ -2204,7 +2214,7 @@ export default function InchargeDashboardPage() {
                     type="button"
                     onClick={() => setIsBulkCreditModalOpen(false)}
                     disabled={submittingBulkCredit}
-                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-xs font-semibold"
+                    className="bg-slate-100 hover:bg-slate-700 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
                   >
                     Cancel
                   </button>
@@ -2223,19 +2233,19 @@ export default function InchargeDashboardPage() {
 
         {/* MODAL 6: ACTION LAUNCHER (CONTEXT-AWARE INDIVIDUAL VS GROUP ACTION) */}
         {isActionLauncherOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-5 text-slate-100 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-5 text-slate-900 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
               {/* Header */}
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 font-mono block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 font-mono block">
                     Workforce Action Launcher
                   </span>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                     {launcherMode === 'group' ? (
                       <>
                         <span>Group Action Mode</span>
-                        <span className="text-xs bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-mono font-normal px-2.5 py-0.5 rounded-full">
+                        <span className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-700/60 font-mono font-normal px-2.5 py-0.5 rounded-full">
                           {selectedStudentIds.size} Students Pre-Loaded
                         </span>
                       </>
@@ -2247,7 +2257,7 @@ export default function InchargeDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setIsActionLauncherOpen(false)}
-                  className="text-slate-400 hover:text-slate-200 bg-slate-800 p-1.5 rounded-lg"
+                  className="text-slate-500 hover:text-slate-900 bg-slate-100 p-1.5 rounded-lg"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2260,10 +2270,10 @@ export default function InchargeDashboardPage() {
                 /* GROUP ACTION FLEXIBLE SELECTION STEP */
                 <div className="space-y-4">
                   {/* Step 1: Batch Dropdown & Individual Search Bar */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 bg-white p-4 rounded-xl border border-slate-200">
                     {/* Batch Quick Add */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-mono uppercase text-slate-400 font-bold tracking-wider">
+                      <label className="text-[10px] font-mono uppercase text-slate-500 font-bold tracking-wider">
                         1. Select Whole Batch
                       </label>
                       <select
@@ -2274,7 +2284,7 @@ export default function InchargeDashboardPage() {
                             e.target.value = '';
                           }
                         }}
-                        className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono h-9"
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono h-9"
                       >
                         <option value="" disabled>
                           -- Pick a batch to add all students --
@@ -2292,7 +2302,7 @@ export default function InchargeDashboardPage() {
 
                     {/* Individual Student Search & Add */}
                     <div className="flex flex-col gap-1.5 relative">
-                      <label className="text-[10px] font-mono uppercase text-slate-400 font-bold tracking-wider">
+                      <label className="text-[10px] font-mono uppercase text-slate-500 font-bold tracking-wider">
                         2. Search & Add Student
                       </label>
                       <div className="relative">
@@ -2301,7 +2311,7 @@ export default function InchargeDashboardPage() {
                           placeholder="Search name, batch, phone..."
                           value={groupSearchQuery}
                           onChange={(e) => setGroupSearchQuery(e.target.value)}
-                          className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-8 pr-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono h-9"
+                          className="w-full bg-white border border-slate-300 rounded-xl pl-8 pr-3 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono h-9"
                         />
                         <svg className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -2309,7 +2319,7 @@ export default function InchargeDashboardPage() {
 
                         {/* Floating Search Results Dropdown */}
                         {groupSearchQuery.trim() !== '' && (
-                          <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-slate-900 border border-slate-700 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-800 shadow-2xl">
+                          <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-white border border-slate-300 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-200 shadow-xl">
                             {students
                               .filter(
                                 (s) =>
@@ -2330,15 +2340,15 @@ export default function InchargeDashboardPage() {
                                     }}
                                     className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors ${
                                       isAlreadyAdded
-                                        ? 'bg-indigo-950/60 text-indigo-300'
-                                        : 'hover:bg-slate-800 text-slate-200'
+                                        ? 'bg-indigo-50 text-indigo-700'
+                                        : 'hover:bg-slate-100 text-slate-800'
                                     }`}
                                   >
                                     <div>
                                       <span className="font-semibold">{s.name}</span>
-                                      <span className="text-[10px] text-slate-400 font-mono ml-2">({s.batch_name || 'General'})</span>
+                                      <span className="text-[10px] text-slate-500 font-mono ml-2">({s.batch_name || 'General'})</span>
                                     </div>
-                                    <span className="text-[10px] font-mono font-bold text-indigo-400">
+                                    <span className="text-[10px] font-mono font-bold text-indigo-700">
                                       {isAlreadyAdded ? '✓ Added' : '+ Add'}
                                     </span>
                                   </button>
@@ -2351,13 +2361,13 @@ export default function InchargeDashboardPage() {
                   </div>
 
                   {/* Assembled Running Roster List */}
-                  <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                  <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                        <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
                           Selected Target Roster
                         </h4>
-                        <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950 px-2.5 py-0.5 rounded-full border border-emerald-800">
+                        <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                           {selectedStudentIds.size} Students
                         </span>
                       </div>
@@ -2366,7 +2376,7 @@ export default function InchargeDashboardPage() {
                         <button
                           type="button"
                           onClick={clearSelection}
-                          className="text-[11px] text-red-400 hover:text-red-300 font-mono font-semibold transition-colors"
+                          className="text-[11px] text-red-400 hover:text-red-700 font-mono font-semibold transition-colors"
                         >
                           Clear All ({selectedStudentIds.size})
                         </button>
@@ -2374,7 +2384,7 @@ export default function InchargeDashboardPage() {
                     </div>
 
                     {selectedStudentIds.size === 0 ? (
-                      <div className="p-4 text-center text-xs text-slate-500 font-mono border border-dashed border-slate-800 rounded-lg">
+                      <div className="p-4 text-center text-xs text-slate-500 font-mono border border-dashed border-slate-200 rounded-lg">
                         No students selected yet. Pick a batch above or search and add individual students.
                       </div>
                     ) : (
@@ -2385,15 +2395,15 @@ export default function InchargeDashboardPage() {
                           return (
                             <div
                               key={s.id}
-                              className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 flex items-center justify-between text-xs hover:border-slate-700 transition-colors"
+                              className="bg-white border border-slate-200 rounded-lg px-3 py-2 flex items-center justify-between text-xs hover:border-slate-200 transition-colors"
                             >
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-white">{s.name}</span>
-                                <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                                <span className="font-bold text-slate-900">{s.name}</span>
+                                <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
                                   {s.batch_name || 'General'}
                                 </span>
-                                <span className="text-[11px] font-mono text-slate-400">
-                                  Due: ₹{s.balance.toFixed(2)}
+                                <span className="text-[11px] font-mono text-slate-500">
+                                  Due: <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{s.balance.toFixed(2)}</span>
                                 </span>
                               </div>
 
@@ -2401,7 +2411,7 @@ export default function InchargeDashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => removeStudentFromGroupSelection(s.id)}
-                                className="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-800 transition-colors"
+                                className="text-slate-500 hover:text-red-400 p-1 rounded hover:bg-slate-100 transition-colors"
                                 title={`Remove ${s.name} from group selection`}
                               >
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2427,7 +2437,7 @@ export default function InchargeDashboardPage() {
                       className={`py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 ${
                         selectedStudentIds.size > 0
                           ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-950/40'
-                          : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                          : 'bg-slate-100 text-slate-500 cursor-not-allowed'
                       }`}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2446,7 +2456,7 @@ export default function InchargeDashboardPage() {
                       className={`py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 ${
                         selectedStudentIds.size > 0
                           ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950/40'
-                          : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                          : 'bg-slate-100 text-slate-500 cursor-not-allowed'
                       }`}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2460,7 +2470,7 @@ export default function InchargeDashboardPage() {
                 /* INDIVIDUAL STUDENT FLOW DIRECT OPTIONS */
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="block text-[11px] font-mono uppercase text-slate-400 font-bold">
+                    <label className="block text-[11px] font-mono uppercase text-slate-500 font-bold">
                       Search & Select Target Student
                     </label>
                     <div className="relative">
@@ -2482,7 +2492,7 @@ export default function InchargeDashboardPage() {
                             setLauncherStudentId(matched[0].id);
                           }
                         }}
-                        className="w-full bg-slate-950 border border-slate-700/80 focus:border-indigo-500 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
+                        className="w-full bg-white border border-slate-200 focus:border-indigo-500 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none"
                       />
                       <svg className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -2491,7 +2501,7 @@ export default function InchargeDashboardPage() {
                         <button
                           type="button"
                           onClick={() => setLauncherSearchQuery('')}
-                          className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
+                          className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2503,7 +2513,7 @@ export default function InchargeDashboardPage() {
                     <select
                       value={launcherStudentId}
                       onChange={(e) => setLauncherStudentId(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-600 font-mono"
                     >
                       {launcherFilteredStudents.length === 0 ? (
                         <option value="">No matching students found</option>
@@ -2517,7 +2527,7 @@ export default function InchargeDashboardPage() {
                     </select>
 
                     {launcherSearchQuery && (
-                      <p className="text-[10px] text-slate-400 font-mono text-right">
+                      <p className="text-[10px] text-slate-500 font-mono text-right">
                         Showing {launcherFilteredStudents.length} of {students.length} students
                       </p>
                     )}
@@ -2566,32 +2576,32 @@ export default function InchargeDashboardPage() {
 
         {/* MODAL: IN-CHARGE REJECT CLAIM */}
         {rejectingClaim && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-100 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-red-400 font-mono block">
                     Workforce Action
                   </span>
-                  <h3 className="text-lg font-bold text-white">Reject Student Payment Claim</h3>
+                  <h3 className="text-lg font-bold text-slate-900">Reject Student Payment Claim</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setRejectingClaim(null)}
-                  className="text-slate-400 hover:text-slate-200 bg-slate-800 p-1.5 rounded-lg"
+                  className="text-slate-500 hover:text-slate-900 bg-slate-100 p-1.5 rounded-lg"
                 >
                   &times;
                 </button>
               </div>
 
-              <p className="text-xs text-slate-300">
-                Rejecting claim of <span className="font-bold text-emerald-400 font-mono">₹{Number(rejectingClaim.claimed_amount).toFixed(2)}</span> for{' '}
-                <span className="font-bold text-white">{rejectingClaim.students?.name}</span>. No journal entry or cash balance update will occur.
+              <p className="text-xs text-slate-700">
+                Rejecting claim of <span className="font-bold text-emerald-700 font-mono">₹{Number(rejectingClaim.claimed_amount).toFixed(2)}</span> for{' '}
+                <span className="font-bold text-slate-900">{rejectingClaim.students?.name}</span>. No journal entry or cash balance update will occur.
               </p>
 
               <form onSubmit={handleInchargeConfirmReject} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400">
+                  <label className="text-xs font-semibold text-slate-500">
                     Optional Reason / Rejection Note:
                   </label>
                   <textarea
@@ -2599,7 +2609,7 @@ export default function InchargeDashboardPage() {
                     value={rejectNote}
                     onChange={(e) => setRejectNote(e.target.value)}
                     placeholder="e.g. Payment transaction not found / Amount mismatch"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-red-500"
+                    className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-red-500"
                   />
                 </div>
 
@@ -2607,7 +2617,7 @@ export default function InchargeDashboardPage() {
                   <button
                     type="button"
                     onClick={() => setRejectingClaim(null)}
-                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-4 py-2.5 rounded-xl"
+                    className="bg-slate-100 hover:bg-slate-700 text-slate-700 text-xs font-semibold px-4 py-2.5 rounded-xl"
                   >
                     Cancel
                   </button>

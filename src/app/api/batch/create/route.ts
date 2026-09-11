@@ -9,14 +9,25 @@ async function checkAdminAuth(req: Request): Promise<boolean> {
   try {
     const supabase = await createServerSupabase();
     const { data: { user } } = await supabase.auth.getUser();
-    if (user && (user.user_metadata?.role === 'admin' || user.email?.includes('admin'))) {
+    if (
+      user &&
+      (user.user_metadata?.role === 'admin' ||
+        user.user_metadata?.role === 'incharge' ||
+        user.email?.includes('admin') ||
+        user.email?.includes('incharge'))
+    ) {
       return true;
     }
 
     const cookieStore = await cookies();
     const roleCookie = cookieStore.get('lab_user_role')?.value;
     const roleHeader = req.headers.get('x-user-role');
-    if (roleCookie === 'admin' || roleHeader === 'admin') {
+    if (
+      roleCookie === 'admin' ||
+      roleCookie === 'incharge' ||
+      roleHeader === 'admin' ||
+      roleHeader === 'incharge'
+    ) {
       return true;
     }
   } catch (e) {

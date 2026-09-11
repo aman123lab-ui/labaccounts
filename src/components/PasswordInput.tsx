@@ -4,27 +4,52 @@ import React, { useState } from 'react';
 
 interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   focusColor?: 'emerald' | 'blue' | 'indigo';
+  variant?: 'light' | 'dark';
 }
 
 export default function PasswordInput({
   className = '',
   focusColor = 'emerald',
+  variant,
   ...props
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
+
+  const isDark =
+    variant === 'dark' ||
+    className.includes('bg-slate-950') ||
+    className.includes('bg-slate-900');
 
   const focusBorderClass =
     focusColor === 'blue'
       ? 'focus:border-blue-500 focus:ring-blue-500'
       : focusColor === 'indigo'
       ? 'focus:border-indigo-500 focus:ring-indigo-500'
-      : 'focus:border-emerald-500 focus:ring-emerald-500';
+      : 'focus:border-emerald-600 focus:ring-emerald-500';
+
+  const baseInputClass = isDark
+    ? 'w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-11 py-2.5 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 transition-all'
+    : 'w-full bg-white border border-slate-300 rounded-xl pl-4 pr-11 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 transition-all';
+
+  const toggleBtnClass = isDark
+    ? 'absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 focus:outline-none focus:text-slate-100 p-1.5 rounded-lg hover:bg-slate-800 transition-colors'
+    : 'absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 focus:outline-none focus:text-slate-900 p-1.5 rounded-lg hover:bg-slate-100 transition-colors';
+
+  const cleanedClassName = className
+    .replace(/bg-white/g, '')
+    .replace(/bg-slate-950/g, '')
+    .replace(/bg-slate-900/g, '')
+    .replace(/text-slate-900/g, '')
+    .replace(/text-slate-100/g, '')
+    .replace(/border-slate-300/g, '')
+    .replace(/border-slate-800/g, '')
+    .trim();
 
   return (
     <div className="relative w-full">
       <input
         type={showPassword ? 'text' : 'password'}
-        className={`w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-11 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 transition-all ${focusBorderClass} ${className}`}
+        className={`${baseInputClass} ${focusBorderClass} ${cleanedClassName}`}
         {...props}
       />
       <button
@@ -32,7 +57,7 @@ export default function PasswordInput({
         onClick={() => setShowPassword((prev) => !prev)}
         aria-label={showPassword ? 'Hide password' : 'Show password'}
         title={showPassword ? 'Hide password' : 'Show password'}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 focus:outline-none focus:text-slate-100 p-1.5 rounded-lg hover:bg-slate-800/60 transition-colors"
+        className={toggleBtnClass}
       >
         {showPassword ? (
           /* Eye Slash Icon (Hide Password) */

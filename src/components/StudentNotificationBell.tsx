@@ -73,11 +73,11 @@ export default function StudentNotificationBell({ studentId, claims, onClaimsSee
       <button
         type="button"
         onClick={handleToggle}
-        className="relative bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 p-2.5 rounded-xl transition-colors focus:outline-none"
+        className="relative bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 p-2.5 rounded-xl transition-colors focus:outline-none shadow-xs"
         title="Payment Claim Notifications"
         aria-label="Payment Claim Notifications"
       >
-        <svg className="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -89,23 +89,23 @@ export default function StudentNotificationBell({ studentId, claims, onClaimsSee
         {/* Unread Status Badge Indicator */}
         {hasUnread && (
           <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-slate-950"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-600 border-2 border-white"></span>
           </span>
         )}
       </button>
 
       {/* Dropdown Popover */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 z-50 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden p-4 space-y-3 animate-scale-up">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden p-4 space-y-3 animate-scale-up text-slate-900">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
                 Payment Notifications
               </span>
               {activeNotifications.length > 0 && (
-                <span className="bg-slate-800 text-emerald-400 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">
+                <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">
                   {activeNotifications.length}
                 </span>
               )}
@@ -113,7 +113,7 @@ export default function StudentNotificationBell({ studentId, claims, onClaimsSee
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="text-slate-500 hover:text-slate-300 p-1 rounded-lg text-xs"
+              className="text-slate-400 hover:text-slate-700 p-1 rounded-lg text-xs"
             >
               ✕
             </button>
@@ -121,9 +121,9 @@ export default function StudentNotificationBell({ studentId, claims, onClaimsSee
 
           {/* Claims List */}
           {activeNotifications.length === 0 ? (
-            <div className="py-6 text-center text-slate-500 text-xs space-y-1 font-mono">
-              <p className="text-slate-400 font-semibold">No new notifications</p>
-              <p className="text-[10px] text-slate-600">All payment claim notifications have been read.</p>
+            <div className="py-6 text-center text-slate-400 text-xs space-y-1 font-mono">
+              <p className="text-slate-600 font-semibold">No new notifications</p>
+              <p className="text-[10px] text-slate-400">All payment claim notifications have been read.</p>
             </div>
           ) : (
             <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1 no-scrollbar">
@@ -137,42 +137,42 @@ export default function StudentNotificationBell({ studentId, claims, onClaimsSee
                     key={claim.id}
                     className={`p-3 rounded-xl border flex flex-col gap-1.5 transition-all text-xs ${
                       isPending
-                        ? 'bg-amber-950/30 border-amber-800/40 text-amber-200'
+                        ? 'bg-amber-50 border-amber-200 text-amber-900'
                         : isVerified
-                        ? 'bg-emerald-950/30 border-emerald-800/40 text-emerald-200'
-                        : 'bg-red-950/30 border-red-800/40 text-red-200'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : 'bg-red-50 border-red-200 text-red-900'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span
                         className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${
                           isPending
-                            ? 'bg-amber-900/60 border-amber-700 text-amber-300'
+                            ? 'bg-amber-100 border-amber-300 text-amber-800'
                             : isVerified
-                            ? 'bg-emerald-900/60 border-emerald-700 text-emerald-300'
-                            : 'bg-red-900/60 border-red-700 text-red-300'
+                            ? 'bg-emerald-100 border-emerald-300 text-emerald-800'
+                            : 'bg-red-100 border-red-300 text-red-800'
                         }`}
                       >
                         {claim.status}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-mono">
+                      <span className="text-[10px] text-slate-500 font-mono">
                         {formatDate(claim.claimed_at)}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between font-mono font-bold">
-                      <span className="text-white">Amount Claimed:</span>
-                      <span className="text-emerald-400">₹{Number(claim.claimed_amount).toFixed(2)}</span>
+                      <span className="text-slate-900">Amount Claimed:</span>
+                      <span className="text-emerald-800">₹{Number(claim.claimed_amount).toFixed(2)}</span>
                     </div>
 
-                    <p className="text-[11px] leading-snug font-sans text-slate-300">
+                    <p className="text-[11px] leading-snug font-sans text-slate-700">
                       {isPending && 'Awaiting admin verification.'}
                       {isVerified && 'Verified and credited to your account!'}
                       {isRejected && (
                         <span>
                           Claim rejected by admin.
                           {claim.admin_note && (
-                            <span className="block text-red-300 font-medium mt-0.5">
+                            <span className="block text-red-700 font-medium mt-0.5">
                               Reason: &quot;{claim.admin_note}&quot;
                             </span>
                           )}

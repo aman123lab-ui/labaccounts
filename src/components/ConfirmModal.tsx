@@ -29,23 +29,21 @@ export default function ConfirmModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-xs">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6"
+            className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-6 shadow-2xl space-y-6 text-slate-900"
           >
             {/* Header Icon & Title */}
             <div className="flex items-start gap-4">
               <div
                 className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border ${
                   variant === 'danger'
-                    ? 'bg-red-950/80 border-red-800/60 text-red-400'
-                    : variant === 'warning'
-                    ? 'bg-amber-950/80 border-amber-800/60 text-amber-400'
-                    : 'bg-blue-950/80 border-blue-800/60 text-blue-400'
+                    ? 'bg-red-50 border-red-200 text-red-600'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-700'
                 }`}
               >
                 {variant === 'danger' ? (
@@ -64,8 +62,8 @@ export default function ConfirmModal({
               </div>
 
               <div>
-                <h3 className="text-lg font-black text-white">{title}</h3>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">{message}</p>
+                <h3 className="text-lg font-black text-slate-900">{title}</h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">{message}</p>
               </div>
             </div>
 
@@ -75,7 +73,7 @@ export default function ConfirmModal({
                 type="button"
                 onClick={onCancel}
                 disabled={loading}
-                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-3 px-4 rounded-xl text-xs transition-colors disabled:opacity-50"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl text-xs transition-colors disabled:opacity-50"
               >
                 {cancelLabel}
               </button>
@@ -83,12 +81,10 @@ export default function ConfirmModal({
                 type="button"
                 onClick={onConfirm}
                 disabled={loading}
-                className={`flex-1 font-bold py-3 px-4 rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 ${
+                className={`flex-1 font-bold py-3 px-4 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 ${
                   variant === 'danger'
-                    ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-950'
-                    : variant === 'warning'
-                    ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-amber-950'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950'
+                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-slate-900 hover:bg-slate-800 text-white'
                 }`}
               >
                 {loading ? (

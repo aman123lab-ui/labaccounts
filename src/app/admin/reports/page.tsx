@@ -10,6 +10,7 @@ import { formatCurrency, formatStudentBalance } from '@/utils/formatCurrency';
 import CustomDateInput from '@/components/CustomDateInput';
 import { isGuestMode, getDemoAccounts, getDemoJournalEntries } from '@/lib/demo/demoStore';
 import { useRealtimeMultiSync } from '@/hooks/useRealtimeSync';
+import { compareBatchNames } from '@/services/batchService';
 
 export interface TrialBalanceRow {
   accountId: string;
@@ -41,11 +42,17 @@ export default function ReportsPage() {
   // Student Ledger Summary Report State
   const [studentRoster, setStudentRoster] = useState<StudentWithDetails[]>([]);
   const [studentSearchTerm, setStudentSearchTerm] = useState('');
-  const [studentBatchFilter, setStudentBatchFilter] = useState<string>('all');
+  const [selectedBatches, setSelectedBatches] = useState<string[]>(['all']);
+  const [isBatchDropdownOpen, setIsBatchDropdownOpen] = useState<boolean>(false);
+  const [batchSearchTerm, setBatchSearchTerm] = useState<string>('');
   const [hideZeroBalanceStudents, setHideZeroBalanceStudents] = useState<boolean>(false);
   const [studentSortBy, setStudentSortBy] = useState<
-    'batch' | 'amount_desc' | 'amount_asc' | 'name_asc' | 'name_desc'
-  >('amount_desc');
+    | 'batch'
+    | 'amount_desc'
+    | 'amount_asc'
+    | 'name_asc'
+    | 'name_desc'
+  >('batch');
 
   // Core Data
   const [trialBalanceRows, setTrialBalanceRows] = useState<TrialBalanceRow[]>([]);
@@ -212,9 +219,14 @@ export default function ReportsPage() {
         const studentObj = acc.students as unknown as { name: string } | null;
         const studentName = studentObj?.name || null;
 
+        let formattedAccountName = acc.name;
+        if (acc.name === 'Cash in Hand (In-Charge)') {
+          formattedAccountName = 'Cash in Hand (In-Charge: Anfaz)';
+        }
+
         return {
           accountId: acc.id,
-          accountName: acc.name,
+          accountName: formattedAccountName,
           studentName,
           isStudentAccount: acc.is_student_account,
           accountType: acc.type.toUpperCase(),
@@ -430,26 +442,6 @@ export default function ReportsPage() {
 
   const isBalanceSheetTallied = Math.abs(totalAssets - totalLiabilitiesAndEquity) < 0.01;
 
-  // Custom batch hierarchy ordering: JD (1..3) -> HS (1..2) -> BS (1..5) -> Others
-  const compareBatchNames = (aName: string = '', bName: string = '') => {
-    const getPrefixRank = (name: string) => {
-      const uppercase = name.toUpperCase().trim();
-      if (uppercase.startsWith('JD')) return 1;
-      if (uppercase.startsWith('HS')) return 2;
-      if (uppercase.startsWith('BS')) return 3;
-      return 4;
-    };
-
-    const rankA = getPrefixRank(aName);
-    const rankB = getPrefixRank(bName);
-
-    if (rankA !== rankB) {
-      return rankA - rankB;
-    }
-
-    return aName.localeCompare(bName, undefined, { numeric: true, sensitivity: 'base' });
-  };
-
   // ==========================================
   // PART 2: STUDENT LEDGER SUMMARY (DEBIT BOOK REPORT) FILTERING
   // ==========================================
@@ -464,9 +456,12 @@ export default function ReportsPage() {
         if (!matchName && !matchPhone && !matchBatch) return false;
       }
 
-      // Batch filter
-      if (studentBatchFilter !== 'all') {
-        if (s.batch_id !== studentBatchFilter && s.batch_name !== studentBatchFilter) return false;
+      // Multi-Batch filter
+      if (!selectedBatches.includes('all') && selectedBatches.length > 0) {
+        const hasMatch = selectedBatches.some(
+          (bId) => s.batch_id === bId || s.batch_name === bId
+        );
+        if (!hasMatch) return false;
       }
 
       // Zero-balance filter
@@ -492,20 +487,25 @@ export default function ReportsPage() {
       if (studentSortBy === 'name_desc') {
         return (b.name || '').localeCompare(a.name || '', undefined, { sensitivity: 'base' });
       }
+      // Default: 'batch' (General → JD → HS → BS), then by name
       const batchCompare = compareBatchNames(a.batch_name, b.batch_name);
       if (batchCompare !== 0) return batchCompare;
       return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
     });
-  }, [studentRoster, studentSearchTerm, studentBatchFilter, hideZeroBalanceStudents, studentSortBy]);
+  }, [studentRoster, studentSearchTerm, selectedBatches, hideZeroBalanceStudents, studentSortBy]);
 
   const uniqueBatchesInRoster = useMemo(() => {
-    const bMap = new Map<string, string>();
+    const bMap = new Map<string, { id: string; name: string; count: number }>();
     studentRoster.forEach((s) => {
-      if (s.batch_name) bMap.set(s.batch_id, s.batch_name);
+      if (s.batch_name) {
+        const key = s.batch_id || s.batch_name;
+        if (!bMap.has(key)) {
+          bMap.set(key, { id: key, name: s.batch_name, count: 0 });
+        }
+        bMap.get(key)!.count += 1;
+      }
     });
-    return Array.from(bMap.entries())
-      .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => compareBatchNames(a.name, b.name));
+    return Array.from(bMap.values()).sort((a, b) => compareBatchNames(a.name, b.name));
   }, [studentRoster]);
 
   const rosterSummary = useMemo(() => {
@@ -539,15 +539,12 @@ export default function ReportsPage() {
     <>
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 space-y-8 flex-1">
         {/* Printable Document Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 print:border-slate-300 pb-6 print:hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 print:border-slate-300 pb-6 print:hidden">
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-400 print:text-emerald-800 font-mono">
-              Non-Profit Credit Service Ledger • Financial Statements
-            </span>
-            <h1 className="text-3xl font-black text-white print:text-slate-900 tracking-tight mt-1">
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">
               Financial Reports Suite
             </h1>
-            <p className="text-xs text-slate-400 print:text-slate-600 mt-1">
+            <p className="text-xs text-slate-500 print:text-slate-600 mt-1">
               Derived live from double-entry Postgres journal entry lines • Certified debit-credit balanced
             </p>
           </div>
@@ -557,9 +554,9 @@ export default function ReportsPage() {
             <button
               type="button"
               onClick={handleDownloadPDF}
-              className="flex-1 sm:flex-initial justify-center bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2 whitespace-nowrap"
+              className="flex-1 sm:flex-initial justify-center bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-xs flex items-center gap-2 whitespace-nowrap"
             >
-              <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
               Download PDF
@@ -567,7 +564,7 @@ export default function ReportsPage() {
             <button
               type="button"
               onClick={handlePrint}
-              className="flex-1 sm:flex-initial justify-center bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 whitespace-nowrap"
+              className="flex-1 sm:flex-initial justify-center bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-xs transition-all flex items-center gap-2 whitespace-nowrap"
             >
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -578,7 +575,7 @@ export default function ReportsPage() {
         </div>
 
         {/* REPORT TAB SELECTOR (Hidden in Print) */}
-        <div className="flex bg-slate-900/90 border border-slate-800/80 p-1.5 rounded-2xl print:hidden overflow-x-auto gap-1.5 items-center">
+        <div className="flex bg-slate-100 border border-slate-200 p-1.5 rounded-2xl print:hidden overflow-x-auto gap-1.5 items-center">
           {[
             { id: 'overview', label: 'Reports Overview' },
             { id: 'trial', label: '1. Trial Balance' },
@@ -592,8 +589,8 @@ export default function ReportsPage() {
               onClick={() => setActiveReportTab(tab.id as typeof activeReportTab)}
               className={`flex-1 shrink-0 min-w-max py-2.5 px-4 rounded-xl text-xs font-bold transition-all whitespace-nowrap text-center ${
                 activeReportTab === tab.id
-                  ? 'bg-emerald-600 text-white shadow-md border border-emerald-500'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-slate-900 text-white shadow-xs border border-slate-900'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               {tab.label}
@@ -605,55 +602,58 @@ export default function ReportsPage() {
         {(activeReportTab === 'overview' || typeof window !== 'undefined') && (
           <div className={`space-y-4 ${activeReportTab !== 'overview' ? 'print:block hidden' : ''}`}>
             {/* Heading (Hidden when printing) */}
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300 print:hidden border-b border-slate-800 pb-2">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600 print:hidden border-b border-slate-200 pb-2">
               Reports Overview & Print Job Metrics
             </h2>
 
             {/* ON-SCREEN BOXED CARDS VIEW (Hidden when printing) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 print:hidden">
               {/* Card 1: Total Service Income */}
-              <div className="bg-slate-900/70 border border-slate-800/80 rounded-xl p-3.5 sm:p-4 shadow-lg">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Service Income</span>
-                <span className="text-xl font-black text-emerald-400 font-mono mt-0.5 block">
-                  ₹{Math.abs(totalIncome).toFixed(2)}
+              <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-xs">
+                <span className="text-[10px] font-bold text-slate-500 uppercase block">Total Service Income</span>
+                <span className="text-xl font-black text-emerald-700 font-mono mt-0.5 flex items-center gap-0.5">
+                  <span className="font-sans">₹</span>
+                  <span className="font-mono">{Math.abs(totalIncome).toFixed(2)}</span>
                 </span>
-                <span className="text-[10px] text-slate-400 mt-0.5 block">Printing Revenue</span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">Printing Revenue</span>
               </div>
 
               {/* Card 2: Total Expense */}
-              <div className="bg-slate-900/70 border border-slate-800/80 rounded-xl p-3.5 sm:p-4 shadow-lg">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Expense</span>
-                <span className="text-xl font-black text-purple-400 font-mono mt-0.5 block">
-                  ₹{Math.abs(totalExpense).toFixed(2)}
+              <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-xs">
+                <span className="text-[10px] font-bold text-slate-500 uppercase block">Total Expense</span>
+                <span className="text-xl font-black text-slate-900 font-mono mt-0.5 flex items-center gap-0.5">
+                  <span className="font-sans">₹</span>
+                  <span className="font-mono">{Math.abs(totalExpense).toFixed(2)}</span>
                 </span>
-                <span className="text-[10px] text-slate-400 mt-0.5 block">Paper, Ink, Maintenance</span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">Paper, Ink, Maintenance</span>
               </div>
 
               {/* Card 3: Cash Balance */}
-              <div className="bg-slate-900/70 border border-slate-800/80 rounded-xl p-3.5 sm:p-4 shadow-lg">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Current Cash Balance</span>
-                <span className="text-xl font-black text-blue-400 font-mono mt-0.5 block">
-                  ₹{Math.abs(cashBalance).toFixed(2)}
+              <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-xs">
+                <span className="text-[10px] font-bold text-slate-500 uppercase block">Current Cash Balance</span>
+                <span className="text-xl font-black text-slate-900 font-mono mt-0.5 flex items-center gap-0.5">
+                  <span className="font-sans">₹</span>
+                  <span className="font-mono">{Math.abs(cashBalance).toFixed(2)}</span>
                 </span>
-                <span className="text-[10px] text-slate-400 mt-0.5 block">Cash in Vault/Bank</span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">Cash in Vault/Bank</span>
               </div>
 
               {/* Card 4: Pages Printed (B/W) */}
-              <div className="bg-slate-900/70 border border-slate-800/80 rounded-xl p-3.5 sm:p-4 shadow-lg">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Pages Printed (B/W)</span>
-                <span className="text-xl font-black text-slate-200 font-mono mt-0.5 block">
+              <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-xs">
+                <span className="text-[10px] font-bold text-slate-500 uppercase block">Pages Printed (B/W)</span>
+                <span className="text-xl font-black text-slate-900 font-mono mt-0.5 block">
                   {bwPages}
                 </span>
-                <span className="text-[10px] text-slate-400 mt-0.5 block">Black & White Total</span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">Black & White Total</span>
               </div>
 
               {/* Card 5: Pages Printed (Color) */}
-              <div className="bg-slate-900/70 border border-slate-800/80 rounded-xl p-3.5 sm:p-4 shadow-lg">
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Pages Printed (Color)</span>
-                <span className="text-xl font-black text-amber-400 font-mono mt-0.5 block">
+              <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-xs">
+                <span className="text-[10px] font-bold text-slate-500 uppercase block">Pages Printed (Color)</span>
+                <span className="text-xl font-black text-emerald-700 font-mono mt-0.5 block">
                   {colorPages}
                 </span>
-                <span className="text-[10px] text-slate-400 mt-0.5 block">Color Print Total</span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">Color Print Total</span>
               </div>
             </div>
 
@@ -662,18 +662,18 @@ export default function ReportsPage() {
 
         {/* 2. TRIAL BALANCE REPORT */}
         {(activeReportTab === 'trial' || activeReportTab === 'overview') && (
-          <div className="space-y-4 pt-6 border-t border-slate-800 print:border-t-0 print:pt-0 print:mt-0">
+          <div className="space-y-4 pt-6 border-t border-slate-200 print:border-t-0 print:pt-0 print:mt-0">
             <div>
-              <h2 className="text-lg font-extrabold text-white print:text-2xl print:font-black print:text-slate-900">Trial Balance</h2>
-              <p className="text-xs text-slate-400 print:hidden mt-0.5">Verification of total debit balances matching total credit balances across all active accounts.</p>
+              <h2 className="text-lg font-extrabold text-slate-900 print:text-2xl print:font-black print:text-slate-900">Trial Balance</h2>
+              <p className="text-xs text-slate-500 print:hidden mt-0.5">Verification of total debit balances matching total credit balances across all active accounts.</p>
               <p className="hidden print:block text-xs font-mono text-slate-600 font-semibold mt-0.5 mb-2">
                 {ieStartDate && ieEndDate ? `${formatDate(ieStartDate)} to ${formatDate(ieEndDate)}` : ''}
               </p>
             </div>
 
-            <div className="border border-slate-800/80 rounded-2xl overflow-x-auto shadow-xl bg-slate-900/40 print:bg-white print:border-slate-300 print:shadow-none">
+            <div className="border border-slate-200 rounded-2xl overflow-x-auto shadow-xs bg-white print:border-slate-300 print:shadow-none">
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-slate-900 text-slate-300 border-b border-slate-800 font-bold uppercase print:bg-slate-100 print:text-slate-900 print:border-slate-300">
+                <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold uppercase print:bg-slate-100 print:text-slate-900 print:border-slate-300">
                   <tr>
                     <th className="p-3.5">Account Title</th>
                     <th className="p-3.5">Category</th>
@@ -681,16 +681,16 @@ export default function ReportsPage() {
                     <th className="p-3.5 text-right">Credit Balance (₹)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 print:divide-slate-200">
+                <tbody className="divide-y divide-slate-200">
                   {/* General Ledger Accounts (Filtered to non-zero) */}
                   {displayedGeneralAccounts.map((r) => (
-                    <tr key={r.accountId} className="hover:bg-slate-800/40 transition-colors print:hover:bg-transparent">
-                      <td className="p-3.5 font-sans font-bold text-slate-200 print:text-slate-900">{r.accountName}</td>
-                      <td className="p-3.5 text-slate-400 print:text-slate-600 font-bold text-[10px]">{r.accountType}</td>
-                      <td className="p-3.5 text-right text-emerald-400 print:text-emerald-800 font-bold">
+                    <tr key={r.accountId} className="hover:bg-slate-50/80 transition-colors print:hover:bg-transparent">
+                      <td className="p-3.5 font-sans font-bold text-slate-900">{r.accountName}</td>
+                      <td className="p-3.5 text-slate-500 font-bold text-[10px]">{r.accountType}</td>
+                      <td className="p-3.5 text-right text-emerald-700 font-bold">
                         {r.debitBalance > 0 ? `₹${r.debitBalance.toFixed(2)}` : ''}
                       </td>
-                      <td className="p-3.5 text-right text-blue-400 print:text-blue-800 font-bold">
+                      <td className="p-3.5 text-right text-slate-800 font-bold">
                         {r.creditBalance > 0 ? `₹${r.creditBalance.toFixed(2)}` : ''}
                       </td>
                     </tr>
@@ -698,10 +698,10 @@ export default function ReportsPage() {
 
                   {/* Student Debit Balances (Receivables - Asset) */}
                   {showStudentARInTB && (
-                    <tr className="hover:bg-slate-800/40 transition-colors print:hover:bg-transparent">
-                      <td className="p-3.5 font-sans font-bold text-slate-200 print:text-slate-900">Student Accounts Receivable</td>
-                      <td className="p-3.5 text-slate-400 print:text-slate-600 font-bold text-[10px]">ASSET</td>
-                      <td className="p-3.5 text-right text-emerald-400 print:text-emerald-800 font-bold">
+                    <tr className="hover:bg-slate-50/80 transition-colors print:hover:bg-transparent">
+                      <td className="p-3.5 font-sans font-bold text-slate-900">Student Accounts Receivable</td>
+                      <td className="p-3.5 text-slate-500 font-bold text-[10px]">ASSET</td>
+                      <td className="p-3.5 text-right text-emerald-700 font-bold">
                         ₹{studentTotalDebit.toFixed(2)}
                       </td>
                       <td className="p-3.5 text-right text-slate-500 font-bold"></td>
@@ -710,11 +710,11 @@ export default function ReportsPage() {
 
                   {/* Student Credit Balances (Payables - Liability) */}
                   {showStudentPayableInTB && (
-                    <tr className="hover:bg-slate-800/40 transition-colors print:hover:bg-transparent">
-                      <td className="p-3.5 font-sans font-bold text-amber-300 print:text-amber-900">Due to Students (Overpayments / Refund Due)</td>
-                      <td className="p-3.5 text-amber-400/80 print:text-amber-700 font-bold text-[10px]">LIABILITY</td>
+                    <tr className="hover:bg-slate-50/80 transition-colors print:hover:bg-transparent">
+                      <td className="p-3.5 font-sans font-bold text-amber-800">Due to Students (Overpayments / Refund Due)</td>
+                      <td className="p-3.5 text-amber-700 font-bold text-[10px]">LIABILITY</td>
                       <td className="p-3.5 text-right text-slate-500 font-bold"></td>
-                      <td className="p-3.5 text-right text-amber-400 print:text-amber-800 font-bold">
+                      <td className="p-3.5 text-right text-amber-700 font-bold">
                         ₹{studentTotalCredit.toFixed(2)}
                       </td>
                     </tr>
@@ -730,14 +730,14 @@ export default function ReportsPage() {
                   )}
 
                   {/* Grand Total Row (Calculated from full underlying data) */}
-                  <tr className="bg-slate-900 font-black text-sm border-t-2 border-slate-700 text-slate-100 print:bg-slate-100 print:text-slate-900 print:border-slate-400">
+                  <tr className="bg-slate-100 font-black text-sm border-t-2 border-slate-300 text-slate-900 print:bg-slate-100 print:text-slate-900 print:border-slate-400">
                     <td colSpan={2} className="p-3.5 font-sans uppercase">
                       Total Trial Balance
                     </td>
-                    <td className="p-3.5 text-right text-emerald-400 print:text-emerald-800 font-mono">
+                    <td className="p-3.5 text-right text-emerald-700 font-mono">
                       ₹{totalTbDebit.toFixed(2)}
                     </td>
-                    <td className="p-3.5 text-right text-blue-400 print:text-blue-800 font-mono">
+                    <td className="p-3.5 text-right text-slate-900 font-mono">
                       ₹{totalTbCredit.toFixed(2)}
                     </td>
                   </tr>
@@ -749,11 +749,11 @@ export default function ReportsPage() {
 
         {/* 3. INCOME & EXPENDITURE ACCOUNT REPORT */}
         {(activeReportTab === 'income_expenditure' || activeReportTab === 'overview') && (
-          <div className="space-y-6 pt-6 border-t border-slate-800 print:border-slate-300 print:pt-4 print:mt-0">
+          <div className="space-y-6 pt-6 border-t border-slate-200 print:border-slate-300 print:pt-4 print:mt-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-extrabold text-white print:text-2xl print:font-black print:text-slate-900">Income & Expenditure Account</h2>
-                <p className="text-xs text-slate-400 print:hidden mt-0.5">
+                <h2 className="text-lg font-extrabold text-slate-900 print:text-2xl print:font-black print:text-slate-900">Income & Expenditure Account</h2>
+                <p className="text-xs text-slate-500 print:hidden mt-0.5">
                   Statement of income and expenditure for the period, resulting in a surplus or deficit
                 </p>
                 <p className="hidden print:block text-xs font-mono text-slate-600 font-semibold mt-0.5 mb-2">
@@ -762,16 +762,16 @@ export default function ReportsPage() {
               </div>
 
               {/* Date Range Selector */}
-              <div className="flex items-center gap-3 bg-slate-900/80 border border-slate-800 p-2.5 rounded-2xl print:hidden">
+              <div className="flex items-center gap-3 bg-white border border-slate-200 p-2.5 rounded-2xl print:hidden shadow-xs">
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="text-[11px] font-bold text-slate-400 print:text-slate-700">From:</span>
+                  <span className="text-[11px] font-bold text-slate-600 print:text-slate-700">From:</span>
                   <CustomDateInput
                     value={ieStartDate}
                     onChange={(val) => setIeStartDate(val)}
                   />
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="text-[11px] font-bold text-slate-400 print:text-slate-700">To:</span>
+                  <span className="text-[11px] font-bold text-slate-600 print:text-slate-700">To:</span>
                   <CustomDateInput
                     value={ieEndDate}
                     onChange={(val) => setIeEndDate(val)}
@@ -781,7 +781,7 @@ export default function ReportsPage() {
                   <button
                     type="button"
                     onClick={resetIeDateRange}
-                    className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 underline font-mono print:hidden px-1"
+                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 underline font-mono print:hidden px-1"
                     title="Reset date range to current financial year"
                   >
                     Reset FY
@@ -793,10 +793,10 @@ export default function ReportsPage() {
             {/* TWO CARDS: INCOME & EXPENDITURE */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* INCOME CARD */}
-              <div className="border border-slate-800/80 rounded-2xl p-5 bg-slate-900/70 shadow-xl space-y-4 print:bg-white print:border-slate-300 print:shadow-none">
-                <h3 className="text-md font-bold text-slate-200 print:text-slate-900 font-mono uppercase border-b border-slate-800 print:border-slate-300 pb-2 flex justify-between items-center">
+              <div className="border border-slate-200 rounded-2xl p-5 bg-white shadow-xs space-y-4 print:border-slate-300 print:shadow-none">
+                <h3 className="text-md font-bold text-slate-900 font-mono uppercase border-b border-slate-200 print:border-slate-300 pb-2 flex justify-between items-center">
                   <span>INCOME</span>
-                  <span className="text-xs text-emerald-400 print:text-emerald-800 font-normal">Credits</span>
+                  <span className="text-xs text-emerald-700 font-normal">Credits</span>
                 </h3>
 
                 <div className="space-y-2 text-xs font-mono">
@@ -804,25 +804,25 @@ export default function ReportsPage() {
                     <div className="text-slate-500 text-center py-4 italic font-sans text-xs">No income account activity recorded for this period</div>
                   ) : (
                     displayedIncomeAccounts.map((inc) => (
-                      <div key={inc.id} className="flex justify-between py-1.5 border-b border-slate-800/60 print:border-slate-200 text-slate-300 print:text-slate-800">
-                        <span className="font-sans font-semibold text-slate-200 print:text-slate-900">{inc.name}</span>
-                        <span className="font-bold text-emerald-400 print:text-emerald-800">₹{inc.amount.toFixed(2)}</span>
+                      <div key={inc.id} className="flex justify-between py-1.5 border-b border-slate-200 text-slate-800">
+                        <span className="font-sans font-semibold text-slate-900">{inc.name}</span>
+                        <span className="font-bold text-emerald-700">₹{inc.amount.toFixed(2)}</span>
                       </div>
                     ))
                   )}
                 </div>
 
-                <div className="pt-4 border-t-2 border-slate-700 print:border-slate-400 flex justify-between items-center text-sm font-black font-mono">
-                  <span className="font-sans text-white print:text-slate-900">TOTAL INCOME</span>
-                  <span className="text-emerald-400 print:text-emerald-800">₹{totalPeriodIncome.toFixed(2)}</span>
+                <div className="pt-4 border-t-2 border-slate-300 flex justify-between items-center text-sm font-black font-mono">
+                  <span className="font-sans text-slate-900">TOTAL INCOME</span>
+                  <span className="text-emerald-700">₹{totalPeriodIncome.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* EXPENDITURE CARD */}
-              <div className="border border-slate-800/80 rounded-2xl p-5 bg-slate-900/70 shadow-xl space-y-4 print:bg-white print:border-slate-300 print:shadow-none">
-                <h3 className="text-md font-bold text-slate-200 print:text-slate-900 font-mono uppercase border-b border-slate-800 print:border-slate-300 pb-2 flex justify-between items-center">
+              <div className="border border-slate-200 rounded-2xl p-5 bg-white shadow-xs space-y-4 print:border-slate-300 print:shadow-none">
+                <h3 className="text-md font-bold text-slate-900 font-mono uppercase border-b border-slate-200 print:border-slate-300 pb-2 flex justify-between items-center">
                   <span>EXPENDITURE</span>
-                  <span className="text-xs text-purple-400 print:text-purple-800 font-normal">Debits</span>
+                  <span className="text-xs text-slate-600 font-normal">Debits</span>
                 </h3>
 
                 <div className="space-y-2 text-xs font-mono">
@@ -830,38 +830,38 @@ export default function ReportsPage() {
                     <div className="text-slate-500 text-center py-4 italic font-sans text-xs">No expenditure account activity recorded for this period</div>
                   ) : (
                     displayedExpenditureAccounts.map((exp) => (
-                      <div key={exp.id} className="flex justify-between py-1.5 border-b border-slate-800/60 print:border-slate-200 text-slate-300 print:text-slate-800">
-                        <span className="font-sans font-semibold text-slate-200 print:text-slate-900">{exp.name}</span>
-                        <span className="font-bold text-purple-400 print:text-purple-800">₹{exp.amount.toFixed(2)}</span>
+                      <div key={exp.id} className="flex justify-between py-1.5 border-b border-slate-200 text-slate-800">
+                        <span className="font-sans font-semibold text-slate-900">{exp.name}</span>
+                        <span className="font-bold text-slate-900">₹{exp.amount.toFixed(2)}</span>
                       </div>
                     ))
                   )}
                 </div>
 
-                <div className="pt-4 border-t-2 border-slate-700 print:border-slate-400 flex justify-between items-center text-sm font-black font-mono">
-                  <span className="font-sans text-white print:text-slate-900">TOTAL EXPENDITURE</span>
-                  <span className="text-purple-400 print:text-purple-800">₹{totalPeriodExpenditure.toFixed(2)}</span>
+                <div className="pt-4 border-t-2 border-slate-300 flex justify-between items-center text-sm font-black font-mono">
+                  <span className="font-sans text-slate-900">TOTAL EXPENDITURE</span>
+                  <span className="text-slate-900">₹{totalPeriodExpenditure.toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
             {/* DYNAMIC SURPLUS / (DEFICIT) SUMMARY BOX */}
-            <div className={`border rounded-2xl p-5 shadow-xl flex flex-col sm:flex-row justify-between items-center gap-3 print:bg-white print:shadow-none ${
+            <div className={`border rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row justify-between items-center gap-3 print:bg-white print:shadow-none ${
               periodNetSurplus >= 0
-                ? 'bg-emerald-950/40 border-emerald-800/60 print:border-emerald-700'
-                : 'bg-red-950/40 border-red-800/60 print:border-red-700'
+                ? 'bg-emerald-50 border-emerald-200'
+                : 'bg-red-50 border-red-200'
             }`}>
               <div className="font-sans text-center sm:text-left">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 print:text-slate-600 block">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
                   Period Financial Result ({ieStartDate ? formatDate(ieStartDate) : 'All-time'} to {ieEndDate ? formatDate(ieEndDate) : 'Present'})
                 </span>
-                <span className="text-base font-black text-slate-100 print:text-slate-900 mt-0.5 block">
+                <span className="text-base font-black text-slate-900 mt-0.5 block">
                   {periodNetSurplus >= 0 ? 'NET SURPLUS FOR THE PERIOD' : 'NET DEFICIT FOR THE PERIOD'}
                 </span>
               </div>
 
               <div className="font-mono text-2xl font-black">
-                <span className={periodNetSurplus >= 0 ? 'text-emerald-400 print:text-emerald-800' : 'text-red-400 print:text-red-700'}>
+                <span className={periodNetSurplus >= 0 ? 'text-emerald-700' : 'text-red-700'}>
                   {periodNetSurplus >= 0 ? `₹${periodNetSurplus.toFixed(2)}` : `(₹${Math.abs(periodNetSurplus).toFixed(2)})`}
                 </span>
               </div>
@@ -871,10 +871,10 @@ export default function ReportsPage() {
 
         {/* 4. BALANCE SHEET REPORT */}
         {(activeReportTab === 'balance_sheet' || activeReportTab === 'overview') && (
-          <div className="space-y-4 pt-6 border-t border-slate-800 print:border-slate-300 print:pt-4 print:mt-0">
+          <div className="space-y-4 pt-6 border-t border-slate-200 print:border-slate-300 print:pt-4 print:mt-0">
             <div>
-              <h2 className="text-lg font-extrabold text-white print:text-2xl print:font-black print:text-slate-900">Statement of Financial Position</h2>
-              <p className="text-xs text-slate-400 print:hidden mt-0.5">Non-profit Statement of Financial Position representing Net Assets and Fund Balances.</p>
+              <h2 className="text-lg font-extrabold text-slate-900 print:text-2xl print:font-black print:text-slate-900">Statement of Financial Position</h2>
+              <p className="text-xs text-slate-500 print:hidden mt-0.5">Non-profit Statement of Financial Position representing Net Assets and Fund Balances.</p>
               <p className="hidden print:block text-xs font-mono text-slate-600 font-semibold mt-0.5 mb-2">
                 Period: {ieStartDate && ieEndDate ? `${formatDate(ieStartDate)} to ${formatDate(ieEndDate)}` : ''}
               </p>
@@ -882,24 +882,24 @@ export default function ReportsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* ASSETS COLUMN */}
-              <div className="border border-slate-800/80 rounded-2xl p-5 bg-slate-900/70 shadow-xl space-y-4 print:bg-white print:border-slate-300 print:shadow-none">
-                <h3 className="text-md font-bold text-slate-200 print:text-slate-900 font-mono uppercase border-b border-slate-800 print:border-slate-300 pb-2">
+              <div className="border border-slate-200 rounded-2xl p-5 bg-white shadow-xs space-y-4 print:border-slate-300 print:shadow-none">
+                <h3 className="text-md font-bold text-slate-900 font-mono uppercase border-b border-slate-200 print:border-slate-300 pb-2">
                   Assets (Debits)
                 </h3>
                 <div className="space-y-2 text-xs font-mono">
                   {/* General Non-Student Asset Accounts (Filtered to non-zero) */}
                   {displayedGeneralAssetAccounts.map((a) => (
-                    <div key={a.accountId} className="flex justify-between py-1.5 border-b border-slate-800/60 print:border-slate-200 text-slate-300 print:text-slate-800">
-                      <span className="font-sans font-semibold text-slate-200 print:text-slate-900">{a.accountName}</span>
-                      <span className="font-bold text-white print:text-slate-900">₹{a.debitBalance.toFixed(2)}</span>
+                    <div key={a.accountId} className="flex justify-between py-1.5 border-b border-slate-200 text-slate-800">
+                      <span className="font-sans font-semibold text-slate-900">{a.accountName}</span>
+                      <span className="font-bold text-slate-900">₹{a.debitBalance.toFixed(2)}</span>
                     </div>
                   ))}
 
                   {/* Single Line for Student Accounts Receivable */}
                   {showStudentARInBS && (
-                    <div className="flex justify-between py-1.5 border-b border-slate-800/60 print:border-slate-200 text-slate-300 print:text-slate-800">
-                      <span className="font-sans font-bold text-slate-200 print:text-slate-900">Student Accounts Receivable</span>
-                      <span className="font-bold text-emerald-400 print:text-emerald-800">₹{studentTotalDebit.toFixed(2)}</span>
+                    <div className="flex justify-between py-1.5 border-b border-slate-200 text-slate-800">
+                      <span className="font-sans font-bold text-slate-900">Student Accounts Receivable</span>
+                      <span className="font-bold text-emerald-700">₹{studentTotalDebit.toFixed(2)}</span>
                     </div>
                   )}
 
@@ -909,33 +909,33 @@ export default function ReportsPage() {
                   )}
                 </div>
 
-                <div className="pt-4 border-t-2 border-slate-700 print:border-slate-400 flex justify-between items-center text-sm font-black font-mono">
-                  <span className="font-sans text-white print:text-slate-900">TOTAL ASSETS</span>
-                  <span className="text-emerald-400 print:text-emerald-800">₹{totalAssets.toFixed(2)}</span>
+                <div className="pt-4 border-t-2 border-slate-300 flex justify-between items-center text-sm font-black font-mono">
+                  <span className="font-sans text-slate-900">TOTAL ASSETS</span>
+                  <span className="text-emerald-700">₹{totalAssets.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* LIABILITIES & EQUITY / FUND BALANCE COLUMN */}
-              <div className="border border-slate-800/80 rounded-2xl p-5 bg-slate-900/70 shadow-xl space-y-4 print:bg-white print:border-slate-300 print:shadow-none">
-                <h3 className="text-md font-bold text-slate-200 print:text-slate-900 font-mono uppercase border-b border-slate-800 print:border-slate-300 pb-2">
+              <div className="border border-slate-200 rounded-2xl p-5 bg-white shadow-xs space-y-4 print:border-slate-300 print:shadow-none">
+                <h3 className="text-md font-bold text-slate-900 font-mono uppercase border-b border-slate-200 print:border-slate-300 pb-2">
                   Liabilities & Fund Balance (Credits)
                 </h3>
                 <div className="space-y-3 text-xs font-mono">
                   {/* Section A: Liabilities & Payables */}
                   <div className="space-y-1.5">
-                    <span className="text-[10px] uppercase font-bold text-amber-400/90 tracking-wider block font-sans">
+                    <span className="text-[10px] uppercase font-bold text-amber-800 tracking-wider block font-sans">
                       Liabilities & Student Obligations
                     </span>
                     {showStudentPayableInBS && (
-                      <div className="flex justify-between py-1.5 border-b border-slate-800/60 print:border-slate-200 text-amber-300 print:text-amber-900">
+                      <div className="flex justify-between py-1.5 border-b border-slate-200 text-amber-800">
                         <span className="font-sans font-bold">Due to Students (Overpayment Refund Due)</span>
                         <span className="font-bold">₹{studentTotalCredit.toFixed(2)}</span>
                       </div>
                     )}
                     {displayedGeneralLiabilityAccounts.map((l) => (
-                      <div key={l.accountId} className="flex justify-between py-1.5 border-b border-slate-800/60 print:border-slate-200 text-slate-300 print:text-slate-800">
-                        <span className="font-sans font-semibold text-slate-200 print:text-slate-900">{l.accountName}</span>
-                        <span className="font-bold text-white print:text-slate-900">₹{l.creditBalance.toFixed(2)}</span>
+                      <div key={l.accountId} className="flex justify-between py-1.5 border-b border-slate-200 text-slate-800">
+                        <span className="font-sans font-semibold text-slate-900">{l.accountName}</span>
+                        <span className="font-bold text-slate-900">₹{l.creditBalance.toFixed(2)}</span>
                       </div>
                     ))}
                     {!showStudentPayableInBS && displayedGeneralLiabilityAccounts.length === 0 && (
@@ -944,19 +944,19 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Section B: Fund Balance & Net Assets */}
-                  <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
-                    <span className="text-[10px] uppercase font-bold text-blue-400/90 tracking-wider block font-sans">
+                  <div className="space-y-1.5 pt-2 border-t border-slate-200">
+                    <span className="text-[10px] uppercase font-bold text-slate-700 tracking-wider block font-sans">
                       Equity & Net Assets
                     </span>
                     {displayedEquityAccounts.map((e) => (
-                      <div key={e.accountId} className="flex justify-between py-1.5 border-b border-slate-800/60 print:border-slate-200 text-slate-300 print:text-slate-800">
-                        <span className="font-sans font-semibold text-slate-200 print:text-slate-900">{e.accountName}</span>
-                        <span className="font-bold text-white print:text-slate-900">₹{e.creditBalance.toFixed(2)}</span>
+                      <div key={e.accountId} className="flex justify-between py-1.5 border-b border-slate-200 text-slate-800">
+                        <span className="font-sans font-semibold text-slate-900">{e.accountName}</span>
+                        <span className="font-bold text-slate-900">₹{e.creditBalance.toFixed(2)}</span>
                       </div>
                     ))}
                     {showNetSurplusInBS && (
-                      <div className={`flex justify-between py-1.5 border-b border-slate-800/60 print:border-slate-200 ${
-                        netSurplus >= 0 ? 'text-emerald-400 print:text-emerald-800' : 'text-red-400 print:text-red-700'
+                      <div className={`flex justify-between py-1.5 border-b border-slate-200 ${
+                        netSurplus >= 0 ? 'text-emerald-700' : 'text-red-700'
                       }`}>
                         <span className="font-sans font-bold">
                           {netSurplus >= 0 ? 'Current Period Net Surplus' : 'Current Period Net Deficit'}
@@ -974,24 +974,24 @@ export default function ReportsPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t-2 border-slate-700 print:border-slate-400 flex justify-between items-center text-sm font-black font-mono">
-                  <span className="font-sans text-white print:text-slate-900">TOTAL LIABILITIES & EQUITY</span>
-                  <span className="text-blue-400 print:text-blue-800">₹{totalLiabilitiesAndEquity.toFixed(2)}</span>
+                <div className="pt-4 border-t-2 border-slate-300 flex justify-between items-center text-sm font-black font-mono">
+                  <span className="font-sans text-slate-900">TOTAL LIABILITIES & EQUITY</span>
+                  <span className="text-slate-900">₹{totalLiabilitiesAndEquity.toFixed(2)}</span>
                 </div>
               </div>
             </div>
 
             {/* BALANCE SHEET TALLY VERIFICATION STATUS */}
-            <div className={`p-4 rounded-2xl border text-xs font-mono font-bold flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg print:border-slate-300 ${
+            <div className={`p-4 rounded-2xl border text-xs font-mono font-bold flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs print:border-slate-300 ${
               isBalanceSheetTallied
-                ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
-                : 'bg-red-950/40 border-red-800/60 text-red-300'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                : 'bg-red-50 border-red-200 text-red-900'
             }`}>
               <div className="flex items-center gap-2 font-sans">
                 <span className="text-base">{isBalanceSheetTallied ? '✓' : '⚠️'}</span>
                 <span>
                   FINANCIAL POSITION STATUS:{' '}
-                  <strong className={isBalanceSheetTallied ? 'text-emerald-400' : 'text-red-400'}>
+                  <strong className={isBalanceSheetTallied ? 'text-emerald-800' : 'text-red-700'}>
                     {isBalanceSheetTallied ? 'BALANCED & TALLIED' : 'UNBALANCED DISCREPANCY DETECTED'}
                   </strong>
                 </span>
@@ -1007,7 +1007,7 @@ export default function ReportsPage() {
 
         {/* 5. STUDENT LEDGER SUMMARY REPORT (DEBIT BOOK) */}
         {activeReportTab === 'student_ledger' && (
-          <div className="space-y-4 pt-6 border-t border-slate-800 print:border-slate-300 print:pt-0 print:border-t-0">
+          <div className="space-y-4 pt-6 border-t border-slate-200 print:border-slate-300 print:pt-0 print:border-t-0">
             {/* PRINT-ONLY SIMPLE HEADING */}
             <div className="hidden print:block mb-4 border-b border-slate-300 pb-3">
               <div className="flex justify-between items-end">
@@ -1024,17 +1024,17 @@ export default function ReportsPage() {
             <div className="space-y-3 print:hidden">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h2 className="text-lg font-extrabold text-white">
+                  <h2 className="text-lg font-extrabold text-slate-900">
                     Student Ledger Summary (Debit Book Report)
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Complete student roster with live double-entry balances, receivables, and refund obligations.
                   </p>
                 </div>
               </div>
 
               {/* Filtering & Sorting Toolbar (Hidden on Print) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/80 p-3 rounded-2xl border border-slate-800/80 shadow-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 min-w-0">
                   {/* Search Input */}
                   <div className="relative flex-1 min-w-[180px]">
@@ -1043,45 +1043,178 @@ export default function ReportsPage() {
                       placeholder="Search student or phone..."
                       value={studentSearchTerm}
                       onChange={(e) => setStudentSearchTerm(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-all"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-all"
                     />
                   </div>
 
-                  {/* Batch Filter Dropdown */}
-                  <select
-                    value={studentBatchFilter}
-                    onChange={(e) => setStudentBatchFilter(e.target.value)}
-                    className="w-full sm:w-auto bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-all font-medium cursor-pointer"
-                  >
-                    <option value="all" className="bg-slate-900 text-slate-100">All Batches</option>
-                    {uniqueBatchesInRoster.map((b) => (
-                      <option key={b.id} value={b.id} className="bg-slate-900 text-slate-100">
-                        {b.name}
-                      </option>
-                    ))}
-                  </select>
+                  {/* Multi-Batch Filter Popover */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsBatchDropdownOpen((prev) => !prev)}
+                      className="w-full sm:w-auto bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 hover:border-slate-300 focus:outline-none focus:border-emerald-500 transition-all font-semibold flex items-center justify-between gap-2 shadow-xs cursor-pointer"
+                    >
+                      <span className="flex items-center gap-1.5 truncate">
+                        <span className="text-slate-500">🎓</span>
+                        <span>
+                          {selectedBatches.includes('all') || selectedBatches.length === 0
+                            ? 'All Batches'
+                            : selectedBatches.length === 1
+                            ? `Batch: ${uniqueBatchesInRoster.find((b) => selectedBatches.includes(b.id))?.name || 'Selected'}`
+                            : `${selectedBatches.length} Batches Selected`}
+                        </span>
+                      </span>
+                      <span className="text-slate-400 text-[10px]">▼</span>
+                    </button>
 
-                  {/* SORT CONTROL DROPDOWN - Premium Slate-Emerald Accent */}
-                  <select
-                    value={studentSortBy}
-                    onChange={(e) => setStudentSortBy(e.target.value as any)}
-                    className="w-full sm:w-auto bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs font-semibold text-emerald-300 hover:border-emerald-500/50 focus:outline-none focus:border-emerald-500 transition-all cursor-pointer shadow-sm"
-                  >
-                    <option value="amount_desc" className="bg-slate-900 text-slate-100">Sort: Amount (High → Low)</option>
-                    <option value="amount_asc" className="bg-slate-900 text-slate-100">Sort: Amount (Low → High)</option>
-                    <option value="batch" className="bg-slate-900 text-slate-100">Sort: Batch Hierarchy</option>
-                    <option value="name_asc" className="bg-slate-900 text-slate-100">Sort: Name (A → Z)</option>
-                    <option value="name_desc" className="bg-slate-900 text-slate-100">Sort: Name (Z → A)</option>
-                  </select>
+                    {isBatchDropdownOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setIsBatchDropdownOpen(false)}
+                        />
+                        <div className="absolute left-0 mt-1 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 p-2.5 space-y-2 text-xs">
+                          <div className="flex items-center justify-between border-b border-slate-100 pb-2 px-1">
+                            <span className="font-bold text-slate-900">Filter Batches</span>
+                            <div className="flex gap-2 text-[11px]">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedBatches(['all'])}
+                                className="text-emerald-700 font-bold hover:underline"
+                              >
+                                Select All
+                              </button>
+                              <span className="text-slate-300">|</span>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedBatches([])}
+                                className="text-slate-500 hover:underline"
+                              >
+                                Clear
+                              </button>
+                            </div>
+                          </div>
+
+                          {uniqueBatchesInRoster.length > 5 && (
+                            <input
+                              type="text"
+                              placeholder="Search batch..."
+                              value={batchSearchTerm}
+                              onChange={(e) => setBatchSearchTerm(e.target.value)}
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
+                            />
+                          )}
+
+                          <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
+                            {/* All Batches Option */}
+                            <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-50 cursor-pointer text-slate-800 font-medium">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedBatches.includes('all') || selectedBatches.length === uniqueBatchesInRoster.length}
+                                  onChange={(e) => {
+                                    if (e.target.checked) setSelectedBatches(['all']);
+                                    else setSelectedBatches([]);
+                                  }}
+                                  className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                />
+                                <span>All Batches</span>
+                              </div>
+                              <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+                                {studentRoster.length}
+                              </span>
+                            </label>
+
+                            <hr className="border-slate-100 my-1" />
+
+                            {uniqueBatchesInRoster
+                              .filter((b) => !batchSearchTerm || b.name.toLowerCase().includes(batchSearchTerm.toLowerCase()))
+                              .map((b) => {
+                                const isChecked = !selectedBatches.includes('all') && selectedBatches.includes(b.id);
+                                return (
+                                  <label
+                                    key={b.id}
+                                    className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-50 cursor-pointer text-slate-800"
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={(e) => {
+                                          let next: string[];
+                                          if (selectedBatches.includes('all')) {
+                                            next = uniqueBatchesInRoster.map((item) => item.id);
+                                          } else {
+                                            next = [...selectedBatches];
+                                          }
+                                          if (e.target.checked) {
+                                            if (!next.includes(b.id)) next.push(b.id);
+                                          } else {
+                                            next = next.filter((id) => id !== b.id);
+                                          }
+                                          if (next.length === uniqueBatchesInRoster.length) {
+                                            setSelectedBatches(['all']);
+                                          } else {
+                                            setSelectedBatches(next);
+                                          }
+                                        }}
+                                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                      />
+                                      <span className="truncate font-semibold text-[11px]">{b.name}</span>
+                                    </div>
+                                    <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+                                      {b.count}
+                                    </span>
+                                  </label>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* SORT CONTROL DROPDOWN */}
+                  <div className="relative">
+                    <select
+                      value={studentSortBy}
+                      onChange={(e) => setStudentSortBy(e.target.value as any)}
+                      className="appearance-none w-full sm:w-auto bg-white border border-slate-200 rounded-xl pl-8 pr-8 py-2 text-xs font-semibold text-slate-800 hover:border-slate-300 focus:outline-none focus:border-emerald-500 transition-all cursor-pointer shadow-xs"
+                    >
+                      <option value="batch" className="bg-white text-slate-900">
+                        Sort: By Batch (General → JD → HS → BS)
+                      </option>
+                      <option value="amount_desc" className="bg-white text-slate-900">
+                        Sort: Balance: High to Low
+                      </option>
+                      <option value="amount_asc" className="bg-white text-slate-900">
+                        Sort: Balance: Low to High
+                      </option>
+                      <option value="name_asc" className="bg-white text-slate-900">
+                        Sort: Student Name (A → Z)
+                      </option>
+                      <option value="name_desc" className="bg-white text-slate-900">
+                        Sort: Student Name (Z → A)
+                      </option>
+                    </select>
+                    <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                      </svg>
+                    </div>
+                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[10px]">
+                      ▼
+                    </div>
+                  </div>
                 </div>
 
                 {/* Hide Zero Balance Checkbox */}
-                <label className="flex items-center justify-center sm:justify-start gap-2 text-xs text-slate-300 cursor-pointer bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl hover:border-slate-700 transition-all whitespace-nowrap shrink-0">
+                <label className="flex items-center justify-center sm:justify-start gap-2 text-xs text-slate-700 cursor-pointer bg-white border border-slate-200 px-3.5 py-2 rounded-xl hover:border-slate-300 transition-all whitespace-nowrap shrink-0">
                   <input
                     type="checkbox"
                     checked={hideZeroBalanceStudents}
                     onChange={(e) => setHideZeroBalanceStudents(e.target.checked)}
-                    className="rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-900"
+                    className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 bg-white"
                   />
                   <span className="font-medium text-[11px]">Hide ₹0.00 Balances</span>
                 </label>
@@ -1089,95 +1222,127 @@ export default function ReportsPage() {
             </div>
 
             {/* Student Roster Report Table (On-Screen View Only) */}
-            <div className="border border-slate-800/80 rounded-2xl overflow-x-auto shadow-xl bg-slate-900/40 print:hidden">
-              <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-slate-900 text-slate-300 border-b border-slate-800 font-bold uppercase">
-                  <tr>
-                    <th className="p-3.5">#</th>
-                    <th
-                      onClick={() => setStudentSortBy(studentSortBy === 'name_asc' ? 'name_desc' : 'name_asc')}
-                      className="p-3.5 cursor-pointer hover:text-emerald-400 transition-colors select-none"
-                      title="Click to sort by Name"
-                    >
-                      Student Name {studentSortBy === 'name_asc' ? '▲' : studentSortBy === 'name_desc' ? '▼' : ''}
-                    </th>
-                    <th
-                      onClick={() => setStudentSortBy('batch')}
-                      className="p-3.5 cursor-pointer hover:text-emerald-400 transition-colors select-none"
-                      title="Click to sort by Batch"
-                    >
-                      Batch {studentSortBy === 'batch' ? '✓' : ''}
-                    </th>
-                    <th className="p-3.5">Phone Number</th>
-                    <th className="p-3.5">Account Status</th>
-                    <th
-                      onClick={() => setStudentSortBy(studentSortBy === 'amount_desc' ? 'amount_asc' : 'amount_desc')}
-                      className="p-3.5 text-right cursor-pointer hover:text-emerald-400 transition-colors select-none"
-                      title="Click to sort by Amount (High to Low / Low to High)"
-                    >
-                      Net Balance (₹) {studentSortBy === 'amount_desc' ? '▼ (High → Low)' : studentSortBy === 'amount_asc' ? '▲ (Low → High)' : ''}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {filteredStudentRoster.length === 0 ? (
+            <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs bg-white print:hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] text-left text-xs font-mono">
+                  <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold uppercase text-[11px]">
                     <tr>
-                      <td colSpan={6} className="p-8 text-center text-slate-500 italic font-sans text-xs">
-                        No student records match the selected filters.
+                      <th className="p-3.5 whitespace-nowrap">#</th>
+                      <th
+                        onClick={() => setStudentSortBy(studentSortBy === 'name_asc' ? 'name_desc' : 'name_asc')}
+                        className="p-3.5 cursor-pointer hover:text-emerald-700 transition-colors select-none whitespace-nowrap"
+                        title="Click to sort by Name"
+                      >
+                        Student Name {studentSortBy === 'name_asc' ? '▲' : studentSortBy === 'name_desc' ? '▼' : ''}
+                      </th>
+                      <th
+                        onClick={() => setStudentSortBy('batch')}
+                        className="p-3.5 cursor-pointer hover:text-emerald-700 transition-colors select-none whitespace-nowrap"
+                        title="Click to sort by Batch"
+                      >
+                        Batch {studentSortBy === 'batch' ? '✓' : ''}
+                      </th>
+                      <th className="p-3.5 whitespace-nowrap">Phone Number</th>
+                      <th className="p-3.5 whitespace-nowrap">Account Status</th>
+                      <th
+                        onClick={() => setStudentSortBy(studentSortBy === 'amount_desc' ? 'amount_asc' : 'amount_desc')}
+                        className="p-3.5 text-right cursor-pointer hover:text-emerald-700 transition-colors select-none whitespace-nowrap"
+                        title="Click to sort by Balance (High to Low / Low to High)"
+                      >
+                        Net Balance (₹) {studentSortBy === 'amount_desc' ? '▼ (High → Low)' : studentSortBy === 'amount_asc' ? '▲ (Low → High)' : ''}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {filteredStudentRoster.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-500 italic font-sans text-xs">
+                          No student records match the selected filters.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredStudentRoster.map((student, idx) => {
+                        const balInfo = formatStudentBalance(student.balance, { showDrCr: true, context: 'admin' });
+                        return (
+                          <tr key={student.id} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="p-3.5 text-slate-500 whitespace-nowrap">{idx + 1}</td>
+                            <td className="p-3.5 font-sans font-bold text-slate-900 whitespace-nowrap">{student.name}</td>
+                            <td className="p-3.5 text-slate-600 font-bold text-[11px] whitespace-nowrap">{student.batch_name}</td>
+                            <td className="p-3.5 text-slate-600 whitespace-nowrap">{student.phone}</td>
+                            <td className="p-3.5 whitespace-nowrap">
+                              {balInfo.isZero ? (
+                                <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold font-sans border border-slate-200">
+                                  Settled (₹0.00)
+                                </span>
+                              ) : balInfo.isCredit ? (
+                                <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-800 text-[10px] font-bold font-sans border border-amber-200">
+                                  Refund Due
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-bold font-sans border border-emerald-200">
+                                  Payment Pending
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3.5 text-right font-bold font-mono whitespace-nowrap">
+                              {balInfo.isZero ? (
+                                <span className="text-slate-500">₹0.00</span>
+                              ) : balInfo.isCredit ? (
+                                <span className="text-amber-700">{balInfo.formatted}</span>
+                              ) : (
+                                <span className="text-emerald-700">{balInfo.formatted}</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+
+                    {/* On-Screen 6-Column Summary Row (Single overall total at the bottom) */}
+                    <tr className="bg-slate-100 font-black text-xs border-t-2 border-slate-300 text-slate-900">
+                      <td colSpan={4} className="p-3.5 font-sans uppercase whitespace-nowrap">
+                        Total Roster Summary ({rosterSummary.count} Students)
+                      </td>
+                      <td className="p-3.5 text-slate-700 font-mono text-[11px] whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span>Dr: ₹{rosterSummary.totalDr.toFixed(2)}</span>
+                          <span className="text-slate-400">|</span>
+                          <span>Cr: ₹{rosterSummary.totalCr.toFixed(2)}</span>
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-right text-emerald-700 font-mono text-sm whitespace-nowrap">
+                        Net AR: ₹{rosterSummary.netAR.toFixed(2)}
                       </td>
                     </tr>
-                  ) : (
-                    filteredStudentRoster.map((student, idx) => {
-                      const balInfo = formatStudentBalance(student.balance, { showDrCr: true, context: 'admin' });
-                      return (
-                        <tr key={student.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="p-3.5 text-slate-500">{idx + 1}</td>
-                          <td className="p-3.5 font-sans font-bold text-slate-200">{student.name}</td>
-                          <td className="p-3.5 text-slate-400 font-bold text-[11px]">{student.batch_name}</td>
-                          <td className="p-3.5 text-slate-400">{student.phone}</td>
-                          <td className="p-3.5">
-                            {balInfo.isZero ? (
-                              <span className="px-2 py-0.5 rounded bg-slate-800/60 text-slate-400 text-[10px] font-bold font-sans">
-                                Settled (₹0.00)
-                              </span>
-                            ) : balInfo.isCredit ? (
-                              <span className="px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 text-[10px] font-bold font-sans">
-                                Refund Due
-                              </span>
-                            ) : (
-                              <span className="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 text-[10px] font-bold font-sans">
-                                Payment Pending
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-3.5 text-right font-bold font-mono">
-                            {balInfo.isZero ? (
-                              <span className="text-slate-500">₹0.00</span>
-                            ) : balInfo.isCredit ? (
-                              <span className="text-amber-400">{balInfo.formatted}</span>
-                            ) : (
-                              <span className="text-emerald-400">{balInfo.formatted}</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                  </tbody>
+                </table>
+              </div>
 
-                  {/* On-Screen 6-Column Summary Row */}
-                  <tr className="bg-slate-900 font-black text-xs border-t-2 border-slate-700 text-slate-100">
-                    <td colSpan={4} className="p-3.5 font-sans uppercase">
-                      Total Roster Summary ({rosterSummary.count} Students)
-                    </td>
-                    <td className="p-3.5 text-slate-400 font-mono text-[11px]">
-                      Dr: ₹{rosterSummary.totalDr.toFixed(2)} | Cr: ₹{rosterSummary.totalCr.toFixed(2)}
-                    </td>
-                    <td className="p-3.5 text-right text-emerald-400 font-mono text-sm">
-                      Net AR: ₹{rosterSummary.netAR.toFixed(2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              {/* Mobile & Desktop Docked Summary Footer Bar */}
+              <div className="bg-slate-50 border-t-2 border-slate-300 p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                  <span className="font-sans uppercase font-bold text-slate-800 text-[11px] sm:text-xs tracking-wider whitespace-nowrap">
+                    Total Roster Summary ({rosterSummary.count} Students)
+                  </span>
+                </div>
+                <div className="flex items-center text-slate-700 flex-nowrap overflow-x-auto">
+                  <div className="inline-flex items-center gap-2 sm:gap-2.5 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-2xs text-[11px] font-mono whitespace-nowrap">
+                    <span>
+                      Dr: <span className="text-slate-900 font-bold">₹{rosterSummary.totalDr.toFixed(2)}</span>
+                    </span>
+                    <span className="text-slate-300">|</span>
+                    <span>
+                      Cr: <span className="text-slate-900 font-bold">₹{rosterSummary.totalCr.toFixed(2)}</span>
+                    </span>
+                    <span className="text-slate-300">|</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-700 font-black">
+                      <span className="text-emerald-800 font-semibold text-[10px]">Net AR:</span>
+                      <span>₹{rosterSummary.netAR.toFixed(2)}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* PRINT-ONLY THREE SEPARATE SIDE-BY-SIDE TABLES VIEW */}

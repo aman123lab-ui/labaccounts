@@ -16,7 +16,7 @@ export interface BatchWithCount extends Batch {
 
 /**
  * Calculates sorting rank and year for a batch.
- * Academic Categories: JD (group 1) -> HS (group 2) -> BS (group 3) -> General (group 4).
+ * Category Order: General (group 1) -> JD (group 2) -> HS (group 3) -> BS (group 4).
  * Alumni Categories: Group 99, sorted by graduating year descending (newest first).
  */
 export function getBatchRank(name: string, category?: string): { group: number; year: number } {
@@ -29,40 +29,50 @@ export function getBatchRank(name: string, category?: string): { group: number; 
     return { group: 99, year };
   }
 
-  if (norm.startsWith('JD') || catNorm === 'JD') return { group: 1, year: 0 };
-  if (norm.startsWith('HS') || catNorm === 'HS') return { group: 2, year: 0 };
-  if (norm.startsWith('BS') || catNorm === 'BS') return { group: 3, year: 0 };
-  return { group: 4, year: 0 };
+  if (norm.startsWith('JD') || catNorm === 'JD') return { group: 2, year: 0 };
+  if (norm.startsWith('HS') || catNorm === 'HS') return { group: 3, year: 0 };
+  if (norm.startsWith('BS') || catNorm === 'BS') return { group: 4, year: 0 };
+  return { group: 1, year: 0 };
+}
+
+/**
+ * Compares two batch names using the shared category order: General -> JD -> HS -> BS.
+ */
+export function compareBatchNames(
+  aName: string = '',
+  bName: string = '',
+  aCategory?: string,
+  bCategory?: string
+): number {
+  const rankA = getBatchRank(aName, aCategory);
+  const rankB = getBatchRank(bName, bCategory);
+
+  if (rankA.group !== rankB.group) {
+    return rankA.group - rankB.group;
+  }
+
+  if (rankA.group === 99) {
+    // Alumni group: sort by graduating year descending (newest year first)
+    if (rankA.year !== rankB.year) {
+      return rankB.year - rankA.year;
+    }
+    return (aName || '').localeCompare(bName || '');
+  }
+
+  // Natural numeric sort inside category group (e.g., JD 1 vs JD 2 vs JD 10)
+  return (aName || '').localeCompare(bName || '', undefined, { numeric: true, sensitivity: 'base' });
 }
 
 /**
  * Sorts batches according to specification:
- * 1. JD batches (JD 1, JD 2, JD 3...)
- * 2. HS batches (HS 1, HS 2...)
- * 3. BS batches (BS 1 through BS 5...)
- * 4. General / Others
+ * 1. General batches first
+ * 2. JD batches (JD 1, JD 2, JD 3...)
+ * 3. HS batches (HS 1, HS 2...)
+ * 4. BS batches (BS 1 through BS 5...)
  * 5. Year-specific Alumni batches (Alumni 2027, Alumni 2026...) newest year first, then generic Alumni
  */
 export function sortBatches<T extends { name: string; category?: string }>(batches: T[]): T[] {
-  return [...batches].sort((a, b) => {
-    const rankA = getBatchRank(a.name, a.category);
-    const rankB = getBatchRank(b.name, b.category);
-
-    if (rankA.group !== rankB.group) {
-      return rankA.group - rankB.group;
-    }
-
-    if (rankA.group === 99) {
-      // Alumni group: sort by graduating year descending (newest year first)
-      if (rankA.year !== rankB.year) {
-        return rankB.year - rankA.year;
-      }
-      return (a.name || '').localeCompare(b.name || '');
-    }
-
-    // Natural sort inside academic group (e.g., JD 1 vs JD 2 vs JD 10)
-    return (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' });
-  });
+  return [...batches].sort((a, b) => compareBatchNames(a.name, b.name, a.category, b.category));
 }
 
 /**
@@ -222,9 +232,13 @@ export async function createBatch(name: string, category?: string): Promise<{ su
 
   if (error || !data || data.length === 0) {
     try {
+      const userRole = typeof window !== 'undefined' ? localStorage.getItem('lab_user_role') || 'admin' : 'admin';
       const apiRes = await fetch('/api/batch/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-role': userRole,
+        },
         body: JSON.stringify({ name: cleanName, category: finalCategory }),
       });
       const resData = await apiRes.json();
@@ -283,9 +297,13 @@ export async function updateBatch(
 
   if (error || !data || data.length === 0) {
     try {
+      const userRole = typeof window !== 'undefined' ? localStorage.getItem('lab_user_role') || 'admin' : 'admin';
       const apiRes = await fetch('/api/batch/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-role': userRole,
+        },
         body: JSON.stringify({ id, name: cleanName, category: cleanCategory }),
       });
       const resData = await apiRes.json();
@@ -303,12 +321,37 @@ export async function updateBatch(
 
 /**
  * Deletes a batch ONLY if zero active students are assigned.
+ * Calls /api/batch/delete which executes with service role permissions.
  */
 export async function deleteBatch(id: string): Promise<{ success: boolean; error?: string }> {
   if (isGuestMode()) {
     return deleteDemoBatch(id);
   }
 
+  // 1. Primary: Use server API endpoint which has service role key to bypass RLS restrictions safely
+  try {
+    const userRole = typeof window !== 'undefined' ? localStorage.getItem('lab_user_role') || 'admin' : 'admin';
+    const apiRes = await fetch('/api/batch/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-role': userRole,
+      },
+      body: JSON.stringify({ id }),
+    });
+
+    const resData = await apiRes.json();
+    if (resData.success) {
+      return { success: true };
+    }
+    if (resData.error) {
+      return { success: false, error: resData.error };
+    }
+  } catch (apiErr) {
+    console.warn('API route batch delete error, attempting direct client fallback:', apiErr);
+  }
+
+  // 2. Direct client fallback with student check & select() verification
   const supabase = createClient();
 
   // Check student count
@@ -338,24 +381,18 @@ export async function deleteBatch(id: string): Promise<{ success: boolean; error
     };
   }
 
-  const { error: deleteErr } = await supabase.from('batches').delete().eq('id', id);
+  const { data: deletedRows, error: deleteErr } = await (supabase
+    .from('batches' as any) as any)
+    .delete()
+    .eq('id', id)
+    .select('id');
 
   if (deleteErr) {
-    try {
-      const apiRes = await fetch('/api/batch/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-user-role': 'admin' },
-        body: JSON.stringify({ id }),
-      });
-      const resData = await apiRes.json();
-      if (resData.success) {
-        return { success: true };
-      }
-      return { success: false, error: resData.error || deleteErr.message };
-    } catch (apiErr) {
-      console.warn('API route batch delete fallback error:', apiErr);
-    }
     return { success: false, error: deleteErr.message };
+  }
+
+  if (!deletedRows || deletedRows.length === 0) {
+    return { success: false, error: 'Failed to delete batch. Server permission denied or batch not found.' };
   }
 
   return { success: true };

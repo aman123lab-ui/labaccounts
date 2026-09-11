@@ -87,6 +87,7 @@ const A_FUND     = '30000000-0000-0000-0000-000000000001';
 const A_INCOME   = '40000000-0000-0000-0000-000000000001';
 const A_PAPER    = '50000000-0000-0000-0000-000000000001';
 const A_EQUIP    = '50000000-0000-0000-0000-000000000002';
+const A_AR_OTHER = '10000000-0000-0000-0000-000000000004';
 
 const A_AR_AARAV  = 'acc-ar-aarav-01';
 const A_AR_PRIYA  = 'acc-ar-priya-02';
@@ -130,13 +131,14 @@ export function createInitialDemoDataset(): DemoDataSet {
   // ── ACCOUNTS ───────────────────────────────────────────────────────────────
   const accounts: Account[] = [
     { id: A_CASH,     name: 'Cash and Bank Account',                      type: 'asset',     is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
-    { id: A_INCHARGE, name: 'Cash in Hand (In-Charge)',                   type: 'asset',     is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
+    { id: A_INCHARGE, name: 'Cash in Hand (In-Charge: Anfaz)',                   type: 'asset',     is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
     { id: A_AR_SUM,   name: 'Student Accounts Receivable (Summary)',      type: 'asset',     is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
     { id: A_AP,       name: 'Accounts Payable',                           type: 'liability', is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
     { id: A_FUND,     name: 'Fund Balance / Net Assets',                  type: 'equity',    is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
     { id: A_INCOME,   name: 'Printing Service Income',                    type: 'revenue',   is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
     { id: A_PAPER,    name: 'Paper & Ink Expense',                        type: 'expense',   is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
     { id: A_EQUIP,    name: 'Equipment Maintenance Expense',              type: 'expense',   is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
+    { id: A_AR_OTHER, name: 'Accounts Receivable (Other)',               type: 'asset',     is_student_account: false, created_at: '2025-01-01T00:00:00Z' },
     { id: A_AR_AARAV,  name: 'Aarav Sharma - Accounts Receivable',  type: 'asset', is_student_account: true,  student_id: 'student-aarav-01',  created_at: d7 },
     { id: A_AR_PRIYA,  name: 'Priya Nair - Accounts Receivable',    type: 'asset', is_student_account: true,  student_id: 'student-priya-02',  created_at: d7 },
     { id: A_AR_RAHUL,  name: 'Rahul Menon - Accounts Receivable',   type: 'asset', is_student_account: true,  student_id: 'student-rahul-03',  created_at: d7 },
@@ -230,7 +232,7 @@ export function createInitialDemoDataset(): DemoDataSet {
     je(d2, 'Print job — Arjun Verma (B&W, 35 pages)',
       [{ a: A_AR_ARJUN, dr: 35, cr: 0 }, { a: A_INCOME, dr: 0, cr: 35 }]),
 
-    je(d2, 'Cash collected by Yaseen (Staff) — Priya Nair full payment',
+    je(d2, 'Cash collected by Anfaz (Staff) — Priya Nair full payment',
       [{ a: A_INCHARGE, dr: 50, cr: 0 }, { a: A_AR_PRIYA, dr: 0, cr: 50 }]),
 
     // d1 — Print + payment

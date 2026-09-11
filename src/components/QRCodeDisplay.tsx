@@ -64,7 +64,7 @@ export default function QRCodeDisplay({ value, size = 240, className = '' }: QRC
       {/* Full Screen Zoom Modal for Desktop Scanning */}
       {isZoomed && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-fade-in"
           onClick={() => setIsZoomed(false)}
         >
           <div

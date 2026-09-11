@@ -7,8 +7,8 @@ import {
   DemoPaymentClaim,
   DemoFinancialYear,
 } from './demoData';
-import { sortBatches } from '@/services/batchService';
-import { normalizePhone } from '@/services/authService';
+import { sortBatches, compareBatchNames } from '@/services/batchService';
+import { normalizePhone, formatStudentName } from '@/services/authService';
 
 let activeGuestMode = false;
 let demoState: DemoDataSet | null = null;
@@ -178,6 +178,15 @@ export function getDemoStudents(options?: { status?: 'active' | 'archived'; sear
     };
   });
 
+  // Sort by Batch category order: General -> JD -> HS -> BS, then numerically within batch, then student name
+  result.sort((a, b) => {
+    const batchA = store.batches.find((bObj) => bObj.id === a.batch_id);
+    const batchB = store.batches.find((bObj) => bObj.id === b.batch_id);
+    const batchCmp = compareBatchNames(a.batch_name, b.batch_name, batchA?.category, batchB?.category);
+    if (batchCmp !== 0) return batchCmp;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
   if (options?.search && options.search.trim()) {
     const term = options.search.trim().toLowerCase();
     const cleanTermPhone = normalizePhone(term);
@@ -264,6 +273,7 @@ export function getDemoStudentStatement(studentId: string) {
 export function registerDemoStudentSingle(input: { name: string; phone: string; password: string; batchId: string }) {
   const store = getStore();
   const cleanPhone = normalizePhone(input.phone);
+  const cleanName = formatStudentName(input.name);
 
   const existing = store.students.find((s) => s.phone === cleanPhone);
   if (existing) {
@@ -273,7 +283,7 @@ export function registerDemoStudentSingle(input: { name: string; phone: string; 
   const studentId = `student-demo-${Date.now()}`;
   const newStudent: Student = {
     id: studentId,
-    name: input.name.trim(),
+    name: cleanName,
     phone: cleanPhone,
     password_hash: input.password,
     batch_id: input.batchId,
@@ -286,7 +296,7 @@ export function registerDemoStudentSingle(input: { name: string; phone: string; 
   const accountId = `acc-ar-demo-${Date.now()}`;
   store.accounts.push({
     id: accountId,
-    name: `${input.name.trim()} - Accounts Receivable`,
+    name: `${cleanName} - Accounts Receivable`,
     type: 'asset',
     is_student_account: true,
     student_id: studentId,
@@ -305,9 +315,10 @@ export function registerDemoStudentsBulk(rows: { name: string; batch: string; ph
 
   rows.forEach((row, i) => {
     const cleanPhone = normalizePhone(row.phone || '');
-    if (!cleanPhone || !row.name) {
+    const cleanName = formatStudentName(row.name || '');
+    if (!cleanPhone || !cleanName) {
       failureCount++;
-      rowResults.push({ rowNumber: i + 1, name: row.name || 'N/A', status: 'failed', error: 'Missing name or phone' });
+      rowResults.push({ rowNumber: i + 1, name: cleanName || 'N/A', status: 'failed', error: 'Missing name or phone' });
       return;
     }
 
@@ -317,7 +328,7 @@ export function registerDemoStudentsBulk(rows: { name: string; batch: string; ph
     }
 
     const res = registerDemoStudentSingle({
-      name: row.name,
+      name: cleanName,
       phone: cleanPhone,
       password: row.password || '1234',
       batchId: batch?.id || store.batches[0]?.id || 'batch-msc-2025',
@@ -333,15 +344,15 @@ export function registerDemoStudentsBulk(rows: { name: string; batch: string; ph
               { accountId: acc.id, debit: Number(row.balance), credit: 0 },
               { accountId: '30000000-0000-0000-0000-000000000001', debit: 0, credit: Number(row.balance) },
             ],
-            `Opening balance for ${row.name}`
+            `Opening balance for ${cleanName}`
           );
           openingBalancesPosted++;
         }
       }
-      rowResults.push({ rowNumber: i + 1, name: row.name, status: 'success' });
+      rowResults.push({ rowNumber: i + 1, name: cleanName, status: 'success' });
     } else {
       failureCount++;
-      rowResults.push({ rowNumber: i + 1, name: row.name, status: 'failed', error: res.error });
+      rowResults.push({ rowNumber: i + 1, name: cleanName, status: 'failed', error: res.error });
     }
   });
 
@@ -352,9 +363,16 @@ export function updateDemoStudent(id: string, data: { name: string; phone: strin
   const store = getStore();
   const student = store.students.find((s) => s.id === id);
   if (!student) return { success: false, error: 'Student not found' };
-  student.name = data.name.trim();
+  const cleanName = formatStudentName(data.name);
+  student.name = cleanName;
   student.phone = normalizePhone(data.phone);
   student.batch_id = data.batch_id;
+
+  const acc = store.accounts.find((a) => a.student_id === id);
+  if (acc) {
+    acc.name = `${cleanName} - Accounts Receivable`;
+  }
+
   return { success: true };
 }
 
@@ -678,6 +696,13 @@ export function voidDemoJournalEntry(entryId: string) {
   je.voided_at = new Date().toISOString();
   return { success: true };
 }
+
+export function deleteDemoJournalEntry(entryId: string) {
+  const store = getStore();
+  store.journalEntries = store.journalEntries.filter((e) => e.id !== entryId);
+  return { success: true };
+}
+
 
 // ----------------------------------------------------
 // METRICS & FINANCIAL REPORTS

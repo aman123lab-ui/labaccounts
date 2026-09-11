@@ -7,10 +7,12 @@ import {
   isGuestMode,
   getDemoJournalEntries,
   voidDemoJournalEntry,
+  deleteDemoJournalEntry,
   updateDemoJournalEntry,
   getDemoAccounts,
   getDemoLedgerAccountsGrouped,
 } from '@/lib/demo/demoStore';
+
 
 export interface DetailedJournalLine {
   id: string;
@@ -313,6 +315,34 @@ export async function voidJournalEntry(
 
   return { success: true };
 }
+
+/**
+ * Permanently deletes a journal entry from the database.
+ */
+export async function deleteJournalEntry(
+  journalEntryId: string,
+  deletedBy: string = 'Admin'
+): Promise<{ success: boolean; error?: string }> {
+  if (isGuestMode()) {
+    return deleteDemoJournalEntry(journalEntryId);
+  }
+
+  try {
+    const apiRes = await fetch('/api/journal/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ journalEntryId, deletedBy }),
+    });
+    const data = await apiRes.json();
+    if (data.success) {
+      return { success: true };
+    }
+    return { success: false, error: data.error || 'Failed to permanently delete journal entry.' };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Error deleting journal entry.' };
+  }
+}
+
 
 /**
  * Updates a journal entry's description, date, and lines.

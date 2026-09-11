@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { getAdminDashboardMetrics, AdminDashboardMetrics } from '@/services/accountingService';
@@ -17,8 +17,14 @@ import {
   FinancialYearIcon,
 } from '@/components/NavIcons';
 
-function formatCurrency(val: number): string {
-  return `₹${Math.abs(val).toFixed(2)}`;
+function formatCurrency(val: number): React.ReactNode {
+  const abs = Math.abs(val).toFixed(2);
+  return (
+    <span className="inline-flex items-center gap-0.5">
+      <span className="font-sans">₹</span>
+      <span className="font-mono">{abs}</span>
+    </span>
+  );
 }
 
 type CardSize = 'hero' | 'wide' | 'tall' | 'standard' | 'compact';
@@ -53,49 +59,6 @@ export default function AdminDashboardPage() {
     surplus: 0,
   });
   const [loading, setLoading] = useState(true);
-
-  // ─── Site Settings: show_demo_button ────────────────────────────────────
-  const [showDemoButton, setShowDemoButton] = useState<boolean | null>(null); // null = loading
-  const [settingsSaving, setSettingsSaving] = useState(false);
-  const [settingsMsg, setSettingsMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  const fetchDemoSetting = useCallback(async () => {
-    try {
-      const res = await fetch('/api/app-settings?key=show_demo_button');
-      if (res.ok) {
-        const json = await res.json();
-        setShowDemoButton(json.value !== 'false');
-      }
-    } catch {
-      setShowDemoButton(true); // Default ON on error
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDemoSetting();
-  }, [fetchDemoSetting]);
-
-  const handleDemoButtonToggle = async (newValue: boolean) => {
-    setSettingsSaving(true);
-    setSettingsMsg(null);
-    const prev = showDemoButton;
-    setShowDemoButton(newValue); // Optimistic update
-    try {
-      const res = await fetch('/api/app-settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: 'show_demo_button', value: String(newValue) }),
-      });
-      if (!res.ok) throw new Error('Save failed');
-      setSettingsMsg({ type: 'success', text: newValue ? 'Demo button shown on login page.' : 'Demo button hidden from login page.' });
-    } catch {
-      setShowDemoButton(prev); // Revert on failure
-      setSettingsMsg({ type: 'error', text: 'Failed to save setting. Please try again.' });
-    } finally {
-      setSettingsSaving(false);
-      setTimeout(() => setSettingsMsg(null), 3500);
-    }
-  };
 
   const getPeriodRange = () => {
     if (periodMode === 'today') {
@@ -141,12 +104,12 @@ export default function AdminDashboardPage() {
       buttonText: 'Open Debit Book',
       icon: DebitBookIcon,
       size: 'hero', // 2x2 Bento Hero
-      accentBorder: 'border-emerald-800/50 hover:border-emerald-500/80',
-      accentBg: 'bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40',
-      iconBg: 'bg-emerald-950 border-emerald-700/60 text-emerald-400',
-      btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950/50',
+      accentBorder: 'border-slate-200 hover:border-slate-300 hover:shadow-md',
+      accentBg: 'bg-white',
+      iconBg: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+      btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs',
       badgeText: 'Primary Daily Activity',
-      badgeStyle: 'text-emerald-400 border-emerald-800/60 font-mono',
+      badgeStyle: 'text-emerald-800 bg-emerald-50 border-emerald-200 font-mono',
       features: ['Instant Student Lookup', 'Log Print Debits & Cash', 'Auto Double-Entry Posting'],
     },
     {
@@ -156,12 +119,12 @@ export default function AdminDashboardPage() {
       buttonText: 'Review Claims',
       icon: PaymentClaimsIcon,
       size: 'wide', // 2x1 Wide Banner
-      accentBorder: 'border-amber-800/50 hover:border-amber-500/80',
-      accentBg: 'bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40',
-      iconBg: 'bg-amber-950 border-amber-700/60 text-amber-400',
-      btnBg: 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-amber-950/50',
+      accentBorder: 'border-slate-200 hover:border-slate-300 hover:shadow-md',
+      accentBg: 'bg-white',
+      iconBg: 'bg-amber-50 border-amber-200 text-amber-700',
+      btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs',
       badgeText: 'Student UPI Approval',
-      badgeStyle: 'text-amber-400 border-amber-800/60 font-mono',
+      badgeStyle: 'text-amber-800 bg-amber-50 border-amber-200 font-mono',
     },
     {
       title: 'Journal Entry',
@@ -170,12 +133,12 @@ export default function AdminDashboardPage() {
       buttonText: 'Open Journal Log',
       icon: JournalIcon,
       size: 'tall', // 1x2 Tall Card
-      accentBorder: 'border-indigo-800/50 hover:border-indigo-500/80',
-      accentBg: 'bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40',
-      iconBg: 'bg-indigo-950 border-indigo-700/60 text-indigo-400',
-      btnBg: 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-950/50',
+      accentBorder: 'border-slate-200 hover:border-slate-300 hover:shadow-md',
+      accentBg: 'bg-white',
+      iconBg: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+      btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs',
       badgeText: 'Full Audit Trail',
-      badgeStyle: 'text-indigo-400 border-indigo-800/60 font-mono',
+      badgeStyle: 'text-indigo-800 bg-indigo-50 border-indigo-200 font-mono',
     },
     {
       title: 'Ledger Accounts',
@@ -184,12 +147,12 @@ export default function AdminDashboardPage() {
       buttonText: 'View Accounts',
       icon: LedgerAccountsIcon,
       size: 'standard', // 1x1 Standard Card
-      accentBorder: 'border-cyan-800/50 hover:border-cyan-500/80',
-      accentBg: 'bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/30',
-      iconBg: 'bg-cyan-950 border-cyan-700/60 text-cyan-400',
-      btnBg: 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-cyan-950/50',
+      accentBorder: 'border-slate-200 hover:border-slate-300 hover:shadow-md',
+      accentBg: 'bg-white',
+      iconBg: 'bg-slate-100 border-slate-200 text-slate-700',
+      btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs',
       badgeText: 'T-Accounts',
-      badgeStyle: 'text-cyan-400 border-cyan-800/60 font-mono',
+      badgeStyle: 'text-slate-800 bg-slate-100 border-slate-200 font-mono',
     },
     {
       title: 'Workforce & Collections',
@@ -198,12 +161,12 @@ export default function AdminDashboardPage() {
       buttonText: 'Review Collections',
       icon: InChargeIcon,
       size: 'wide', // 2x1 Wide Card
-      accentBorder: 'border-rose-800/50 hover:border-rose-500/80',
-      accentBg: 'bg-gradient-to-br from-slate-900 via-slate-900 to-rose-950/30',
-      iconBg: 'bg-rose-950 border-rose-700/60 text-rose-400',
-      btnBg: 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-950/50',
+      accentBorder: 'border-slate-200 hover:border-slate-300 hover:shadow-md',
+      accentBg: 'bg-white',
+      iconBg: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+      btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs',
       badgeText: 'Shift Handover',
-      badgeStyle: 'text-rose-400 border-rose-800/60 font-mono',
+      badgeStyle: 'text-indigo-800 bg-indigo-50 border-indigo-200 font-mono',
     },
     {
       title: 'All Students',
@@ -212,12 +175,12 @@ export default function AdminDashboardPage() {
       buttonText: 'Manage Students',
       icon: StudentsIcon,
       size: 'standard', // 1x1 Standard Card
-      accentBorder: 'border-purple-800/50 hover:border-purple-500/80',
-      accentBg: 'bg-gradient-to-br from-slate-900 via-slate-900 to-purple-950/30',
-      iconBg: 'bg-purple-950 border-purple-700/60 text-purple-400',
-      btnBg: 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-950/50',
+      accentBorder: 'border-slate-200 hover:border-slate-300 hover:shadow-md',
+      accentBg: 'bg-white',
+      iconBg: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+      btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs',
       badgeText: 'Roster',
-      badgeStyle: 'text-purple-400 border-purple-800/60 font-mono',
+      badgeStyle: 'text-emerald-800 bg-emerald-50 border-emerald-200 font-mono',
     },
     {
       title: 'Financial Reports',
@@ -226,12 +189,12 @@ export default function AdminDashboardPage() {
       buttonText: 'Generate Reports',
       icon: ReportsIcon,
       size: 'compact', // 2x1 Compact Card
-      accentBorder: 'border-blue-800/50 hover:border-blue-500/80',
-      accentBg: 'bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/30',
-      iconBg: 'bg-blue-950 border-blue-700/60 text-blue-400',
-      btnBg: 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-950/50',
+      accentBorder: 'border-slate-200 hover:border-slate-300 hover:shadow-md',
+      accentBg: 'bg-white',
+      iconBg: 'bg-slate-100 border-slate-200 text-slate-700',
+      btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs',
       badgeText: 'Financial Statements',
-      badgeStyle: 'text-blue-400 border-blue-800/60 font-mono',
+      badgeStyle: 'text-slate-800 bg-slate-100 border-slate-200 font-mono',
     },
     {
       title: 'Financial Year',
@@ -240,12 +203,12 @@ export default function AdminDashboardPage() {
       buttonText: 'Configure Year',
       icon: FinancialYearIcon,
       size: 'compact', // 2x1 Compact Card
-      accentBorder: 'border-teal-800/50 hover:border-teal-500/80',
-      accentBg: 'bg-gradient-to-br from-slate-900 via-slate-900 to-teal-950/30',
-      iconBg: 'bg-teal-950 border-teal-700/60 text-teal-400',
-      btnBg: 'bg-teal-600 hover:bg-teal-500 text-white shadow-teal-950/50',
+      accentBorder: 'border-slate-200 hover:border-slate-300 hover:shadow-md',
+      accentBg: 'bg-white',
+      iconBg: 'bg-slate-100 border-slate-200 text-slate-700',
+      btnBg: 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-xs',
       badgeText: 'Period Setup',
-      badgeStyle: 'text-teal-400 border-teal-800/60 font-mono',
+      badgeStyle: 'text-slate-800 bg-slate-100 border-slate-200 font-mono',
     },
   ];
 
@@ -269,24 +232,24 @@ export default function AdminDashboardPage() {
   return (
     <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 space-y-8 flex-1">
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Admin Executive Dashboard</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Admin Executive Dashboard</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Live double-entry ledger analytics • Derived dynamically from database journal lines
           </p>
         </div>
 
         {/* Period Toggle & Date Picker Controls */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto self-stretch sm:self-auto">
-          <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-xl w-full sm:w-auto">
+          <div className="flex bg-slate-100 border border-slate-200 p-1 rounded-xl w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setPeriodMode('today')}
               className={`flex-1 sm:flex-initial px-4 py-2 sm:py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
                 periodMode === 'today'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Today
@@ -296,8 +259,8 @@ export default function AdminDashboardPage() {
               onClick={() => setPeriodMode('month')}
               className={`flex-1 sm:flex-initial px-4 py-2 sm:py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
                 periodMode === 'month'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Month View
@@ -321,19 +284,19 @@ export default function AdminDashboardPage() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.05 }}
-          className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-slate-700 transition-all"
+          className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all"
         >
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Total Credit Given
             </span>
-            <div className="w-7 h-7 rounded-lg bg-emerald-950 border border-emerald-800/60 flex items-center justify-center text-emerald-400 font-bold font-mono text-xs">
-              ₹
+            <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold font-mono text-xs">
+              <span className="font-sans">₹</span>
             </div>
           </div>
-          <div className="text-2xl font-black text-white font-mono">
+          <div className="text-2xl font-black text-slate-900 font-mono">
             {loading ? (
-              <span className="text-slate-600 animate-pulse">₹0.00</span>
+              <span className="text-slate-400 animate-pulse"><span className="font-sans">₹</span>0.00</span>
             ) : (
               formatCurrency(metrics.totalCreditGiven)
             )}
@@ -348,21 +311,21 @@ export default function AdminDashboardPage() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-slate-700 transition-all"
+          className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all"
         >
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Cash Flow
             </span>
-            <div className="w-7 h-7 rounded-lg bg-blue-950 border border-blue-800/60 flex items-center justify-center text-blue-400">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
           </div>
-          <div className={`text-2xl font-black font-mono ${metrics.cashFlow < 0 ? 'text-red-400' : metrics.cashFlow > 0 ? 'text-emerald-400' : 'text-white'}`}>
+          <div className={`text-2xl font-black font-mono ${metrics.cashFlow < 0 ? 'text-red-600' : metrics.cashFlow > 0 ? 'text-emerald-700' : 'text-slate-900'}`}>
             {loading ? (
-              <span className="text-slate-600 animate-pulse">₹0.00</span>
+              <span className="text-slate-400 animate-pulse"><span className="font-sans">₹</span>0.00</span>
             ) : (
               formatCurrency(metrics.cashFlow)
             )}
@@ -377,26 +340,26 @@ export default function AdminDashboardPage() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.15 }}
-          className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-slate-700 transition-all"
+          className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all"
         >
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Total Expenses
             </span>
-            <div className="w-7 h-7 rounded-lg bg-purple-950 border border-purple-800/60 flex items-center justify-center text-purple-400">
+            <div className="w-7 h-7 rounded-lg bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
-          <div className="text-2xl font-black text-white font-mono flex items-center gap-1.5 flex-wrap">
+          <div className="text-2xl font-black text-slate-900 font-mono flex items-center gap-1.5 flex-wrap">
             {loading ? (
-              <span className="text-slate-600 animate-pulse">₹0.00</span>
+              <span className="text-slate-400 animate-pulse"><span className="font-sans">₹</span>0.00</span>
             ) : (
               <>
                 <span>{formatCurrency(metrics.totalExpenses)}</span>
                 {metrics.totalExpenses < 0 && (
-                  <span className="text-xs font-semibold text-amber-400 font-sans bg-amber-950/60 border border-amber-800/50 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-semibold text-amber-800 font-sans bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
                     Net Refund
                   </span>
                 )}
@@ -413,21 +376,21 @@ export default function AdminDashboardPage() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
-          className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-slate-700 transition-all"
+          className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all"
         >
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Net Surplus
             </span>
-            <div className="w-7 h-7 rounded-lg bg-teal-950 border border-teal-800/60 flex items-center justify-center text-teal-400">
+            <div className="w-7 h-7 rounded-lg bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
-          <div className={`text-2xl font-black font-mono ${metrics.surplus < 0 ? 'text-red-400' : metrics.surplus > 0 ? 'text-emerald-400' : 'text-white'}`}>
+          <div className={`text-2xl font-black font-mono ${metrics.surplus < 0 ? 'text-red-600' : metrics.surplus > 0 ? 'text-emerald-700' : 'text-slate-900'}`}>
             {loading ? (
-              <span className="text-slate-600 animate-pulse">₹0.00</span>
+              <span className="text-slate-400 animate-pulse"><span className="font-sans">₹</span>0.00</span>
             ) : (
               formatCurrency(metrics.surplus)
             )}
@@ -455,22 +418,22 @@ export default function AdminDashboardPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.05 * idx }}
-                  className={`border rounded-2xl p-6 sm:p-7 shadow-2xl flex flex-col justify-between transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
+                  className={`border rounded-2xl p-6 sm:p-7 shadow-xs flex flex-col justify-between transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
                 >
                   <div>
                     <div className="flex items-center justify-between gap-3 mb-4">
-                      <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${card.iconBg}`}>
+                      <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center shadow-xs transition-transform group-hover:scale-105 ${card.iconBg}`}>
                         <IconComponent className="w-7 h-7" />
                       </div>
-                      <span className={`text-[11px] uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-slate-950/80 border ${card.badgeStyle}`}>
+                      <span className={`text-[11px] uppercase font-bold tracking-wider px-3 py-1 rounded-full border ${card.badgeStyle}`}>
                         {card.badgeText}
                       </span>
                     </div>
 
-                    <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight group-hover:text-emerald-300 transition-colors">
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight group-hover:text-emerald-700 transition-colors">
                       {card.title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed font-normal">
+                    <p className="text-xs sm:text-sm text-slate-600 mt-2.5 leading-relaxed font-normal">
                       {card.description}
                     </p>
 
@@ -480,9 +443,9 @@ export default function AdminDashboardPage() {
                         {card.features.map((feat, i) => (
                           <span
                             key={i}
-                            className="text-[10px] sm:text-[11px] font-medium text-slate-300 bg-slate-950/60 border border-slate-800 px-2.5 py-1 rounded-lg flex items-center gap-1.5"
+                            className="text-[10px] sm:text-[11px] font-medium text-slate-700 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                             {feat}
                           </span>
                         ))}
@@ -492,7 +455,7 @@ export default function AdminDashboardPage() {
 
                   <Link
                     href={card.href}
-                    className={`mt-6 w-full font-extrabold text-sm px-5 py-3.5 rounded-xl shadow-xl transition-all flex items-center justify-between gap-2 ${card.btnBg}`}
+                    className={`mt-6 w-full font-extrabold text-sm px-5 py-3.5 rounded-xl shadow-xs transition-all flex items-center justify-between gap-2 ${card.btnBg}`}
                   >
                     <span>{card.buttonText}</span>
                     <svg className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -513,22 +476,22 @@ export default function AdminDashboardPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.05 * idx }}
-                  className={`border rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
+                  className={`border rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
                 >
                   <div className="flex items-start gap-4 flex-1">
-                    <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shadow-md flex-shrink-0 transition-transform group-hover:scale-105 ${card.iconBg}`}>
+                    <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shadow-xs flex-shrink-0 transition-transform group-hover:scale-105 ${card.iconBg}`}>
                       <IconComponent className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="text-base font-bold text-white tracking-tight group-hover:text-amber-300 transition-colors">
+                        <h3 className="text-base font-bold text-slate-900 tracking-tight group-hover:text-emerald-700 transition-colors">
                           {card.title}
                         </h3>
-                        <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-950/80 border ${card.badgeStyle}`}>
+                        <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${card.badgeStyle}`}>
                           {card.badgeText}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-300 leading-relaxed">
+                      <p className="text-xs text-slate-600 leading-relaxed">
                         {card.description}
                       </p>
                     </div>
@@ -536,7 +499,7 @@ export default function AdminDashboardPage() {
 
                   <Link
                     href={card.href}
-                    className={`font-extrabold text-xs px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 flex-shrink-0 w-full sm:w-auto ${card.btnBg}`}
+                    className={`font-extrabold text-xs px-4 py-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 flex-shrink-0 w-full sm:w-auto ${card.btnBg}`}
                   >
                     <span>{card.buttonText}</span>
                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -557,28 +520,28 @@ export default function AdminDashboardPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.05 * idx }}
-                  className={`border rounded-2xl p-5 shadow-xl flex flex-col justify-between transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
+                  className={`border rounded-2xl p-5 shadow-xs flex flex-col justify-between transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shadow-md transition-transform group-hover:scale-105 ${card.iconBg}`}>
+                      <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shadow-xs transition-transform group-hover:scale-105 ${card.iconBg}`}>
                         <IconComponent className="w-5 h-5" />
                       </div>
-                      <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-950/80 border ${card.badgeStyle}`}>
+                      <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${card.badgeStyle}`}>
                         {card.badgeText}
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-white tracking-tight group-hover:text-indigo-300 transition-colors">
+                    <h3 className="text-base font-bold text-slate-900 tracking-tight group-hover:text-emerald-700 transition-colors">
                       {card.title}
                     </h3>
-                    <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                    <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                       {card.description}
                     </p>
 
-                    <div className="mt-4 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-[11px] text-slate-400 space-y-1.5">
-                      <div className="flex items-center gap-1.5 font-medium text-slate-300">
-                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                    <div className="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1.5">
+                      <div className="flex items-center gap-1.5 font-medium text-slate-800">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                         <span>Double-Entry Validation</span>
                       </div>
                       <p className="text-[10px] text-slate-500 leading-tight">
@@ -589,7 +552,7 @@ export default function AdminDashboardPage() {
 
                   <Link
                     href={card.href}
-                    className={`mt-5 w-full font-bold text-xs px-3.5 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 ${card.btnBg}`}
+                    className={`mt-5 w-full font-bold text-xs px-3.5 py-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 ${card.btnBg}`}
                   >
                     <span>{card.buttonText}</span>
                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -610,22 +573,22 @@ export default function AdminDashboardPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.05 * idx }}
-                  className={`border rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
+                  className={`border rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shadow-md flex-shrink-0 transition-transform group-hover:scale-105 ${card.iconBg}`}>
+                    <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shadow-xs flex-shrink-0 transition-transform group-hover:scale-105 ${card.iconBg}`}>
                       <IconComponent className="w-5 h-5" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-bold text-white tracking-tight truncate group-hover:text-blue-300 transition-colors">
+                        <h3 className="text-sm font-bold text-slate-900 tracking-tight truncate group-hover:text-emerald-700 transition-colors">
                           {card.title}
                         </h3>
-                        <span className={`hidden sm:inline-block text-[9px] uppercase font-bold tracking-wider px-2 py-0.2 rounded-full bg-slate-950/80 border ${card.badgeStyle}`}>
+                        <span className={`hidden sm:inline-block text-[9px] uppercase font-bold tracking-wider px-2 py-0.2 rounded-full border ${card.badgeStyle}`}>
                           {card.badgeText}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                      <p className="text-[11px] text-slate-500 truncate mt-0.5">
                         {card.description}
                       </p>
                     </div>
@@ -633,7 +596,7 @@ export default function AdminDashboardPage() {
 
                   <Link
                     href={card.href}
-                    className={`font-bold text-xs px-3.5 py-2 rounded-lg shadow-md transition-all flex items-center justify-center gap-1.5 flex-shrink-0 ${card.btnBg}`}
+                    className={`font-bold text-xs px-3.5 py-2 rounded-lg shadow-xs transition-all flex items-center justify-center gap-1.5 flex-shrink-0 ${card.btnBg}`}
                   >
                     <span>{card.buttonText}</span>
                     <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -653,29 +616,29 @@ export default function AdminDashboardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.05 * idx }}
-                className={`border rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col justify-between transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
+                className={`border rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between transition-all duration-300 group ${card.accentBg} ${card.accentBorder} ${spanClasses}`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-2.5">
-                    <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shadow-md transition-transform group-hover:scale-105 ${card.iconBg}`}>
+                    <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shadow-xs transition-transform group-hover:scale-105 ${card.iconBg}`}>
                       <IconComponent className="w-4 h-4" />
                     </div>
-                    <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.2 rounded-full bg-slate-950/80 border ${card.badgeStyle}`}>
+                    <span className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.2 rounded-full border ${card.badgeStyle}`}>
                       {card.badgeText}
                     </span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors">
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight group-hover:text-emerald-700 transition-colors">
                     {card.title}
                   </h3>
-                  <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
                     {card.description}
                   </p>
                 </div>
 
                 <Link
                   href={card.href}
-                  className={`mt-3.5 w-full font-bold text-xs px-3 py-2 rounded-lg shadow-md transition-all flex items-center justify-center gap-1.5 ${card.btnBg}`}
+                  className={`mt-3.5 w-full font-bold text-xs px-3 py-2 rounded-lg shadow-xs transition-all flex items-center justify-center gap-1.5 ${card.btnBg}`}
                 >
                   <span>{card.buttonText}</span>
                   <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -687,90 +650,7 @@ export default function AdminDashboardPage() {
           })}
         </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* SITE SETTINGS SECTION                                              */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <div className="border-t border-slate-800 pt-8 pb-8">
-        <div className="mb-5">
-          <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-            <span className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0">
-              <svg className="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </span>
-            Site Settings
-          </h2>
-          <p className="text-xs text-slate-400 mt-1 ml-9">Runtime toggles — take effect immediately, no deploy needed.</p>
-        </div>
 
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 sm:p-6 w-full">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-slate-100">
-                Show "Try Guest Mode" on login page
-              </p>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Controls whether the amber <strong className="text-amber-300">"Try Guest Mode"</strong> button
-                is visible on the main login screen. Turning this OFF hides the button but never blocks
-                direct links to <code className="text-slate-300 bg-slate-800 px-1 rounded">/demo</code> — external portfolio links always work.
-              </p>
-            </div>
-
-            {/* Toggle switch */}
-            <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-              <button
-                id="toggle-demo-button-setting"
-                type="button"
-                disabled={settingsSaving || showDemoButton === null}
-                onClick={() => showDemoButton !== null && handleDemoButtonToggle(!showDemoButton)}
-                className={`relative w-12 h-6 rounded-full border-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed ${
-                  showDemoButton
-                    ? 'bg-emerald-600 border-emerald-500 focus:ring-emerald-500'
-                    : 'bg-slate-700 border-slate-600 focus:ring-slate-500'
-                }`}
-                aria-label="Toggle demo button visibility on login page"
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${
-                    showDemoButton ? 'translate-x-6' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-              <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                showDemoButton === null ? 'text-slate-500' : showDemoButton ? 'text-emerald-400' : 'text-slate-500'
-              }`}>
-                {showDemoButton === null ? '...' : showDemoButton ? 'ON' : 'OFF'}
-              </span>
-            </div>
-          </div>
-
-          {/* Status message */}
-          {settingsMsg && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className={`mt-4 p-2.5 rounded-lg text-xs font-medium flex items-center gap-2 ${
-                settingsMsg.type === 'success'
-                  ? 'bg-emerald-950/60 border border-emerald-800/60 text-emerald-300'
-                  : 'bg-red-950/60 border border-red-800/60 text-red-300'
-              }`}
-            >
-              {settingsMsg.type === 'success' ? (
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-              {settingsMsg.text}
-            </motion.div>
-          )}
-        </div>
-      </div>
     </main>
   );
 }

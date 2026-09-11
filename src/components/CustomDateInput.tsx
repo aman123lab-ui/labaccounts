@@ -45,11 +45,11 @@ export default function CustomDateInput({
         readOnly
         value={displayValue}
         placeholder={placeholder}
-        className={`bg-slate-950 border border-slate-800 rounded-xl pl-3 pr-8 py-1.5 text-xs text-slate-100 font-mono focus:outline-none group-hover:border-emerald-500/70 transition-colors cursor-pointer ${className}`}
+        className={`bg-white border border-slate-300 rounded-xl pl-3 pr-8 py-1.5 text-xs text-slate-900 font-mono focus:outline-none group-hover:border-emerald-600 transition-colors cursor-pointer ${className}`}
       />
       {/* Calendar Icon */}
       <svg
-        className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 absolute right-2.5 pointer-events-none transition-colors"
+        className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 absolute right-2.5 pointer-events-none transition-colors"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
