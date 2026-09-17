@@ -153,29 +153,19 @@ export default function JournalEntryPage() {
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 space-y-6 flex-1">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Journal Entries Log</h1>
-            <p className="text-xs text-slate-500 mt-1">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight truncate">Journal Entries Log</h1>
+            <p className="text-xs text-slate-500 mt-1 break-words whitespace-normal">
               Chronological double-entry posting ledger with full line inspection, date/student filters, and auditable edits/voids.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            {/* + New Journal Entry Button (Primary action on top for mobile, middle on desktop) */}
-            <button
-              type="button"
-              onClick={() => setIsNewModalOpen(true)}
-              className="w-full sm:w-auto order-1 sm:order-2 h-10 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 whitespace-nowrap"
-            >
-              <span className="text-base font-normal leading-none">+</span>
-              <span>New Journal Entry</span>
-            </button>
-
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto overflow-x-auto sm:overflow-visible pb-1 sm:pb-0 no-scrollbar shrink-0">
             {/* Show / Hide Voided Entries Toggle Button */}
             <button
               type="button"
               onClick={() => setShowVoided((prev) => !prev)}
-              className={`flex-1 sm:flex-initial order-2 sm:order-1 h-9 sm:h-10 font-bold text-xs px-3 sm:px-4 rounded-xl border transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap ${
+              className={`shrink-0 h-9 sm:h-10 font-bold text-xs px-3 sm:px-4 rounded-xl border transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                 showVoided
                   ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100'
                   : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-xs'
@@ -198,8 +188,18 @@ export default function JournalEntryPage() {
               <span>{showVoided ? 'Hide Voided' : `Show Voided (${voidedCount})`}</span>
             </button>
 
+            {/* + New Journal Entry Button */}
+            <button
+              type="button"
+              onClick={() => setIsNewModalOpen(true)}
+              className="shrink-0 h-9 sm:h-10 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+            >
+              <span className="text-base font-normal leading-none">+</span>
+              <span>New Journal Entry</span>
+            </button>
+
             {/* Total Entries Badge */}
-            <div className="order-3 h-9 sm:h-10 text-xs font-mono bg-white border border-slate-200 px-3 sm:px-4 rounded-xl text-slate-600 flex items-center justify-center whitespace-nowrap shrink-0 shadow-xs">
+            <div className="shrink-0 h-9 sm:h-10 text-xs font-mono bg-white border border-slate-200 px-3 sm:px-4 rounded-xl text-slate-600 flex items-center justify-center whitespace-nowrap shadow-xs">
               <span>
                 Total: <strong className="text-slate-900">{displayedEntries.length}</strong>
               </span>

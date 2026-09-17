@@ -1009,14 +1009,13 @@ export default function ReportsPage() {
         {activeReportTab === 'student_ledger' && (
           <div className="space-y-4 pt-6 border-t border-slate-200 print:border-slate-300 print:pt-0 print:border-t-0">
             {/* PRINT-ONLY SIMPLE HEADING */}
-            <div className="hidden print:block mb-4 border-b border-slate-300 pb-3">
+            <div className="hidden print:block mb-3 border-b-2 border-gray-800 pb-2">
               <div className="flex justify-between items-end">
                 <div>
-                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">Debit Book Report</h1>
-                  <p className="text-xs text-slate-600 mt-0.5">Student Ledger Roster & Balance Summary</p>
+                  <h1 className="text-xl font-black text-gray-900 tracking-tight uppercase">STATEMENT OF STUDENT BALANCES</h1>
                 </div>
-                <span className="text-[11px] font-mono text-slate-500">
-                  Printed on: {formatDate(new Date().toISOString())}
+                <span className="text-[11px] font-mono text-gray-600">
+                  Generated: {formatDate(new Date().toISOString())}
                 </span>
               </div>
             </div>
@@ -1345,94 +1344,68 @@ export default function ReportsPage() {
               </div>
             </div>
 
-            {/* PRINT-ONLY THREE SEPARATE SIDE-BY-SIDE TABLES VIEW */}
-            <div className="hidden print:block space-y-6">
-              {(() => {
-                if (filteredStudentRoster.length === 0) {
-                  return (
-                    <div className="p-8 text-center text-slate-500 italic font-sans text-xs border border-slate-300 rounded-lg">
-                      No student records match the selected filters.
-                    </div>
-                  );
-                }
+            {/* PRINT-ONLY SINGLE UNIFIED 3-COLUMN TABLE VIEW */}
+            <div className="hidden print:block space-y-4 print:p-0 print:shadow-none">
+              {filteredStudentRoster.length === 0 ? (
+                <div className="p-4 text-center text-gray-500 italic font-sans text-xs border border-gray-300 rounded-lg">
+                  No student records match the selected filters.
+                </div>
+              ) : (
+                <table className="w-full text-left border-collapse border border-gray-300 table-fixed">
+                  <tbody className="divide-y divide-gray-300">
+                    {Array.from({ length: Math.ceil(filteredStudentRoster.length / 3) }).map((_, rowIndex) => {
+                      const c1 = filteredStudentRoster[rowIndex * 3];
+                      const c2 = filteredStudentRoster[rowIndex * 3 + 1];
+                      const c3 = filteredStudentRoster[rowIndex * 3 + 2];
+                      
+                      const renderCell = (student: typeof filteredStudentRoster[0] | undefined, isLast: boolean) => {
+                        if (!student) return <td className={`w-1/3 p-0 align-top ${!isLast ? 'border-r border-gray-300' : ''}`}></td>;
+                        const balInfo = formatStudentBalance(student.balance, { showDrCr: true, context: 'admin' });
+                        return (
+                          <td className={`w-1/3 p-0 align-top ${!isLast ? 'border-r border-gray-300' : ''}`}>
+                            <div className="flex justify-between items-center py-1 px-2 min-w-0">
+                              <div className="flex items-baseline gap-1 min-w-0 leading-tight">
+                                <span className="text-[10.5px] font-semibold text-gray-900 leading-tight">
+                                  {student.name}
+                                </span>
+                                <span className="text-[9.5px] text-gray-500 font-normal shrink-0">
+                                  {student.batch_name}
+                                </span>
+                              </div>
+                              <span className="text-[10.5px] font-medium text-gray-800 shrink-0 ml-1 whitespace-nowrap text-right font-mono">
+                                {balInfo.isZero ? '₹0.00' : balInfo.formatted}
+                              </span>
+                            </div>
+                          </td>
+                        );
+                      };
 
-                // Chunk roster into pages of up to 18 students (6 in col 1, 6 in col 2, 6 in col 3)
-                const STUDENTS_PER_PAGE = 18;
-                const pages = [];
-                for (let i = 0; i < filteredStudentRoster.length; i += STUDENTS_PER_PAGE) {
-                  const chunk = filteredStudentRoster.slice(i, i + STUDENTS_PER_PAGE);
-                  const colSize = Math.ceil(chunk.length / 3);
-                  pages.push([
-                    chunk.slice(0, colSize),
-                    chunk.slice(colSize, colSize * 2),
-                    chunk.slice(colSize * 2),
-                  ]);
-                }
+                      return (
+                        <tr key={rowIndex} className="break-inside-avoid">
+                          {renderCell(c1, false)}
+                          {renderCell(c2, false)}
+                          {renderCell(c3, true)}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
 
-                return pages.map((columns, pageIdx) => (
-                  <div
-                    key={pageIdx}
-                    className={`flex gap-2.5 items-start ${
-                      pageIdx < pages.length - 1 ? 'print-page-break mb-6' : 'mb-4'
-                    }`}
-                  >
-                    {columns.map((colStudents, colIdx) => (
-                      <div key={colIdx} className="w-1/3 border border-slate-300 rounded-lg overflow-hidden bg-white">
-                        <table className="w-full text-left text-xs font-mono border-collapse">
-                          <thead className="bg-slate-100 text-slate-900 border-b border-slate-300 font-bold uppercase text-[10px]">
-                            <tr>
-                              <th className="p-1.5 border-r border-slate-300 w-full">NAME</th>
-                              <th className="p-1.5 text-right whitespace-nowrap w-1 shrink-0">AMOUNT</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-200">
-                            {colStudents.length === 0 ? (
-                              <tr>
-                                <td colSpan={2} className="p-1.5 text-slate-400 italic text-[10px] text-center">
-                                  —
-                                </td>
-                              </tr>
-                            ) : (
-                              colStudents.map((student) => {
-                                const balInfo = formatStudentBalance(student.balance, { showDrCr: true, context: 'admin' });
-                                return (
-                                  <tr key={student.id} className="border-b border-slate-200">
-                                    <td className="p-1.5 font-sans font-bold text-slate-900 text-[11px] border-r border-slate-200 truncate">
-                                      {student.name}{' '}
-                                      <span className="text-slate-600 font-bold text-[10px] ml-1">{student.batch_name}</span>
-                                    </td>
-                                    <td className="p-1.5 text-right font-bold font-mono text-[11px] whitespace-nowrap">
-                                      {balInfo.isZero ? (
-                                        <span className="text-slate-600">₹0.00</span>
-                                      ) : balInfo.isCredit ? (
-                                        <span className="text-amber-800">{balInfo.formatted}</span>
-                                      ) : (
-                                        <span className="text-emerald-800">{balInfo.formatted}</span>
-                                      )}
-                                    </td>
-                                  </tr>
-                                );
-                              })
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    ))}
-                  </div>
-                ));
-              })()}
-
-              {/* Total Roster Summary Line (Spans Full Width) */}
-              <div className="pt-3 border-t-2 border-slate-400 font-mono text-xs font-bold text-slate-900 flex justify-between items-center bg-slate-100 p-3 rounded-xl break-inside-avoid">
-                <span className="font-sans uppercase font-bold">
-                  Total Roster Summary ({rosterSummary.count} Students)
-                </span>
-                <div className="flex items-center gap-6 font-mono">
-                  <span>Dr: ₹{rosterSummary.totalDr.toFixed(2)} | Cr: ₹{rosterSummary.totalCr.toFixed(2)}</span>
-                  <span className="text-emerald-800 font-black text-sm">
+              {/* Total Summary Box */}
+              {filteredStudentRoster.length > 0 && (
+                <div className="mt-4 border-2 border-gray-800 rounded-sm p-2 flex justify-between items-center break-inside-avoid">
+                  <span className="font-bold text-sm text-gray-900 uppercase">
+                    Total Outstanding ({rosterSummary.count} students)
+                  </span>
+                  <span className="font-bold text-sm text-gray-900 font-mono">
                     Net AR: ₹{rosterSummary.netAR.toFixed(2)}
                   </span>
                 </div>
+              )}
+
+              <div className="mt-6 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest break-inside-avoid">
+                *** END OF REPORT &middot; LAB ACCOUNTING ***
               </div>
             </div>
           </div>

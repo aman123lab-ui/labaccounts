@@ -608,8 +608,8 @@ export default function IncomeExpensePage() {
 
   return (
     <AdminAuthGuard>
-      <div className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 space-y-5">
-        <div className="max-w-2xl mx-auto space-y-5 pb-12">
+      <div className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 space-y-4">
+        <div className="max-w-2xl mx-auto space-y-4 pb-12">
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
             <div>
@@ -619,9 +619,6 @@ export default function IncomeExpensePage() {
                   Income & Expense Entry
                 </h1>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Direct entry for common revenue & expense transactions with automated 2-line vouchers.
-              </p>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
@@ -658,8 +655,8 @@ export default function IncomeExpensePage() {
           )}
 
           {/* Main Entry Card (Compact & Balanced Container) */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-5">
-            <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* 1. TRANSACTION TYPE TOGGLE (Income vs Expense) */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -753,9 +750,6 @@ export default function IncomeExpensePage() {
                       <div className={`text-xs font-bold ${paymentMethod === 'cash' ? 'text-slate-900' : 'text-slate-700'}`}>
                         Cash / Bank (Immediate)
                       </div>
-                      <div className="text-[11px] text-slate-500 leading-tight">
-                        {entryType === 'income' ? 'Settled via Cash & Bank' : 'Paid out of Cash & Bank'}
-                      </div>
                     </div>
                   </button>
 
@@ -778,9 +772,6 @@ export default function IncomeExpensePage() {
                     <div>
                       <div className={`text-xs font-bold ${paymentMethod === 'credit' ? 'text-slate-900' : 'text-slate-700'}`}>
                         Credit (On Account)
-                      </div>
-                      <div className="text-[11px] text-slate-500 leading-tight">
-                        {entryType === 'income' ? 'Charge to Student / Receivable' : 'Payable / Student Credit'}
                       </div>
                     </div>
                   </button>
@@ -1405,11 +1396,7 @@ export default function IncomeExpensePage() {
                   <input
                     type="text"
                     required
-                    placeholder={
-                      entryType === 'income'
-                        ? 'e.g. Lab printing, study materials, or binding charges'
-                        : 'e.g. Purchased A4 paper reams, printer ink, or hardware maintenance'
-                    }
+                    placeholder="Description (optional)"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-xs transition-all"

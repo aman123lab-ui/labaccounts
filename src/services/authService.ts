@@ -490,7 +490,9 @@ export async function loginStudent(phone: string, password: string): Promise<{ s
       }),
     });
 
-    const syncRes = await res.json();
+    const syncRes = res.headers.get('content-type')?.includes('application/json')
+      ? await res.json()
+      : { success: false, error: 'Invalid API response format' };
     if (!syncRes.success) {
       return { success: false, error: syncRes.error || 'Student auth sync failed.' };
     }
@@ -578,7 +580,9 @@ export async function loginAdmin(email: string, password: string): Promise<{ suc
         }),
       });
 
-      const syncRes = await res.json();
+      const syncRes = res.headers.get('content-type')?.includes('application/json')
+        ? await res.json()
+        : { success: false, error: 'Invalid API response format' };
       if (!syncRes.success) {
         return { success: false, error: syncRes.error || 'Admin auth sync failed.' };
       }
@@ -698,7 +702,9 @@ export async function loginIncharge(email: string, password: string): Promise<{ 
       }),
     });
 
-    const syncRes = await res.json();
+    const syncRes = res.headers.get('content-type')?.includes('application/json')
+      ? await res.json()
+      : { success: false, error: 'Invalid API response format' };
     if (!syncRes.success) {
       return { success: false, error: syncRes.error || 'Workforce auth sync failed.' };
     }

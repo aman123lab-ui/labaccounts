@@ -241,7 +241,9 @@ export async function createBatch(name: string, category?: string): Promise<{ su
         },
         body: JSON.stringify({ name: cleanName, category: finalCategory }),
       });
-      const resData = await apiRes.json();
+      const resData = apiRes.headers.get('content-type')?.includes('application/json')
+        ? await apiRes.json()
+        : { success: false, error: 'Invalid API response format' };
       if (resData.success && resData.data) {
         return { success: true, data: resData.data as Batch };
       }
@@ -306,7 +308,9 @@ export async function updateBatch(
         },
         body: JSON.stringify({ id, name: cleanName, category: cleanCategory }),
       });
-      const resData = await apiRes.json();
+      const resData = apiRes.headers.get('content-type')?.includes('application/json')
+        ? await apiRes.json()
+        : { success: false, error: 'Invalid API response format' };
       if (resData.success && resData.data) {
         return { success: true, data: resData.data as Batch };
       }
@@ -340,7 +344,9 @@ export async function deleteBatch(id: string): Promise<{ success: boolean; error
       body: JSON.stringify({ id }),
     });
 
-    const resData = await apiRes.json();
+    const resData = apiRes.headers.get('content-type')?.includes('application/json')
+      ? await apiRes.json()
+      : { success: false, error: 'Invalid API response format' };
     if (resData.success) {
       return { success: true };
     }

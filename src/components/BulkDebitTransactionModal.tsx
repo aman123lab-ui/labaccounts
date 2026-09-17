@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { postJournalEntry } from '@/services/accountingService';
+import { postJournalEntry, getChartOfAccounts } from '@/services/accountingService';
 import { normalizePhone } from '@/services/authService';
 import { calculatePrintAmount, PrintTypeOption, PrintSideOption } from '@/config/printingRates';
 import { isGuestMode, getDemoAccounts, postDemoJournalEntry, getDemoStudents } from '@/lib/demo/demoStore';
+import { Account } from '@/types/database.types';
 
 interface BulkDebitTransactionModalProps {
   isOpen: boolean;
@@ -51,6 +52,25 @@ export default function BulkDebitTransactionModal({
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<BulkDebitResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  const [revenueAccounts, setRevenueAccounts] = useState<Account[]>([]);
+  const [selectedRevenueAccountId, setSelectedRevenueAccountId] = useState<string>('');
+
+  useEffect(() => {
+    async function loadAccounts() {
+      const allAccs = await getChartOfAccounts();
+      const revAccs = allAccs.filter((a) => a.type === 'revenue');
+      setRevenueAccounts(revAccs);
+      
+      const defaultAcc = revAccs.find((a) => a.name.toLowerCase() === 'printing revenue');
+      if (defaultAcc) {
+        setSelectedRevenueAccountId(defaultAcc.id);
+      } else if (revAccs.length > 0) {
+        setSelectedRevenueAccountId(revAccs[0].id);
+      }
+    }
+    loadAccounts();
+  }, []);
 
   if (!isOpen) return null;
 
@@ -116,7 +136,7 @@ export default function BulkDebitTransactionModal({
     if (isGuestMode()) {
       const demoStudents = getDemoStudents({ status: 'active' });
       const demoAccounts = getDemoAccounts();
-      const serviceIncomeAccountId = '40000000-0000-0000-0000-000000000001';
+      const serviceIncomeAccountId = selectedRevenueAccountId || '40000000-0000-0000-0000-000000000001';
 
       const studentByPhone = new Map<string, any>();
       demoStudents.forEach((s) => {
@@ -258,7 +278,7 @@ export default function BulkDebitTransactionModal({
       .eq('type', 'revenue')
       .limit(1)
       .maybeSingle() as any);
-    const serviceIncomeAccountId = revAcc?.id || '40000000-0000-0000-0000-000000000001';
+    const serviceIncomeAccountId = selectedRevenueAccountId || revAcc?.id || '40000000-0000-0000-0000-000000000001';
 
     // Map students strictly by normalized PHONE NUMBER
     const studentByPhone = new Map<string, { id: string; name: string }>();
@@ -526,6 +546,21 @@ export default function BulkDebitTransactionModal({
                 onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
                 className="w-full text-xs text-slate-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-800 hover:file:bg-emerald-100 file:cursor-pointer border border-slate-300 rounded-xl bg-white p-2"
               />
+            </div>
+            
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Revenue Account
+              </label>
+              <select
+                value={selectedRevenueAccountId}
+                onChange={(e) => setSelectedRevenueAccountId(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
+              >
+                {revenueAccounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>{acc.name}</option>
+                ))}
+              </select>
             </div>
 
             <div className="flex justify-end gap-3 pt-2">

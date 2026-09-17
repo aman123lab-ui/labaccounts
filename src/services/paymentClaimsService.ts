@@ -63,7 +63,9 @@ export async function submitPaymentClaim(
       body: JSON.stringify({ studentId, claimedAmount, upiTn }),
     });
 
-    const result = await res.json();
+    const result = res.headers.get('content-type')?.includes('application/json')
+      ? await res.json()
+      : { success: false, error: 'Invalid API response format' };
     return result;
   } catch (err: any) {
     console.warn('API route submission failed, falling back to client client:', err);

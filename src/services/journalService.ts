@@ -298,7 +298,9 @@ export async function voidJournalEntry(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ journalEntryId, voidedBy }),
       });
-      const data = await apiRes.json();
+      const data = apiRes.headers.get('content-type')?.includes('application/json')
+        ? await apiRes.json()
+        : { success: false, error: 'Invalid API response format' };
       if (data.success) {
         return { success: true };
       }
@@ -333,7 +335,9 @@ export async function deleteJournalEntry(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ journalEntryId, deletedBy }),
     });
-    const data = await apiRes.json();
+    const data = apiRes.headers.get('content-type')?.includes('application/json')
+      ? await apiRes.json()
+      : { success: false, error: 'Invalid API response format' };
     if (data.success) {
       return { success: true };
     }
@@ -444,7 +448,9 @@ export async function updateJournalEntry(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ journalEntryId, description, date, lines, changedBy }),
       });
-      const data = await apiRes.json();
+      const data = apiRes.headers.get('content-type')?.includes('application/json')
+        ? await apiRes.json()
+        : { success: false, error: 'Invalid API response format' };
       if (data.success) {
         return { success: true };
       }

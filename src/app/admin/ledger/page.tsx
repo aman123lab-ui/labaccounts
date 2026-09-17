@@ -10,6 +10,7 @@ import BulkDebitTransactionModal from '@/components/BulkDebitTransactionModal';
 import ConfirmModal from '@/components/ConfirmModal';
 import { Batch } from '@/types/database.types';
 import { getBatches } from '@/services/batchService';
+import { getChartOfAccounts } from '@/services/accountingService';
 import {
   getStudents,
   StudentWithDetails,
@@ -23,6 +24,7 @@ import {
   generateWhatsAppLink,
 } from '@/services/ledgerService';
 import { PRINTING_RATES, calculatePrintAmount, PrintTypeOption, PrintSideOption } from '@/config/printingRates';
+import { Account } from '@/types/database.types';
 import { createClient } from '@/lib/supabase/client';
 import { isGuestMode, getDemoStudentStatement } from '@/lib/demo/demoStore';
 import { getValidSessionUser, SessionUserInfo } from '@/services/authService';
@@ -74,6 +76,8 @@ export default function DebitBookPage() {
   const [description, setDescription] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const [paidImmediately, setPaidImmediately] = useState<boolean>(false);
+  const [revenueAccounts, setRevenueAccounts] = useState<Account[]>([]);
+  const [selectedRevenueAccountId, setSelectedRevenueAccountId] = useState<string>('');
 
   // Credit Form Fields
   const [creditAmount, setCreditAmount] = useState<number>(10);
@@ -106,11 +110,22 @@ export default function DebitBookPage() {
   });
 
   useEffect(() => {
-    async function loadBatches() {
+    async function loadBatchesAndAccounts() {
       const bList = await getBatches();
       setBatches(bList);
+
+      const allAccs = await getChartOfAccounts();
+      const revAccs = allAccs.filter((a) => a.type === 'revenue');
+      setRevenueAccounts(revAccs);
+      
+      const defaultAcc = revAccs.find((a) => a.name.toLowerCase() === 'printing revenue');
+      if (defaultAcc) {
+        setSelectedRevenueAccountId(defaultAcc.id);
+      } else if (revAccs.length > 0) {
+        setSelectedRevenueAccountId(revAccs[0].id);
+      }
     }
-    loadBatches();
+    loadBatchesAndAccounts();
   }, []);
 
   // Compute Total Receivable across all student account balances
@@ -170,6 +185,7 @@ export default function DebitBookPage() {
           discount,
           paidImmediately,
           useInchargeCashAccount: isIncharge,
+          revenueAccountId: selectedRevenueAccountId,
         });
 
         if (res.success) {
@@ -447,20 +463,31 @@ export default function DebitBookPage() {
                           {student.status === 'active' ? (
                             <>
                               {/* Remind via WhatsApp Button */}
-                              {student.balance > 0 && (
-                                <a
-                                  href={generateWhatsAppLink(student.phone, student.name, student.balance)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0"
-                                  title="Send WhatsApp Balance Due Reminder"
-                                >
-                                  <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12.031 2c-5.514 0-9.998 4.486-9.998 10.001 0 1.764.462 3.486 1.341 5.008l-1.424 5.201 5.321-1.396c1.472.804 3.136 1.228 4.76 1.228h.004c5.513 0 9.998-4.486 9.998-10.001 0-2.67-1.039-5.181-2.928-7.071-1.888-1.888-4.401-2.928-7.072-2.928zm0 1.636c4.612 0 8.362 3.75 8.362 8.365 0 2.234-.868 4.335-2.448 5.914-1.579 1.579-3.68 2.448-5.913 2.448h-.003c-1.393 0-2.812-.37-4.053-1.07l-.29-.163-3.007.789.803-2.932-.178-.284c-.767-1.228-1.173-2.651-1.173-4.103 0-4.615 3.75-8.364 8.362-8.364z" />
-                                  </svg>
-                                  WhatsApp
-                                </a>
-                              )}
+                              {(() => {
+                                const isOverdue = student.balance > 0;
+                                return (
+                                  <a
+                                    href={isOverdue && student.phone ? `https://wa.me/91${student.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`നമസ്കാരം ${student.name}, ലാബിൽ നിന്നുള്ള ഓർമ്മപ്പെടുത്തൽ സന്ദേശമാണിത്. നിങ്ങളുടെ ലാബ് പ്രിന്റ് ഇനത്തിൽ ₹${student.balance.toFixed(2)} രൂപ കുടിശ്ശികയുണ്ട്. ദയവായി ഈ തുക എത്രയും വേഗം അടച്ചു തീർക്കുക. നന്ദി.`)}` : '#'}
+                                    target={isOverdue && student.phone ? "_blank" : undefined}
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => {
+                                      if (!isOverdue || !student.phone) e.preventDefault();
+                                    }}
+                                    aria-disabled={!isOverdue || !student.phone}
+                                    className={`font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1.5 shrink-0 ${
+                                      isOverdue && student.phone
+                                        ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300'
+                                        : 'text-gray-400 bg-gray-100 border border-gray-200 opacity-60 cursor-not-allowed'
+                                    }`}
+                                    title={!student.phone ? 'No phone number' : !isOverdue ? 'No pending balance' : 'Send WhatsApp Reminder'}
+                                  >
+                                    <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M12.031 2c-5.514 0-9.998 4.486-9.998 10.001 0 1.764.462 3.486 1.341 5.008l-1.424 5.201 5.321-1.396c1.472.804 3.136 1.228 4.76 1.228h.004c5.513 0 9.998-4.486 9.998-10.001 0-2.67-1.039-5.181-2.928-7.071-1.888-1.888-4.401-2.928-7.072-2.928zm0 1.636c4.612 0 8.362 3.75 8.362 8.365 0 2.234-.868 4.335-2.448 5.914-1.579 1.579-3.68 2.448-5.913 2.448h-.003c-1.393 0-2.812-.37-4.053-1.07l-.29-.163-3.007.789.803-2.932-.178-.284c-.767-1.228-1.173-2.651-1.173-4.103 0-4.615 3.75-8.364 8.362-8.364z" />
+                                    </svg>
+                                    WhatsApp
+                                  </a>
+                                );
+                              })()}
 
                               <button
                                 type="button"
@@ -779,6 +806,21 @@ export default function DebitBookPage() {
                           onChange={(e) => setDescription(e.target.value)}
                           className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
                         />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Revenue Account
+                        </label>
+                        <select
+                          value={selectedRevenueAccountId}
+                          onChange={(e) => setSelectedRevenueAccountId(e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
+                        >
+                          {revenueAccounts.map((acc) => (
+                            <option key={acc.id} value={acc.id}>{acc.name}</option>
+                          ))}
+                        </select>
                       </div>
 
                       {/* Paid in Cash Immediately Toggle Card */}

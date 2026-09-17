@@ -41,7 +41,7 @@ export default function StudentPayNowModal({
   if (!isOpen) return null;
 
   const numAmount = Math.max(0, Number(payAmount) || 0);
-  const transactionNote = 'Print Cash';
+  const transactionNote = UPI_CONFIG.defaultNote;
   const upiQrUrl = buildUpiQrUrl(numAmount, transactionNote);
   const upiIntentUrl = buildUpiIntentUrl(numAmount, transactionNote);
 
@@ -156,7 +156,7 @@ export default function StudentPayNowModal({
                   onClick={handleCopyUpiId}
                   className="text-[11px] bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-0.5 rounded-lg transition-colors shrink-0"
                 >
-                  {copied ? 'Copied' : 'Copy'}
+                  {copied ? 'Copied!' : 'Copy'}
                 </button>
               </div>
             </div>
@@ -164,12 +164,9 @@ export default function StudentPayNowModal({
             {/* Mobile Intent Button */}
             <a
               href={upiIntentUrl}
-              className="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-2 rounded-xl shadow-xs transition-all w-full text-center"
+              className="w-full text-center py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm flex items-center justify-center gap-2 transition-colors mt-2"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-              Pay with UPI App
+              Pay via UPI App (GPay / PhonePe / Paytm)
             </a>
           </div>
         </div>

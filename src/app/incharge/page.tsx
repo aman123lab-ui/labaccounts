@@ -4,6 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import InchargeAuthGuard from '@/components/InchargeAuthGuard';
 import GuestModeBanner from '@/components/GuestModeBanner';
+import AddStudentModal from '@/components/AddStudentModal';
+import EditStudentModal from '@/components/EditStudentModal';
 import { getValidSessionUser, logoutUser, SessionUserInfo } from '@/services/authService';
 import { createClient } from '@/lib/supabase/client';
 import { isGuestMode, getDemoStudents, getDemoBatches } from '@/lib/demo/demoStore';
@@ -25,7 +27,9 @@ import {
 } from '@/services/paymentClaimsService';
 import { formatDate } from '@/utils/formatDate';
 import { sortBatches } from '@/services/batchService';
-import { Student, Batch } from '@/types/database.types';
+import { getStudentDetailsAndBalance } from '@/services/studentService';
+import { getChartOfAccounts } from '@/services/accountingService';
+import { Student, Batch, Account } from '@/types/database.types';
 
 export default function InchargeDashboardPage() {
   const [sessionUser, setSessionUser] = useState<SessionUserInfo | null>(null);
@@ -54,6 +58,28 @@ export default function InchargeDashboardPage() {
 
   // Action Launcher Modal (Individual vs Group Action Choice Screen)
   const [isActionLauncherOpen, setIsActionLauncherOpen] = useState(false);
+  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
+  const [mobileActionStudent, setMobileActionStudent] = useState<any>(null);
+  const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [statementStudent, setStatementStudent] = useState<(Student & { balance: number }) | null>(null);
+  const [statementTransactions, setStatementTransactions] = useState<any[]>([]);
+  const [loadingStatement, setLoadingStatement] = useState(false);
+
+  useEffect(() => {
+    if (statementStudent) {
+      setLoadingStatement(true);
+      getStudentDetailsAndBalance({ studentId: statementStudent.id })
+        .then(res => {
+          if (res && res.transactions) {
+            setStatementTransactions(res.transactions);
+          }
+        })
+        .catch(console.error)
+        .finally(() => setLoadingStatement(false));
+    } else {
+      setStatementTransactions([]);
+    }
+  }, [statementStudent]);
   const [launcherStudentId, setLauncherStudentId] = useState<string>('');
   const [launcherMode, setLauncherMode] = useState<'individual' | 'group'>('individual');
   const [launcherSearchQuery, setLauncherSearchQuery] = useState<string>('');
@@ -99,10 +125,16 @@ export default function InchargeDashboardPage() {
   // Modal State for Log Print Job (Debit)
   const [isDebitModalOpen, setIsDebitModalOpen] = useState(false);
   const [targetStudentForDebit, setTargetStudentForDebit] = useState<(Student & { balance: number }) | null>(null);
-  const [printType, setPrintType] = useState<PrintTypeOption>('bw');
-  const [printSide, setPrintSide] = useState<PrintSideOption>('single');
-  const [numPages, setNumPages] = useState<number>(1);
-  const [discount, setDiscount] = useState<number>(0);
+  const [globalStudentSearchQuery, setGlobalStudentSearchQuery] = useState('');
+
+  // Revenue Accounts State
+  const [revenueAccounts, setRevenueAccounts] = useState<Account[]>([]);
+  const [selectedRevenueAccountId, setSelectedRevenueAccountId] = useState<string>('');
+  const [selectedBulkRevenueAccountId, setSelectedBulkRevenueAccountId] = useState<string>('');
+  
+  // Multi-item print job state
+  const [printItems, setPrintItems] = useState<{ id: string; type: PrintTypeOption; side: PrintSideOption; pages: number; discount: number }[]>([]);
+  
   const [debitDesc, setDebitDesc] = useState('');
   const [paidImmediately, setPaidImmediately] = useState<boolean>(false);
   const [submittingDebit, setSubmittingDebit] = useState(false);
@@ -213,6 +245,19 @@ export default function InchargeDashboardPage() {
       // 4. Fetch all payment claims
       const pClaims = await getAllPaymentClaims('ALL');
       setPaymentClaims(pClaims || []);
+
+      // 5. Fetch revenue accounts
+      const allAccs = await getChartOfAccounts();
+      const revAccs = allAccs.filter(a => a.type === 'revenue');
+      setRevenueAccounts(revAccs);
+      const defaultAcc = revAccs.find(a => a.name.toLowerCase() === 'printing revenue');
+      if (defaultAcc) {
+        setSelectedRevenueAccountId(defaultAcc.id);
+        setSelectedBulkRevenueAccountId(defaultAcc.id);
+      } else if (revAccs.length > 0) {
+        setSelectedRevenueAccountId(revAccs[0].id);
+        setSelectedBulkRevenueAccountId(revAccs[0].id);
+      }
     } catch (err) {
       console.error('Failed to load In-charge dashboard data:', err);
     } finally {
@@ -454,9 +499,7 @@ export default function InchargeDashboardPage() {
   const handleOpenGroupAction = () => {
     setLauncherMode('group');
     setGroupSearchQuery('');
-    if (selectedStudentIds.size === 0 && filteredStudents.length > 0) {
-      setSelectedStudentIds(new Set(filteredStudents.map((s) => s.id)));
-    }
+    
     setIsActionLauncherOpen(true);
   };
 
@@ -498,6 +541,7 @@ export default function InchargeDashboardPage() {
         discount: bulkDiscount,
         paidImmediately: bulkPaidImmediately,
         useInchargeCashAccount: true,
+        revenueAccountId: selectedBulkRevenueAccountId,
       });
 
       if (res.success) {
@@ -619,22 +663,42 @@ export default function InchargeDashboardPage() {
     }
   };
 
-  // Calculated print price for modal
+  // Calculated multi-item print total
   const computedPrintCalc = useMemo(() => {
-    return calculatePrintAmount(printType, printSide, numPages, discount);
-  }, [printType, printSide, numPages, discount]);
+    let totalAmount = 0;
+    printItems.forEach(item => {
+      totalAmount += calculatePrintAmount(item.type, item.side, item.pages, item.discount).totalAmount;
+    });
+    return { totalAmount };
+  }, [printItems]);
 
-  // Open Log Print Job Modal
-  const openDebitModal = (student: Student & { balance: number }) => {
-    setTargetStudentForDebit(student);
-    setPrintType('bw');
-    setPrintSide('single');
-    setNumPages(1);
-    setDiscount(0);
+
+  const openDebitModal = (student?: Student & { balance: number } | null) => {
+    setTargetStudentForDebit(student || null);
+    setGlobalStudentSearchQuery('');
+    setPrintItems([{ id: Date.now().toString(), type: 'bw', side: 'single', pages: 1, discount: 0 }]);
     setPaidImmediately(false);
-    setDebitDesc(`Print Job (B/W, single, 1 pages)`);
+    setDebitDesc('');
     setDebitError(null);
     setIsDebitModalOpen(true);
+  };
+
+  const openGlobalDebitModal = () => {
+    openDebitModal(null);
+  };
+
+  const addPrintItem = () => {
+    setPrintItems(prev => [...prev, { id: Date.now().toString() + Math.random().toString(), type: 'bw', side: 'single', pages: 1, discount: 0 }]);
+  };
+  
+  const updatePrintItem = (id: string, field: string, value: any) => {
+    setPrintItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+  };
+  
+  const removePrintItem = (id: string) => {
+    if (printItems.length > 1) {
+      setPrintItems(prev => prev.filter(item => item.id !== id));
+    }
   };
 
   // Handle Log Print Job Submit
@@ -646,15 +710,19 @@ export default function InchargeDashboardPage() {
     setDebitError(null);
 
     try {
+      const mappedItems = printItems.map(item => ({
+        printType: item.type,
+        side: item.side,
+        numPages: item.pages,
+        discount: item.discount
+      }));
       const res = await postDebitEntries({
         studentIds: [targetStudentForDebit.id],
-        printType,
-        side: printSide,
-        numPages,
+        items: mappedItems,
         description: debitDesc,
-        discount,
         paidImmediately,
         useInchargeCashAccount: true,
+        revenueAccountId: selectedRevenueAccountId,
       });
 
       if (res.success) {
@@ -672,13 +740,18 @@ export default function InchargeDashboardPage() {
   };
 
   // Open Receive Cash Payment Modal
-  const openCreditModal = (student: Student & { balance: number }) => {
+  const openCreditModal = (student?: Student & { balance: number } | null) => {
     const staffName = sessionUser?.userName || sessionUser?.inchargeEmail || 'Workforce Member';
-    setTargetStudentForCredit(student);
-    setCreditAmount(student.balance > 0 ? student.balance.toFixed(2) : '');
-    setCreditDesc(`Cash payment received from ${student.name} — collected by ${staffName}`);
+    setTargetStudentForCredit(student || null);
+    setGlobalStudentSearchQuery('');
+    setCreditAmount(student && student.balance > 0 ? student.balance.toFixed(2) : '');
+    setCreditDesc(student ? `Cash payment received from ${student.name} — collected by ${staffName}` : `Cash payment received — collected by ${staffName}`);
     setCreditError(null);
     setIsCreditModalOpen(true);
+  };
+
+  const openGlobalCreditModal = () => {
+    openCreditModal(null);
   };
 
   // Handle Receive Cash Submit
@@ -776,16 +849,7 @@ export default function InchargeDashboardPage() {
 
               {/* Action Buttons: Debit Book & Logout */}
               <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                <Link
-                  href="/admin/ledger"
-                  className="bg-emerald-50 hover:bg-emerald-100/90 text-emerald-800 border border-emerald-200/90 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-2 group"
-                  title="Open Debit Book to record or view student transactions"
-                >
-                  <svg className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                  <span>Debit Book</span>
-                </Link>
+ 
 
                 <button
                   type="button"
@@ -914,16 +978,40 @@ export default function InchargeDashboardPage() {
                     Showing <strong className="text-slate-900 font-bold">{filteredStudents.length}</strong> students
                   </div>
 
+                  {/* Add Student Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsAddStudentOpen(true)}
+                    className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold px-3.5 py-2 rounded-xl text-xs shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap transition-all"
+                  >
+                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Add Student</span>
+                  </button>
+
                   {/* Button 1: Individual Action */}
                   <button
                     type="button"
-                    onClick={handleOpenIndividualAction}
+                    onClick={openGlobalDebitModal}
                     className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap transition-all border border-indigo-400/30 shadow-indigo-950/40"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
                     <span>Log Print Job</span>
+                  </button>
+
+                  {/* Button 1.5: Global Collect Cash */}
+                  <button
+                    type="button"
+                    onClick={openGlobalCreditModal}
+                    className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap transition-all border border-emerald-400/30 shadow-emerald-950/40"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Collect Cash</span>
                   </button>
 
                   {/* Button 2: Group Action */}
@@ -968,7 +1056,15 @@ export default function InchargeDashboardPage() {
                           const isOverdue = stud.balance > 0;
                           return (
                             <tr key={stud.id} className="hover:bg-slate-50 transition-colors">
-                              <td className="px-4 py-4 font-bold text-slate-900">{stud.name}</td>
+                              <td className="px-4 py-4 font-bold text-slate-900">
+                                <button
+                                  type="button"
+                                  onClick={() => setStatementStudent(stud)}
+                                  className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 text-left"
+                                >
+                                  {stud.name}
+                                </button>
+                              </td>
                               <td className="px-4 py-4 font-mono text-slate-500">{stud.batch_name}</td>
                               <td className="px-4 py-4 font-mono text-slate-500">{stud.phone}</td>
                               <td className="px-4 py-4 font-mono font-bold text-right text-base">
@@ -977,32 +1073,78 @@ export default function InchargeDashboardPage() {
                                 </span>
                               </td>
                               <td className="px-4 py-4">
-                                <div className="flex items-center justify-center gap-2">
+                                <div className="hidden lg:flex items-center justify-center gap-2">
+                                  {/* Edit Student Button */}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setEditingStudent(stud); }}
+                                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1 border border-slate-200"
+                                    title="Edit student details"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                    <span>Edit</span>
+                                  </button>
+
+                                  {/* Log Print Job Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => openDebitModal(stud)}
+                                    className="bg-indigo-600/90 hover:bg-indigo-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1"
+                                    title="Log print job for student"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                    <span>Log Print</span>
+                                  </button>
+
                                   {/* Collect Cash Payment Button */}
                                   <button
                                     type="button"
                                     onClick={() => openCreditModal(stud)}
-                                    className="bg-emerald-600/90 hover:bg-emerald-500 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-all shadow-md flex items-center gap-1"
+                                    className="bg-emerald-600/90 hover:bg-emerald-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1"
                                     title="Collect cash payment from student"
                                   >
-                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                     <span>Collect Cash</span>
                                   </button>
 
-                                  {/* WhatsApp Reminder */}
-                                  {isOverdue && (
-                                    <a
-                                      href={generateWhatsAppLink(stud.phone, stud.name, stud.balance)}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="bg-emerald-50/90 hover:bg-emerald-100 text-emerald-800 border border-emerald-300/80 px-2.5 py-1.5 rounded-lg text-xs transition-all font-semibold shadow-sm"
-                                      title="Send WhatsApp payment reminder"
-                                    >
-                                      WhatsApp
-                                    </a>
-                                  )}
+                                  {/* WhatsApp Reminder Button */}
+                                  <a
+                                    href={isOverdue && stud.phone ? `https://wa.me/91${stud.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`നമസ്കാരം ${stud.name}, ലാബിൽ നിന്നുള്ള ഓർമ്മപ്പെടുത്തൽ സന്ദേശമാണിത്. നിങ്ങളുടെ ലാബ് പ്രിന്റ് ഇനത്തിൽ ₹${stud.balance.toFixed(2)} രൂപ കുടിശ്ശികയുണ്ട്. ദയവായി ഈ തുക എത്രയും വേഗം അടച്ചു തീർക്കുക. നന്ദി.`)}` : '#'}
+                                    target={isOverdue && stud.phone ? "_blank" : undefined}
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => {
+                                      if (!isOverdue || !stud.phone) e.preventDefault();
+                                    }}
+                                    aria-disabled={!isOverdue || !stud.phone}
+                                    className={`font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1 ${
+                                      isOverdue && stud.phone
+                                        ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300'
+                                        : 'text-gray-400 bg-gray-100 border border-gray-200 opacity-60 cursor-not-allowed'
+                                    }`}
+                                    title={!stud.phone ? 'No phone number' : !isOverdue ? 'No pending balance' : 'Send WhatsApp Reminder'}
+                                  >
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <span>WhatsApp</span>
+                                  </a>
+                                </div>
+                                <div className="flex lg:hidden justify-center items-center">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setMobileActionStudent(stud); }}
+                                    className="p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                    </svg>
+                                  </button>
                                 </div>
                               </td>
                             </tr>
@@ -1547,9 +1689,9 @@ export default function InchargeDashboardPage() {
         </div>
 
         {/* MODAL 1: LOG PRINT JOB (DEBIT ENTRY) */}
-        {isDebitModalOpen && targetStudentForDebit && (
+        {isDebitModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
-            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-visible">
               <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 font-mono block">
@@ -1569,11 +1711,77 @@ export default function InchargeDashboardPage() {
               </div>
 
               <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
-                <span className="text-slate-500 block text-[10px] uppercase font-bold">Target Student</span>
-                <span className="text-slate-900 font-bold text-sm">{targetStudentForDebit.name}</span>
-                <span className="text-slate-500 font-mono block text-[11px] mt-0.5">
-                  Current Balance: <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Math.abs(targetStudentForDebit.balance).toFixed(2)}</span>
-                </span>
+                {targetStudentForDebit ? (
+                  <>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-slate-500 block text-[10px] uppercase font-bold">Target Student</span>
+                        <span className="text-slate-900 font-bold text-sm">{targetStudentForDebit.name}</span>
+                        <span className="text-slate-500 font-mono block text-[11px] mt-0.5">
+                          Current Balance: <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Math.abs(targetStudentForDebit.balance).toFixed(2)}</span>
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setTargetStudentForDebit(null)}
+                        className="text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono uppercase text-slate-500 font-bold tracking-wider">
+                      Search & Select Student
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search name, batch, phone..."
+                        value={globalStudentSearchQuery}
+                        onChange={(e) => setGlobalStudentSearchQuery(e.target.value)}
+                        autoFocus
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono h-9"
+                      />
+                      <svg className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      
+                      {globalStudentSearchQuery.trim() !== '' && (
+                        <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-white border border-slate-300 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-200 shadow-xl">
+                          {students
+                            .filter(
+                              (s) =>
+                                s.name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase().trim()) ||
+                                (s.batch_name || '').toLowerCase().includes(globalStudentSearchQuery.toLowerCase().trim()) ||
+                                s.phone?.includes(globalStudentSearchQuery.trim())
+                            )
+                            .slice(0, 10)
+                            .map((s) => (
+                              <button
+                                type="button"
+                                key={s.id}
+                                onClick={() => {
+                                  setTargetStudentForDebit(s);
+                                  setGlobalStudentSearchQuery('');
+                                }}
+                                className="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors"
+                              >
+                                <div>
+                                  <span className="font-semibold text-slate-900">{s.name}</span>
+                                  <span className="text-[10px] text-slate-500 font-mono ml-2">({s.batch_name || 'General'})</span>
+                                </div>
+                                <span className="text-[10px] font-mono font-bold text-indigo-700 whitespace-nowrap">
+                                  ₹{Math.abs(s.balance).toFixed(2)}
+                                </span>
+                              </button>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {debitError && (
@@ -1582,76 +1790,113 @@ export default function InchargeDashboardPage() {
                 </div>
               )}
 
+              {targetStudentForDebit && (
               <form onSubmit={handleDebitSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Print Type
-                    </label>
-                    <select
-                      value={printType}
-                      onChange={(e) => setPrintType(e.target.value as PrintTypeOption)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                    >
-                      <option value="bw">B/W (₹1/page)</option>
-                      <option value="color">Color (₹5/page)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Side
-                    </label>
-                    <select
-                      value={printSide}
-                      onChange={(e) => setPrintSide(e.target.value as PrintSideOption)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                    >
-                      <option value="single">Single Sided</option>
-                      <option value="double">Double Sided</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Number of Pages
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={numPages}
-                      onChange={(e) => setNumPages(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Discount (₹)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={discount}
-                      onChange={(e) => setDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
+                <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
+                  {printItems.map((item, index) => (
+                    <div key={item.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl relative space-y-3">
+                      <div className="absolute -top-2 -left-2 w-5 h-5 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-[10px] font-bold border border-indigo-200">
+                        {index + 1}
+                      </div>
+                      {printItems.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removePrintItem(item.id)}
+                          className="absolute -top-2 -right-2 w-5 h-5 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-[10px] hover:bg-red-200 border border-red-200 transition-colors"
+                        >
+                          ✕
+                        </button>
+                      )}
+                      
+                      <div className="grid grid-cols-2 gap-3 mt-1">
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-700 mb-1">Print Type</label>
+                          <select
+                            value={item.type}
+                            onChange={(e) => updatePrintItem(item.id, 'type', e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                          >
+                            <option value="bw">B/W (₹1/page)</option>
+                            <option value="color">Color (₹5/page)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-700 mb-1">Side</label>
+                          <select
+                            value={item.side}
+                            onChange={(e) => updatePrintItem(item.id, 'side', e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                          >
+                            <option value="single">Single Sided</option>
+                            <option value="double">Double Sided</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-700 mb-1">Num Pages</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={item.pages}
+                            onChange={(e) => updatePrintItem(item.id, 'pages', Math.max(1, parseInt(e.target.value) || 1))}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-700 mb-1">Discount (₹)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.discount}
+                            onChange={(e) => updatePrintItem(item.id, 'discount', Math.max(0, parseFloat(e.target.value) || 0))}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <button
+                    type="button"
+                    onClick={addPrintItem}
+                    className="w-full border-2 border-dashed border-indigo-200 text-indigo-600 hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50 bg-white font-semibold py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Add Another Print Item</span>
+                  </button>
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                    Entry Description
+                    Overall Entry Description (Optional)
                   </label>
                   <input
                     type="text"
                     value={debitDesc}
                     onChange={(e) => setDebitDesc(e.target.value)}
+                    placeholder="e.g. Project report and charts"
                     className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Revenue Account
+                  </label>
+                  <select
+                    value={selectedRevenueAccountId}
+                    onChange={(e) => setSelectedRevenueAccountId(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                  >
+                    {revenueAccounts.map((acc) => (
+                      <option key={acc.id} value={acc.id}>{acc.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Paid in Cash Immediately Toggle Card */}
@@ -1668,7 +1913,7 @@ export default function InchargeDashboardPage() {
                       className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 ${
                         paidImmediately
                           ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm shadow-emerald-500/50'
-                          : 'bg-slate-900 border-slate-200 text-transparent'
+                          : 'bg-white border-slate-300 text-transparent'
                       }`}
                     >
                       <svg className="w-3.5 h-3.5 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1724,14 +1969,15 @@ export default function InchargeDashboardPage() {
                   </button>
                 </div>
               </form>
+              )}
             </div>
           </div>
         )}
 
         {/* MODAL 2: RECEIVE CASH PAYMENT (CREDIT ENTRY) */}
-        {isCreditModalOpen && targetStudentForCredit && (
+        {isCreditModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
-            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-visible">
               <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 font-mono block">
@@ -1751,11 +1997,89 @@ export default function InchargeDashboardPage() {
               </div>
 
               <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
-                <span className="text-slate-500 block text-[10px] uppercase font-bold">Target Student</span>
-                <span className="text-slate-900 font-bold text-sm">{targetStudentForCredit.name}</span>
-                <span className="text-slate-500 font-mono block text-[11px] mt-0.5">
-                  Current Receivable Due: <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Math.abs(targetStudentForCredit.balance).toFixed(2)}</span>
-                </span>
+                {targetStudentForCredit ? (
+                  <>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-slate-500 block text-[10px] uppercase font-bold">Target Student</span>
+                        <span className="text-slate-900 font-bold text-sm">{targetStudentForCredit.name}</span>
+                        <span className="text-slate-500 font-mono block text-[11px] mt-0.5">
+                          Current Receivable Due: <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Math.abs(targetStudentForCredit.balance).toFixed(2)}</span>
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setTargetStudentForCredit(null)}
+                        className="text-[10px] font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-md transition-colors"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-mono uppercase text-slate-500 font-bold tracking-wider">
+                      Search & Select Student
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search name, batch, phone..."
+                        value={globalStudentSearchQuery}
+                        onChange={(e) => setGlobalStudentSearchQuery(e.target.value)}
+                        autoFocus
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono h-9"
+                      />
+                      <svg className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      
+                      {globalStudentSearchQuery.trim() !== '' && (
+                        <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-white border border-slate-300 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-200 shadow-xl">
+                          {students
+                            .filter(
+                              (s) =>
+                                s.status === 'active' &&
+                                (s.name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase()) ||
+                                  (s.phone && s.phone.includes(globalStudentSearchQuery)) ||
+                                  (s.batch_name && s.batch_name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase())))
+                            )
+                            .map((s) => (
+                              <button
+                                key={s.id}
+                                type="button"
+                                onClick={() => {
+                                  openCreditModal(s);
+                                }}
+                                className="w-full text-left px-3 py-2 hover:bg-emerald-50 transition-colors flex items-center justify-between"
+                              >
+                                <div>
+                                  <div className="font-bold text-slate-900">{s.name}</div>
+                                  <div className="text-[10px] font-mono text-slate-500">{s.batch_name}</div>
+                                </div>
+                                <div className="text-right">
+                                  <div className={`font-mono font-bold ${s.balance < 0 ? 'text-red-600' : s.balance > 0 ? 'text-blue-600' : 'text-slate-500'}`}>
+                                    ₹{Math.abs(s.balance).toFixed(2)}
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          {students.filter(
+                            (s) =>
+                              s.status === 'active' &&
+                              (s.name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase()) ||
+                                (s.phone && s.phone.includes(globalStudentSearchQuery)) ||
+                                (s.batch_name && s.batch_name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase())))
+                          ).length === 0 && (
+                            <div className="px-3 py-4 text-center text-slate-500 font-mono text-[10px]">
+                              No active students found.
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {creditError && (
@@ -1995,6 +2319,19 @@ export default function InchargeDashboardPage() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">Revenue Account</label>
+                  <select
+                    value={selectedBulkRevenueAccountId}
+                    onChange={(e) => setSelectedBulkRevenueAccountId(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                  >
+                    {revenueAccounts.map((acc) => (
+                      <option key={acc.id} value={acc.id}>{acc.name}</option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Paid in Cash Immediately Toggle Card */}
                 <div
                   onClick={() => setBulkPaidImmediately(!bulkPaidImmediately)}
@@ -2009,7 +2346,7 @@ export default function InchargeDashboardPage() {
                       className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 ${
                         bulkPaidImmediately
                           ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm shadow-emerald-500/50'
-                          : 'bg-slate-900 border-slate-200 text-transparent'
+                          : 'bg-white border-slate-300 text-transparent'
                       }`}
                     >
                       <svg className="w-3.5 h-3.5 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2635,6 +2972,234 @@ export default function InchargeDashboardPage() {
           </div>
         )}
       </main>
+        {/* STATEMENT MODAL */}
+        {statementStudent && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col">
+              <div className="bg-slate-900 p-5 flex justify-between items-center relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+                <div className="relative z-10">
+                  <h3 className="text-lg font-black text-white">Student Account</h3>
+                  <p className="text-slate-300 text-[10px] font-mono tracking-wider uppercase">{statementStudent.name}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStatementStudent(null)}
+                  className="relative z-10 text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700 p-1.5 rounded-lg transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="p-6 space-y-5">
+                <div className="text-center space-y-1">
+                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Total Outstanding Balance</p>
+                  <div className={`text-4xl font-black font-mono ${statementStudent.balance > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                    <span className="font-sans mr-1">₹</span>{Math.abs(statementStudent.balance).toFixed(2)}
+                  </div>
+                  {statementStudent.balance > 0 ? (
+                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200 mt-2">DUE FROM STUDENT</span>
+                  ) : (
+                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 mt-2">SETTLED / IN ADVANCE</span>
+                  )}
+                </div>
+
+                <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-lg bg-slate-50">
+                  {loadingStatement ? (
+                    <div className="p-4 text-center text-xs text-slate-500 font-semibold animate-pulse">Loading ledger...</div>
+                  ) : statementTransactions.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-500 font-semibold">No transaction history.</div>
+                  ) : (
+                    <table className="w-full text-left text-[10px] sm:text-xs">
+                      <thead className="bg-slate-100 sticky top-0 shadow-sm">
+                        <tr>
+                          <th className="px-2 py-1.5 font-semibold text-slate-600 border-b border-slate-200">Date</th>
+                          <th className="px-2 py-1.5 font-semibold text-slate-600 border-b border-slate-200">Details</th>
+                          <th className="px-2 py-1.5 font-semibold text-slate-600 text-right border-b border-slate-200">Debit</th>
+                          <th className="px-2 py-1.5 font-semibold text-slate-600 text-right border-b border-slate-200">Credit</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {statementTransactions.map((t, i) => (
+                          <tr key={i} className="hover:bg-white transition-colors">
+                            <td className="px-2 py-2 text-slate-500 whitespace-nowrap">{new Date(t.date).toLocaleDateString('en-GB')}</td>
+                            <td className="px-2 py-2 text-slate-700 truncate max-w-[120px]" title={t.description}>{t.description}</td>
+                            <td className="px-2 py-2 text-right text-red-600 font-mono">{t.debit > 0 ? t.debit.toFixed(2) : '-'}</td>
+                            <td className="px-2 py-2 text-right text-emerald-600 font-mono">{t.credit > 0 ? t.credit.toFixed(2) : '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => {
+                          const s = statementStudent;
+                          setStatementStudent(null);
+                          openDebitModal(s);
+                      }}
+                      className="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs py-2.5 rounded-xl border border-indigo-200 transition-colors"
+                    >
+                      Log Print Job
+                    </button>
+                    <button 
+                      onClick={() => {
+                          const s = statementStudent;
+                          setStatementStudent(null);
+                          openCreditModal(s);
+                      }}
+                      className="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs py-2.5 rounded-xl border border-emerald-200 transition-colors"
+                    >
+                      Collect Cash
+                    </button>
+                  </div>
+
+                  {(() => {
+                    const isOverdue = statementStudent.balance > 0;
+                    return (
+                      <a
+                        href={isOverdue && statementStudent.phone ? `https://wa.me/91${statementStudent.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`നമസ്കാരം ${statementStudent.name}, ലാബിൽ നിന്നുള്ള ഓർമ്മപ്പെടുത്തൽ സന്ദേശമാണിത്. നിങ്ങളുടെ ലാബ് പ്രിന്റ് ഇനത്തിൽ ₹${statementStudent.balance.toFixed(2)} രൂപ കുടിശ്ശികയുണ്ട്. ദയവായി ഈ തുക എത്രയും വേഗം അടച്ചു തീർക്കുക. നന്ദി.`)}` : '#'}
+                        target={isOverdue && statementStudent.phone ? "_blank" : undefined}
+                        rel="noopener noreferrer"
+                        onClick={(e) => {
+                          if (!isOverdue || !statementStudent.phone) {
+                            e.preventDefault();
+                          } else {
+                            setStatementStudent(null);
+                          }
+                        }}
+                        aria-disabled={!isOverdue || !statementStudent.phone}
+                        className={`w-full font-semibold px-4 py-2.5 rounded-xl flex justify-center items-center gap-2 text-xs ${
+                          isOverdue && statementStudent.phone 
+                            ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300' 
+                            : 'text-gray-400 bg-gray-100 border border-gray-200 opacity-60 cursor-not-allowed'
+                        }`}
+                        title={!statementStudent.phone ? 'No phone number' : !isOverdue ? 'No pending balance' : 'Send WhatsApp Reminder'}
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span>Send WhatsApp Reminder</span>
+                      </a>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MOBILE ACTIONS MODAL */}
+        {mobileActionStudent && (() => {
+          const isOverdue = mobileActionStudent.balance > 0;
+          return (
+          <div className="fixed inset-0 z-[75] flex items-end justify-center sm:items-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
+              <div className="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center relative">
+                <div className="relative z-10">
+                  <h3 className="text-base font-black text-slate-800">Actions for {mobileActionStudent.name}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileActionStudent(null)}
+                  className="relative z-10 text-slate-400 hover:text-slate-600 bg-slate-200/50 hover:bg-slate-200 p-1.5 rounded-lg transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="p-4 flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setMobileActionStudent(null); setEditingStudent(mobileActionStudent); }}
+                  className="w-full bg-slate-100 text-slate-700 font-semibold px-4 py-3 rounded-xl flex justify-center items-center gap-2 border border-slate-200"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  <span>Edit Student</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setMobileActionStudent(null); openDebitModal(mobileActionStudent); }}
+                  className="w-full bg-indigo-600 text-white font-semibold px-4 py-3 rounded-xl flex justify-center items-center gap-2 shadow-md shadow-indigo-200"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  <span>Log Print Job</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setMobileActionStudent(null); openCreditModal(mobileActionStudent); }}
+                  className="w-full bg-emerald-600 text-white font-semibold px-4 py-3 rounded-xl flex justify-center items-center gap-2 shadow-md shadow-emerald-200"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span>Collect Cash</span>
+                </button>
+
+                {/* WhatsApp Reminder Button */}
+                <a
+                  href={isOverdue && mobileActionStudent.phone ? `https://wa.me/91${mobileActionStudent.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`നമസ്കാരം ${mobileActionStudent.name}, ലാബിൽ നിന്നുള്ള ഓർമ്മപ്പെടുത്തൽ സന്ദേശമാണിത്. നിങ്ങളുടെ ലാബ് പ്രിന്റ് ഇനത്തിൽ ₹${mobileActionStudent.balance.toFixed(2)} രൂപ കുടിശ്ശികയുണ്ട്. ദയവായി ഈ തുക എത്രയും വേഗം അടച്ചു തീർക്കുക. നന്ദി.`)}` : '#'}
+                  target={isOverdue && mobileActionStudent.phone ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (!isOverdue || !mobileActionStudent.phone) {
+                      e.preventDefault();
+                    } else {
+                      setMobileActionStudent(null);
+                    }
+                  }}
+                  aria-disabled={!isOverdue || !mobileActionStudent.phone}
+                  className={`w-full font-semibold px-4 py-3 rounded-xl flex justify-center items-center gap-2 ${
+                    isOverdue && mobileActionStudent.phone 
+                      ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300' 
+                      : 'text-gray-400 bg-gray-100 border border-gray-200 opacity-60 cursor-not-allowed'
+                  }`}
+                  title={!mobileActionStudent.phone ? 'No phone number' : !isOverdue ? 'No pending balance' : 'Send WhatsApp Reminder'}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <span>Send WhatsApp Reminder</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          );
+        })()}
+
+        {/* ADD STUDENT MODAL */}
+        <AddStudentModal
+          isOpen={isAddStudentOpen}
+          onClose={() => setIsAddStudentOpen(false)}
+          onStudentAdded={() => {
+            setIsAddStudentOpen(false);
+            loadDashboardData();
+          }}
+        />
+
+        <EditStudentModal
+          isOpen={!!editingStudent}
+          onClose={() => setEditingStudent(null)}
+          onStudentEdited={() => {
+            setEditingStudent(null);
+            loadDashboardData();
+          }}
+          student={editingStudent}
+        />
+
     </InchargeAuthGuard>
   );
 }

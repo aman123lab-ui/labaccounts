@@ -4,15 +4,24 @@ import { calculatePrintAmount, PrintTypeOption, PrintSideOption } from '@/config
 import { isGuestMode, getDemoAccounts, postDemoJournalEntry } from '@/lib/demo/demoStore';
 import { getValidSessionUser } from './authService';
 
-export interface PostDebitInput {
-  studentIds: string[];
+export interface PrintJobItem {
   printType: PrintTypeOption;
   side: PrintSideOption;
   numPages: number;
+  discount?: number;
+}
+
+export interface PostDebitInput {
+  studentIds: string[];
+  printType?: PrintTypeOption; // Optional for backward compatibility if items are used
+  side?: PrintSideOption;
+  numPages?: number;
   description: string;
-  discount: number;
+  discount?: number;
   paidImmediately?: boolean;
   useInchargeCashAccount?: boolean;
+  items?: PrintJobItem[];
+  revenueAccountId?: string;
 }
 
 export interface PostCreditInput {
@@ -48,17 +57,20 @@ async function resolveUseInchargeCash(explicit?: boolean): Promise<boolean> {
 }
 
 /**
- * Helper to fetch Service Income Account ID (Revenue)
+ * Helper to fetch Service Income Account ID (Revenue).
+ * Prioritizes 'Printing Revenue', falling back to any revenue account.
  */
 async function getServiceIncomeAccountId(): Promise<string> {
   const supabase = createClient();
   const { data } = await (supabase.from('accounts') as any)
-    .select('id')
-    .eq('type', 'revenue')
-    .limit(1)
-    .maybeSingle();
+    .select('id, name')
+    .eq('type', 'revenue');
 
-  if (data?.id) return data.id;
+  if (data && data.length > 0) {
+    const defaultAcc = data.find((a: any) => a.name.toLowerCase() === 'printing revenue');
+    if (defaultAcc) return defaultAcc.id;
+    return data[0].id;
+  }
   return '40000000-0000-0000-0000-000000000001';
 }
 
@@ -111,12 +123,34 @@ export async function postDebitEntries(input: PostDebitInput): Promise<{
   results: LedgerEntryResult[];
   error?: string;
 }> {
+  // Determine effective print items
+  const printItems: PrintJobItem[] = input.items && input.items.length > 0
+    ? input.items
+    : [{
+        printType: input.printType || 'bw',
+        side: input.side || 'single',
+        numPages: input.numPages || 1,
+        discount: input.discount || 0
+      }];
+
+  // Calculate grand total amount
+  const finalAmount = printItems.reduce((acc, item) => {
+    return acc + calculatePrintAmount(item.printType, item.side, item.numPages, item.discount || 0).totalAmount;
+  }, 0);
+
   if (isGuestMode()) {
-    const calc = calculatePrintAmount(input.printType, input.side, input.numPages, input.discount);
-    const finalAmount = calc.totalAmount;
     const demoAccounts = getDemoAccounts();
-    const serviceIncomeAccountId = '40000000-0000-0000-0000-000000000001';
-    const desc = input.description.trim() || `Print Job (${input.printType.toUpperCase()}, ${input.side}, ${input.numPages} pages)`;
+    const serviceIncomeAccountId = input.revenueAccountId || '40000000-0000-0000-0000-000000000001';
+    
+    // Construct dynamic description if not explicitly provided
+    let defaultDesc = `Print Job`;
+    if (printItems.length === 1) {
+      defaultDesc = `Print Job (${printItems[0].printType.toUpperCase()}, ${printItems[0].side}, ${printItems[0].numPages} pages)`;
+    } else {
+      defaultDesc = `Multi-Item Print Job (${printItems.length} items)`;
+    }
+    const desc = input.description.trim() || defaultDesc;
+    
     const results: LedgerEntryResult[] = [];
     let totalPosted = 0;
 
@@ -157,14 +191,11 @@ export async function postDebitEntries(input: PostDebitInput): Promise<{
     return { success: false, totalPosted: 0, results: [], error: 'No students selected.' };
   }
 
-  const calc = calculatePrintAmount(input.printType, input.side, input.numPages, input.discount);
-  const finalAmount = calc.totalAmount;
-
   if (finalAmount <= 0) {
     return { success: false, totalPosted: 0, results: [], error: 'Calculated transaction amount must be greater than zero.' };
   }
 
-  const serviceIncomeAccountId = await getServiceIncomeAccountId();
+  const serviceIncomeAccountId = input.revenueAccountId || await getServiceIncomeAccountId();
 
   let cashDebitAccountId = '';
   if (input.paidImmediately) {
@@ -184,6 +215,15 @@ export async function postDebitEntries(input: PostDebitInput): Promise<{
   (accountsData || []).forEach((acc: any) => {
     if (acc.student_id) accountMap.set(acc.student_id, acc.id);
   });
+  
+  // Construct dynamic description if not explicitly provided
+  let defaultDesc = `Print Job`;
+  if (printItems.length === 1) {
+    defaultDesc = `Print Job (${printItems[0].printType.toUpperCase()}, ${printItems[0].side}, ${printItems[0].numPages} pages)`;
+  } else {
+    defaultDesc = `Multi-Item Print Job (${printItems.length} items)`;
+  }
+  const desc = input.description.trim() || defaultDesc;
 
   for (const studentId of input.studentIds) {
     const studentARAccountId = accountMap.get(studentId);
@@ -199,7 +239,6 @@ export async function postDebitEntries(input: PostDebitInput): Promise<{
     }
 
     const debitAccountId = input.paidImmediately ? cashDebitAccountId : studentARAccountId!;
-    const desc = input.description.trim() || `Print Job (${input.printType.toUpperCase()}, ${input.side}, ${input.numPages} pages)`;
 
     // 1. Post Journal Entry: Student AR or Cash (Dr) / Service Income (Cr)
     const journalRes = await postJournalEntry(
@@ -220,20 +259,23 @@ export async function postDebitEntries(input: PostDebitInput): Promise<{
       continue;
     }
 
-    // 2. Insert linked Print Job record
-    const { error: printJobError } = await (supabase.from('print_jobs' as any) as any).insert({
-      journal_entry_id: journalRes.entryId,
-      student_id: studentId,
-      print_type: input.printType,
-      side: input.side,
-      num_pages: input.numPages,
-      description: desc,
-      discount: input.discount || 0,
-      amount: finalAmount,
-    });
+    // 2. Insert linked Print Job records (one per item)
+    for (const item of printItems) {
+      const itemAmount = calculatePrintAmount(item.printType, item.side, item.numPages, item.discount || 0).totalAmount;
+      const { error: printJobError } = await (supabase.from('print_jobs' as any) as any).insert({
+        journal_entry_id: journalRes.entryId,
+        student_id: studentId,
+        print_type: item.printType,
+        side: item.side,
+        num_pages: item.numPages,
+        description: desc, // Shared description for all items of this job
+        discount: item.discount || 0,
+        amount: itemAmount,
+      });
 
-    if (printJobError) {
-      console.warn('Print job record warning:', printJobError.message);
+      if (printJobError) {
+        console.warn('Print job record warning:', printJobError.message);
+      }
     }
 
     totalPosted++;
