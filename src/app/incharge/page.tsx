@@ -808,14 +808,14 @@ export default function InchargeDashboardPage() {
   return (
     <InchargeAuthGuard>
       <GuestModeBanner />
-      <main className="min-h-screen bg-white text-slate-900 p-4 sm:p-6 lg:p-8 font-sans selection:bg-indigo-500 selection:text-slate-950">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <main className="min-h-screen bg-white text-slate-900 p-3 sm:p-6 lg:p-8 font-sans selection:bg-indigo-500 selection:text-slate-950">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
           {/* HEADER BAR */}
-          <header className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-5">
+          <header className="bg-white border border-slate-200 rounded-2xl p-3 sm:p-6 shadow-xl space-y-3 sm:space-y-5">
             {/* Top Row: User Profile Info & Logout */}
-            <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black tracking-wider text-base shadow-md shadow-indigo-500/20 border border-indigo-500 shrink-0">
+            <div className="flex items-center justify-between gap-2 sm:gap-4 flex-nowrap">
+              <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black tracking-wider text-sm sm:text-base shadow-md shadow-indigo-500/20 border border-indigo-500 shrink-0">
                   LAB
                 </div>
                 <div className="min-w-0 flex-1">
@@ -847,19 +847,18 @@ export default function InchargeDashboardPage() {
                 </div>
               </div>
 
-              {/* Action Buttons: Debit Book & Logout */}
-              <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
- 
-
+              {/* Action Buttons: Logout */}
+              <div className="flex items-center shrink-0 self-center">
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="bg-slate-100/90 hover:bg-red-50/70 hover:border-red-200/80 text-slate-700 hover:text-red-700 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-2 group"
+                  className="bg-slate-100/90 hover:bg-red-50/70 hover:border-red-200/80 text-slate-700 hover:text-red-700 border border-slate-200 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-2 group"
+                  title="Logout"
                 >
-                  <svg className="w-4 h-4 text-slate-500 group-hover:text-red-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 text-slate-500 group-hover:text-red-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  <span>Logout</span>
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
               </div>
             </div>
@@ -868,7 +867,7 @@ export default function InchargeDashboardPage() {
             <div className="border-t border-slate-200/90" />
 
             {/* Bottom Row: Tab Navigation Bar */}
-            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none py-1 -mx-3 px-3 sm:mx-0 sm:px-0">
               {/* Tab 1: Student Debits & Cash */}
               <button
                 type="button"
@@ -941,10 +940,10 @@ export default function InchargeDashboardPage() {
               )}
 
               {/* Controls & Filters */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto flex-1">
+              <div className="bg-white border border-slate-200 rounded-2xl p-3 sm:p-5 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-3 sm:gap-4">
+                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full lg:w-auto flex-1">
                   {/* Search Input */}
-                  <div className="relative w-full sm:w-64">
+                  <div className="relative w-full sm:w-64 shrink-0">
                     <svg className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -957,74 +956,79 @@ export default function InchargeDashboardPage() {
                     />
                   </div>
 
-                  {/* Batch Filter Dropdown (Sorted by JD -> HS -> BS -> General -> Alumni) */}
-                  <select
-                    value={selectedBatch}
-                    onChange={(e) => setSelectedBatch(e.target.value)}
-                    className="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all w-full sm:w-auto shadow-sm"
-                  >
-                    <option value="all">All Batches ({students.length})</option>
-                    {batches.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </select>
+                  {/* 2-Column Row on Mobile for Batch & Add Student */}
+                  <div className="flex w-full sm:w-auto gap-2 sm:gap-3">
+                    {/* Batch Filter Dropdown */}
+                    <select
+                      value={selectedBatch}
+                      onChange={(e) => setSelectedBatch(e.target.value)}
+                      className="flex-1 sm:flex-none min-w-[130px] bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all shadow-sm"
+                    >
+                      <option value="all">All Batches ({students.length})</option>
+                      {batches.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Add Student Button (Moved inside this row on mobile) */}
+                    <button
+                      type="button"
+                      onClick={() => setIsAddStudentOpen(true)}
+                      className="flex-1 sm:flex-none min-w-[120px] bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold px-3.5 py-2 rounded-xl text-xs shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap transition-all"
+                    >
+                      <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>Add Student</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* DEDICATED TOOLBAR BUTTONS */}
-                <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full lg:w-auto justify-between lg:justify-end">
                   <div className="text-xs text-slate-500 font-mono hidden lg:block mr-1">
                     Showing <strong className="text-slate-900 font-bold">{filteredStudents.length}</strong> students
                   </div>
 
-                  {/* Add Student Button */}
-                  <button
-                    type="button"
-                    onClick={() => setIsAddStudentOpen(true)}
-                    className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold px-3.5 py-2 rounded-xl text-xs shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap transition-all"
-                  >
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>Add Student</span>
-                  </button>
+                  {/* Primary Actions Wrapper (Full width on mobile) */}
+                  <div className="grid grid-cols-1 sm:flex sm:flex-row gap-2 sm:gap-2.5 w-full lg:w-auto">
+                    <button
+                      type="button"
+                      onClick={openGlobalDebitModal}
+                      className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap transition-all border border-indigo-400/30 shadow-indigo-950/40"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>Log Print Job</span>
+                    </button>
 
-                  {/* Button 1: Individual Action */}
-                  <button
-                    type="button"
-                    onClick={openGlobalDebitModal}
-                    className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap transition-all border border-indigo-400/30 shadow-indigo-950/40"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>Log Print Job</span>
-                  </button>
+                    <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 sm:gap-2.5 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        onClick={openGlobalCreditModal}
+                        className="flex-1 sm:w-auto bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap transition-all border border-emerald-400/30 shadow-emerald-950/40"
+                      >
+                        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span className="truncate">Collect Cash</span>
+                      </button>
 
-                  {/* Button 1.5: Global Collect Cash */}
-                  <button
-                    type="button"
-                    onClick={openGlobalCreditModal}
-                    className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap transition-all border border-emerald-400/30 shadow-emerald-950/40"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>Collect Cash</span>
-                  </button>
-
-                  {/* Button 2: Group Action */}
-                  <button
-                    type="button"
-                    onClick={handleOpenGroupAction}
-                    className="bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap transition-all border border-emerald-400/40 shadow-emerald-950/40"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <span>Group Action</span>
-                  </button>
+                      <button
+                        type="button"
+                        onClick={handleOpenGroupAction}
+                        className="flex-1 sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap transition-all border border-emerald-400/40 shadow-emerald-950/40"
+                      >
+                        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span className="truncate">Group Action</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1040,119 +1044,194 @@ export default function InchargeDashboardPage() {
                     No matching student records found.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs text-slate-700">
-                      <thead className="bg-white text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
-                        <tr>
-                          <th className="px-4 py-3.5 font-bold">Student Name</th>
-                          <th className="px-4 py-3.5 font-bold">Batch</th>
-                          <th className="px-4 py-3.5 font-bold">Phone</th>
-                          <th className="px-4 py-3.5 font-bold text-right">Current Balance</th>
-                          <th className="px-4 py-3.5 font-bold text-center">Workforce Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200/80 bg-white">
-                        {filteredStudents.map((stud) => {
-                          const isOverdue = stud.balance > 0;
-                          return (
-                            <tr key={stud.id} className="hover:bg-slate-50 transition-colors">
-                              <td className="px-4 py-4 font-bold text-slate-900">
+                  <>
+                    {/* Mobile Cards (Visible only on < sm) */}
+                    <div className="block sm:hidden divide-y divide-slate-100/80">
+                      {filteredStudents.map((stud) => {
+                        const isOverdue = stud.balance > 0;
+                        return (
+                          <div key={stud.id} className="p-4 bg-white hover:bg-slate-50 transition-colors space-y-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
                                 <button
                                   type="button"
                                   onClick={() => setStatementStudent(stud)}
-                                  className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 text-left"
+                                  className="text-indigo-600 hover:text-indigo-800 font-bold text-sm text-left truncate flex items-center gap-1.5"
                                 >
-                                  {stud.name}
+                                  <span className="truncate">{stud.name}</span>
                                 </button>
-                              </td>
-                              <td className="px-4 py-4 font-mono text-slate-500">{stud.batch_name}</td>
-                              <td className="px-4 py-4 font-mono text-slate-500">{stud.phone}</td>
-                              <td className="px-4 py-4 font-mono font-bold text-right text-base">
-                                <span className={isOverdue ? 'text-rose-600' : 'text-emerald-700'}>
+                                <div className="text-[11px] text-slate-500 font-mono mt-0.5">{stud.batch_name}</div>
+                              </div>
+                              <div className="shrink-0 text-right">
+                                <span className={`font-mono font-bold text-sm ${isOverdue ? 'text-rose-600' : 'text-emerald-700'}`}>
                                   ₹{Math.abs(stud.balance).toFixed(2)}
                                 </span>
-                              </td>
-                              <td className="px-4 py-4">
-                                <div className="hidden lg:flex items-center justify-center gap-2">
-                                  {/* Edit Student Button */}
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setEditingStudent(stud); }}
-                                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1 border border-slate-200"
-                                    title="Edit student details"
-                                  >
-                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                    </svg>
-                                    <span>Edit</span>
-                                  </button>
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                              <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
+                                <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                                {stud.phone || 'No phone'}
+                              </span>
 
-                                  {/* Log Print Job Button */}
-                                  <button
-                                    type="button"
-                                    onClick={() => openDebitModal(stud)}
-                                    className="bg-indigo-600/90 hover:bg-indigo-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1"
-                                    title="Log print job for student"
-                                  >
-                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                    </svg>
-                                    <span>Log Print</span>
-                                  </button>
+                              <div className="flex items-center gap-1.5">
+                                {/* Log Print Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => openDebitModal(stud)}
+                                  className="bg-indigo-600/90 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1"
+                                >
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                  </svg>
+                                  <span>Log Print</span>
+                                </button>
+                                
+                                {/* WhatsApp Reminder Button */}
+                                <a
+                                  href={isOverdue && stud.phone ? `https://wa.me/91${stud.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`നമസ്കാരം ${stud.name}, ലാബിൽ നിന്നുള്ള ഓർമ്മപ്പെടുത്തൽ സന്ദേശമാണിത്. നിങ്ങളുടെ ലാബ് പ്രിന്റ് ഇനത്തിൽ ₹${stud.balance.toFixed(2)} രൂപ കുടിശ്ശികയുണ്ട്. ദയവായി ഈ തുക എത്രയും വേഗം അടച്ചു തീർക്കുക. നന്ദി.`)}` : '#'}
+                                  target={isOverdue && stud.phone ? "_blank" : undefined}
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => {
+                                    if (!isOverdue || !stud.phone) e.preventDefault();
+                                  }}
+                                  aria-disabled={!isOverdue || !stud.phone}
+                                  className={`font-semibold p-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center justify-center ${
+                                    isOverdue && stud.phone
+                                      ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300'
+                                      : 'text-gray-400 bg-gray-100 border border-gray-200 opacity-60 cursor-not-allowed'
+                                  }`}
+                                  title={!stud.phone ? 'No phone number' : !isOverdue ? 'No pending balance' : 'Send WhatsApp Reminder'}
+                                >
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                  </svg>
+                                </a>
 
-                                  {/* Collect Cash Payment Button */}
-                                  <button
-                                    type="button"
-                                    onClick={() => openCreditModal(stud)}
-                                    className="bg-emerald-600/90 hover:bg-emerald-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1"
-                                    title="Collect cash payment from student"
-                                  >
-                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                    <span>Collect Cash</span>
-                                  </button>
+                                {/* Options (...) */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setMobileActionStudent(stud); }}
+                                  className="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"
+                                >
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                                  {/* WhatsApp Reminder Button */}
-                                  <a
-                                    href={isOverdue && stud.phone ? `https://wa.me/91${stud.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`നമസ്കാരം ${stud.name}, ലാബിൽ നിന്നുള്ള ഓർമ്മപ്പെടുത്തൽ സന്ദേശമാണിത്. നിങ്ങളുടെ ലാബ് പ്രിന്റ് ഇനത്തിൽ ₹${stud.balance.toFixed(2)} രൂപ കുടിശ്ശികയുണ്ട്. ദയവായി ഈ തുക എത്രയും വേഗം അടച്ചു തീർക്കുക. നന്ദി.`)}` : '#'}
-                                    target={isOverdue && stud.phone ? "_blank" : undefined}
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => {
-                                      if (!isOverdue || !stud.phone) e.preventDefault();
-                                    }}
-                                    aria-disabled={!isOverdue || !stud.phone}
-                                    className={`font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1 ${
-                                      isOverdue && stud.phone
-                                        ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300'
-                                        : 'text-gray-400 bg-gray-100 border border-gray-200 opacity-60 cursor-not-allowed'
-                                    }`}
-                                    title={!stud.phone ? 'No phone number' : !isOverdue ? 'No pending balance' : 'Send WhatsApp Reminder'}
-                                  >
-                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                    <span>WhatsApp</span>
-                                  </a>
-                                </div>
-                                <div className="flex lg:hidden justify-center items-center">
+                    {/* Desktop Table (Hidden on < sm) */}
+                    <div className="hidden sm:block overflow-x-auto">
+                      <table className="w-full text-left text-xs text-slate-700">
+                        <thead className="bg-slate-50 text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
+                          <tr>
+                            <th className="px-4 py-3.5 font-bold">Student Name</th>
+                            <th className="px-4 py-3.5 font-bold">Batch</th>
+                            <th className="px-4 py-3.5 font-bold">Phone</th>
+                            <th className="px-4 py-3.5 font-bold text-right">Current Balance</th>
+                            <th className="px-4 py-3.5 font-bold text-center">Workforce Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200/80 bg-white">
+                          {filteredStudents.map((stud) => {
+                            const isOverdue = stud.balance > 0;
+                            return (
+                              <tr key={stud.id} className="hover:bg-slate-50 transition-colors">
+                                <td className="px-4 py-4 font-bold text-slate-900">
                                   <button
                                     type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileActionStudent(stud); }}
-                                    className="p-2 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                                    onClick={() => setStatementStudent(stud)}
+                                    className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 text-left"
                                   >
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                    </svg>
+                                    {stud.name}
                                   </button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                                </td>
+                                <td className="px-4 py-4 font-mono text-slate-500">{stud.batch_name}</td>
+                                <td className="px-4 py-4 font-mono text-slate-500">{stud.phone}</td>
+                                <td className="px-4 py-4 font-mono font-bold text-right text-base">
+                                  <span className={isOverdue ? 'text-rose-600' : 'text-emerald-700'}>
+                                    ₹{Math.abs(stud.balance).toFixed(2)}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-4">
+                                  <div className="flex items-center justify-center gap-2">
+                                    {/* Edit Student Button */}
+                                    <button
+                                      type="button"
+                                      onClick={(e) => { e.stopPropagation(); setEditingStudent(stud); }}
+                                      className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1 border border-slate-200"
+                                      title="Edit student details"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                      </svg>
+                                      <span>Edit</span>
+                                    </button>
+
+                                    {/* Log Print Job Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => openDebitModal(stud)}
+                                      className="bg-indigo-600/90 hover:bg-indigo-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1"
+                                      title="Log print job for student"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                      </svg>
+                                      <span>Log Print</span>
+                                    </button>
+
+                                    {/* Collect Cash Payment Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => openCreditModal(stud)}
+                                      className="bg-emerald-600/90 hover:bg-emerald-500 text-white font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1"
+                                      title="Collect cash payment from student"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                      </svg>
+                                      <span>Collect Cash</span>
+                                    </button>
+
+                                    {/* WhatsApp Reminder Button */}
+                                    <a
+                                      href={isOverdue && stud.phone ? `https://wa.me/91${stud.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`നമസ്കാരം ${stud.name}, ലാബിൽ നിന്നുള്ള ഓർമ്മപ്പെടുത്തൽ സന്ദേശമാണിത്. നിങ്ങളുടെ ലാബ് പ്രിന്റ് ഇനത്തിൽ ₹${stud.balance.toFixed(2)} രൂപ കുടിശ്ശികയുണ്ട്. ദയവായി ഈ തുക എത്രയും വേഗം അടച്ചു തീർക്കുക. നന്ദി.`)}` : '#'}
+                                      target={isOverdue && stud.phone ? "_blank" : undefined}
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => {
+                                        if (!isOverdue || !stud.phone) e.preventDefault();
+                                      }}
+                                      aria-disabled={!isOverdue || !stud.phone}
+                                      className={`font-semibold px-2.5 py-1.5 rounded-lg text-[11px] transition-all shadow-sm flex items-center gap-1 ${
+                                        isOverdue && stud.phone
+                                          ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300'
+                                          : 'text-gray-400 bg-gray-100 border border-gray-200 opacity-60 cursor-not-allowed'
+                                      }`}
+                                      title={!stud.phone ? 'No phone number' : !isOverdue ? 'No pending balance' : 'Send WhatsApp Reminder'}
+                                    >
+                                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                      </svg>
+                                      <span>WhatsApp</span>
+                                    </a>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -1691,7 +1770,7 @@ export default function InchargeDashboardPage() {
         {/* MODAL 1: LOG PRINT JOB (DEBIT ENTRY) */}
         {isDebitModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
-            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-visible">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 font-mono block">
@@ -1749,7 +1828,7 @@ export default function InchargeDashboardPage() {
                       </svg>
                       
                       {globalStudentSearchQuery.trim() !== '' && (
-                        <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-white border border-slate-300 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-200 shadow-xl">
+                        <div className="mt-1.5 z-30 bg-white border border-slate-300 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-200 shadow-xl">
                           {students
                             .filter(
                               (s) =>
@@ -1977,7 +2056,7 @@ export default function InchargeDashboardPage() {
         {/* MODAL 2: RECEIVE CASH PAYMENT (CREDIT ENTRY) */}
         {isCreditModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
-            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-visible">
+            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 font-mono block">
@@ -2035,7 +2114,7 @@ export default function InchargeDashboardPage() {
                       </svg>
                       
                       {globalStudentSearchQuery.trim() !== '' && (
-                        <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-white border border-slate-300 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-200 shadow-xl">
+                        <div className="mt-1.5 z-30 bg-white border border-slate-300 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-200 shadow-xl">
                           {students
                             .filter(
                               (s) =>
