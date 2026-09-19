@@ -281,7 +281,7 @@ export default function AdminDashboardPage() {
                       ))}
                     </Pie>
                     <RechartsTooltip 
-                      formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Amount']}
+                      formatter={(value: any) => [`₹${Number(value).toFixed(2)}`, 'Amount']}
                       contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', padding: '8px 12px' }}
                       itemStyle={{ fontSize: '13px', fontWeight: 'bold' }}
                       labelStyle={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}
@@ -372,7 +372,7 @@ export default function AdminDashboardPage() {
                       ))}
                     </Pie>
                     <RechartsTooltip 
-                      formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Amount']}
+                      formatter={(value: any) => [`₹${Number(value).toFixed(2)}`, 'Amount']}
                       contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', padding: '8px 12px' }}
                       itemStyle={{ fontSize: '13px', fontWeight: 'bold' }}
                       labelStyle={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}
