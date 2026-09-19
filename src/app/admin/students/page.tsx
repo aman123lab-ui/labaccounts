@@ -21,6 +21,7 @@ import {
 export default function AllStudentsPage() {
   const [statusFilter, setStatusFilter] = useState<'active' | 'archived'>('active');
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterBatchId, setFilterBatchId] = useState('all');
   const [students, setStudents] = useState<StudentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -147,13 +148,26 @@ export default function AllStudentsPage() {
     fetchStudentList();
   };
 
+  const sortedStudents = [...students]
+    .filter((s) => filterBatchId === 'all' || s.batch_id === filterBatchId)
+    .sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+
   return (
     <>
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 space-y-6 flex-1">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Student Ledger Directory</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Student Ledger Directory</h1>
+              {!loading && (
+                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+                  {sortedStudents.length} Total
+                </span>
+              )}
+            </div>
             <p className="text-xs text-slate-500 mt-1">
               Manage student profiles, view live signed balances, edit details, reset passwords, or soft-archive records.
             </p>
@@ -186,23 +200,36 @@ export default function AllStudentsPage() {
 
         {/* Filter Controls: Search & Active/Archived Toggle */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          {/* Live Search Bar */}
-          <div className="relative flex-1 max-w-md">
-            <input
-              type="text"
-              placeholder="Search by student name or phone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-all"
-            />
-            <svg
-              className="w-4 h-4 text-slate-400 absolute left-3.5 top-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          {/* Live Search Bar, Filter Dropdown */}
+          <div className="flex flex-1 max-w-3xl gap-2">
+            <div className="relative flex-1 min-w-[200px]">
+              <input
+                type="text"
+                placeholder="Search name or phone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-all"
+              />
+              <svg
+                className="w-4 h-4 text-slate-400 absolute left-3.5 top-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            
+            <select
+              value={filterBatchId}
+              onChange={(e) => setFilterBatchId(e.target.value)}
+              className="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 font-semibold shrink-0 cursor-pointer max-w-[160px] truncate"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+              <option value="all">Filter: All Batches</option>
+              {batches.map(b => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+            </select>
           </div>
 
           {/* Active vs Archived Filter Toggle */}
@@ -260,7 +287,7 @@ export default function AllStudentsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 font-mono">
-                  {students.map((student) => (
+                  {sortedStudents.map((student) => (
                     <tr key={student.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="p-4 font-sans font-semibold text-slate-900 flex items-center gap-2">
                         <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] text-emerald-700 font-bold">

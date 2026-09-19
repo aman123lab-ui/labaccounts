@@ -14,7 +14,7 @@ export default function InchargeAuthGuard({ children }: { children: React.ReactN
       const sessionUser = await getValidSessionUser();
 
       if (!sessionUser.authenticated) {
-        router.replace('/incharge/login');
+        router.replace('/');
         return;
       }
 
@@ -24,7 +24,7 @@ export default function InchargeAuthGuard({ children }: { children: React.ReactN
         } else if (sessionUser.role === 'student') {
           router.replace('/student');
         } else {
-          router.replace('/incharge/login');
+          router.replace('/');
         }
         return;
       }

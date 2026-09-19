@@ -53,7 +53,6 @@ export default function AdminSidebar() {
     return () => clearInterval(interval);
   }, []);
 
-  // Close mobile drawer on route change
   useEffect(() => {
     setIsMobileOpen(false);
   }, [pathname]);
@@ -75,207 +74,150 @@ export default function AdminSidebar() {
       ]
     : [
         { label: 'Dashboard', href: '/admin', icon: DashboardIcon },
-        { label: 'All Students', href: '/admin/students', icon: StudentsIcon },
+        { label: 'Students', href: '/admin/students', icon: StudentsIcon },
         { label: 'Debit Book', href: '/admin/ledger', icon: DebitBookIcon },
-        { label: 'Journal Entry', href: '/admin/journal', icon: JournalIcon },
-        { label: 'Ledger Accounts', href: '/admin/ledger-accounts', icon: LedgerAccountsIcon },
+        { label: 'Journals', href: '/admin/journal', icon: JournalIcon },
+        { label: 'Ledgers', href: '/admin/ledger-accounts', icon: LedgerAccountsIcon },
         { label: 'Income & Expense', href: '/admin/income-expense', icon: IncomeExpenseIcon },
-        { label: 'Workforce & Collections', href: '/admin/cash-handovers', icon: InChargeIcon, badge: pendingHandoversCount },
-        { label: 'Payment Claims', href: '/admin/payment-claims', icon: PaymentClaimsIcon, badge: pendingClaimsCount },
+        { label: 'Workforce', href: '/admin/cash-handovers', icon: InChargeIcon, badge: pendingHandoversCount },
+        { label: 'Claims', href: '/admin/payment-claims', icon: PaymentClaimsIcon, badge: pendingClaimsCount },
         { label: 'Reports', href: '/admin/reports', icon: ReportsIcon },
         { label: 'Financial Year', href: '/admin/financial-year', icon: FinancialYearIcon },
         { label: 'Settings', href: '/admin/settings', icon: SettingsIcon },
       ];
 
+  // Active item title for the topbar
+  const activeItem = navItems.find((item) => pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(`${item.href}/`))) || navItems[0];
+
   return (
     <>
       {/* ========================================================================= */}
-      {/* MOBILE TOP BAR (Always visible in normal document flow on mobile)         */}
+      {/* SLIM TOP NAVBAR (~56px)                                                  */}
       {/* ========================================================================= */}
-      <header className="md:hidden h-14 bg-white border-b border-slate-200 px-4 flex items-center justify-between sticky top-0 z-30 w-full flex-shrink-0 print:hidden">
+      <header className="h-14 bg-white border-b border-slate-200/80 px-4 flex items-center justify-between sticky top-0 z-40 w-full shrink-0 shadow-sm print:hidden">
+        {/* LEFT: Logo & Active Section */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setIsMobileOpen((prev) => !prev)}
-            className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-            aria-label="Toggle Navigation Menu"
+            className="md:hidden p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
           >
-            {isMobileOpen ? <CloseIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
+            {isMobileOpen ? <CloseIcon className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
           </button>
-          <Link href={homeHref} className="flex items-center gap-2">
+
+          <Link href={homeHref} className="flex items-center gap-2 shrink-0">
             <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center font-black text-white text-xs shadow-sm">
               LA
             </div>
-            <span className="font-extrabold text-slate-900 text-sm tracking-tight">Lab Accounting</span>
+            <span className="hidden xl:inline font-bold text-slate-900 text-sm tracking-tight">{portalSubtitle}</span>
           </Link>
+          <div className="hidden md:block w-px h-4 bg-slate-200 mx-2 shrink-0" />
+          
+          {/* Desktop Horizontal Nav Links */}
+          <nav className="hidden md:flex flex-1 items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap scroll-smooth min-w-0 pr-4">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(`${item.href}/`));
+              
+              if (item.label === 'Settings') {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center justify-center p-1.5 rounded-md transition-colors ml-auto ${
+                      isActive
+                        ? 'bg-emerald-50 text-emerald-700 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                    title="Settings"
+                  >
+                    <item.icon className="w-4 h-4" />
+                  </Link>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-md transition-colors group ${
+                    isActive
+                      ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  {Boolean(item.badge && item.badge > 0) && (
+                    <span className={`font-mono text-[9px] px-1 py-0.5 rounded-md ml-0.5 ${
+                      isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700 group-hover:bg-slate-300'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+          
+          <span className="md:hidden font-bold text-slate-800 text-sm ml-1 truncate">{activeItem.label}</span>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-          {roleBadgeLabel}
-        </span>
+
+        {/* RIGHT: Role, Avatar, Logout */}
+        <div className="flex items-center gap-3 md:gap-4">
+          <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/50 hidden sm:inline-block">
+            {roleBadgeLabel}
+          </span>
+          <div className="w-px h-4 bg-slate-200 hidden sm:block" />
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-slate-400 hover:text-red-600 transition-colors p-1"
+            title="Log out"
+          >
+            <LogOutIcon className="w-5 h-5" />
+          </button>
+        </div>
       </header>
 
       {/* ========================================================================= */}
-      {/* MOBILE OFF-CANVAS DRAWER & BACKDROP (Fixed overlay, zero layout space)   */}
+      {/* MOBILE OFF-CANVAS DRAWER                                                  */}
       {/* ========================================================================= */}
-      {/* Backdrop Overlay */}
       <div
-        className={`md:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 transition-opacity duration-300 print:hidden ${
+        className={`md:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 transition-opacity duration-200 print:hidden ${
           isMobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsMobileOpen(false)}
-        aria-hidden="true"
       />
 
-      {/* Off-canvas Drawer Panel */}
       <aside
-        className={`md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-white border-r border-slate-200 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col print:hidden ${
+        className={`md:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2xl transition-transform duration-300 flex flex-col print:hidden ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Drawer Header */}
-        <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200 flex-shrink-0">
-          <Link href={homeHref} className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-black text-white text-xs shadow-sm">
-              LA
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-slate-900 text-sm tracking-tight leading-tight">LAB</span>
-              <span className="text-[10px] text-slate-500 font-medium">Lab Accounting</span>
-            </div>
-          </Link>
-          <button
-            type="button"
-            onClick={() => setIsMobileOpen(false)}
-            className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-            aria-label="Close menu"
-          >
+        <div className="h-14 px-4 flex items-center justify-between border-b border-slate-100">
+          <span className="font-bold text-slate-900 text-sm">Navigation</span>
+          <button onClick={() => setIsMobileOpen(false)} className="p-1 text-slate-400 hover:text-slate-800">
             <CloseIcon className="w-5 h-5" />
           </button>
         </div>
-
-        {/* Mobile Nav Links */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-thin scrollbar-thumb-slate-200">
+        <div className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
           {navItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(`${item.href}/`));
-            const IconComponent = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                  isActive
-                    ? 'bg-slate-100 text-slate-900 font-bold border border-slate-200/80 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                  isActive ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'text-slate-600 hover:bg-slate-50'
                 }`}
               >
-                <IconComponent className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-emerald-600' : 'text-slate-500'}`} />
-                <span className="flex-1 truncate">{item.label}</span>
+                <item.icon className={`w-5 h-5 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
+                <span className="flex-1">{item.label}</span>
                 {Boolean(item.badge && item.badge > 0) && (
-                  <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-[10px] font-mono px-2 py-0.5 rounded-full flex-shrink-0">
-                    {item.badge}
-                  </span>
+                  <span className="bg-emerald-100 text-emerald-800 font-mono text-[10px] px-1.5 py-0.5 rounded-md">{item.badge}</span>
                 )}
               </Link>
             );
           })}
-        </div>
-
-        {/* Mobile Bottom Footer */}
-        <div className="p-4 border-t border-slate-200 space-y-3 bg-slate-50 flex-shrink-0">
-          <div className="flex items-center justify-between text-xs px-1">
-            <span className="text-slate-600 font-medium">Active Session</span>
-            <span className="font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-white text-slate-700 border border-slate-200">
-              Role: {roleBadgeLabel}
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="w-full bg-white hover:bg-red-50 text-slate-700 hover:text-red-700 border border-slate-200 hover:border-red-200 font-semibold px-3 py-2 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors"
-          >
-            <LogOutIcon className="w-4 h-4" />
-            <span>Log Out</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* ========================================================================= */}
-      {/* DESKTOP LEFT SIDEBAR (Sticky full-height sidebar for md screens and up) */}
-      {/* ========================================================================= */}
-      <aside className="hidden md:flex flex-col bg-white border-r border-slate-200 sticky top-0 h-screen z-40 flex-shrink-0 w-64 print:hidden">
-        {/* Sidebar Header: Logo */}
-        <div className="h-16 border-b border-slate-200 flex items-center justify-between px-4 flex-shrink-0">
-          <Link href={homeHref} className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center font-black text-white text-xs shadow-xs flex-shrink-0">
-              LA
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight whitespace-nowrap truncate">
-                LAB — Lab Accounting
-              </span>
-              <span className="text-[10px] text-slate-500 font-mono font-normal">
-                {portalSubtitle}
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Sidebar Nav Items */}
-        <nav className="flex-1 overflow-y-auto py-4 space-y-1 px-3 scrollbar-thin scrollbar-thumb-slate-200">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(`${item.href}/`));
-            const IconComponent = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
-                  isActive
-                    ? 'bg-slate-100 text-slate-900 font-bold border border-slate-200/80 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-                }`}
-              >
-                {/* Active left indicator bar */}
-                {isActive && (
-                  <span className="absolute left-0 top-2 bottom-2 w-1 bg-emerald-600 rounded-r-full" />
-                )}
-
-                <IconComponent
-                  className={`w-5 h-5 flex-shrink-0 transition-colors ${
-                    isActive ? 'text-emerald-600' : 'text-slate-500 group-hover:text-slate-700'
-                  }`}
-                />
-
-                <span className="flex-1 truncate">{item.label}</span>
-
-                {/* Badges */}
-                {Boolean(item.badge && item.badge > 0) && (
-                  <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-[10px] font-mono px-2 py-0.5 rounded-full shadow-2xs flex-shrink-0">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Sidebar Footer: Role & Logout */}
-        <div className="p-3 border-t border-slate-200 space-y-2 bg-slate-50 flex-shrink-0">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[11px] text-slate-500 font-medium">Portal Access</span>
-            <span className="font-mono text-[10px] px-2.5 py-0.5 rounded-full bg-white text-slate-700 border border-slate-200">
-              Role: {roleBadgeLabel}
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="w-full bg-white hover:bg-red-50 text-slate-700 hover:text-red-700 border border-slate-200 hover:border-red-200 font-semibold px-3 py-2 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors group"
-          >
-            <LogOutIcon className="w-4 h-4 text-slate-500 group-hover:text-red-600 transition-colors" />
-            <span>Log Out</span>
-          </button>
         </div>
       </aside>
     </>

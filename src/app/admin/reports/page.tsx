@@ -30,7 +30,9 @@ export default function ReportsPage() {
   // Overview Summary Cards State
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
-  const [cashBalance, setCashBalance] = useState(0);
+  const [vaultCash, setVaultCash] = useState(0);
+  const [inchargeCash, setInchargeCash] = useState(0);
+  const [totalLiquidCash, setTotalLiquidCash] = useState(0);
   const [bwPages, setBwPages] = useState(0);
   const [colorPages, setColorPages] = useState(0);
 
@@ -167,7 +169,8 @@ export default function ReportsPage() {
 
       let inc = 0;
       let exp = 0;
-      let cash = 0;
+      let vCash = 0;
+      let iCash = 0;
 
       (entriesData || []).forEach((entry) => {
         const entryLines = entry.journal_entry_lines as unknown as {
@@ -188,15 +191,21 @@ export default function ReportsPage() {
           if (l.accounts?.type === 'revenue') inc += (c - d);
           if (l.accounts?.type === 'expense') exp += (d - c);
           const accNameLower = (l.accounts?.name || '').toLowerCase();
-          if (accNameLower.includes('cash') && !accNameLower.includes('in-charge')) {
-            cash += (d - c);
+          if (accNameLower.includes('cash')) {
+            if (accNameLower.includes('in-charge')) {
+              iCash += (d - c);
+            } else {
+              vCash += (d - c);
+            }
           }
         });
       });
 
       setTotalIncome(inc);
       setTotalExpense(exp);
-      setCashBalance(cash);
+      setVaultCash(vCash);
+      setInchargeCash(iCash);
+      setTotalLiquidCash(vCash + iCash);
 
       // 5. Build Trial Balance Rows for ALL Chart of Accounts
       const tb: TrialBalanceRow[] = (accData || []).map((acc) => {
@@ -607,7 +616,7 @@ export default function ReportsPage() {
             </h2>
 
             {/* ON-SCREEN BOXED CARDS VIEW (Hidden when printing) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 print:hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3.5 print:hidden">
               {/* Card 1: Total Service Income */}
               <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-xs">
                 <span className="text-[10px] font-bold text-slate-500 uppercase block">Total Service Income</span>
@@ -628,14 +637,34 @@ export default function ReportsPage() {
                 <span className="text-[10px] text-slate-500 mt-0.5 block">Paper, Ink, Maintenance</span>
               </div>
 
-              {/* Card 3: Cash Balance */}
+              {/* Card 3: Vault / Bank Cash */}
               <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-xs">
-                <span className="text-[10px] font-bold text-slate-500 uppercase block">Current Cash Balance</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase block">Vault / Bank Cash</span>
                 <span className="text-xl font-black text-slate-900 font-mono mt-0.5 flex items-center gap-0.5">
                   <span className="font-sans">₹</span>
-                  <span className="font-mono">{Math.abs(cashBalance).toFixed(2)}</span>
+                  <span className="font-mono">{Math.abs(vaultCash).toFixed(2)}</span>
                 </span>
-                <span className="text-[10px] text-slate-500 mt-0.5 block">Cash in Vault/Bank</span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">Main Admin Vault</span>
+              </div>
+
+              {/* Card 4: Desk Cash / Incharge */}
+              <div className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-xs">
+                <span className="text-[10px] font-bold text-slate-500 uppercase block">Desk Cash / Incharge</span>
+                <span className="text-xl font-black text-slate-900 font-mono mt-0.5 flex items-center gap-0.5">
+                  <span className="font-sans">₹</span>
+                  <span className="font-mono">{Math.abs(inchargeCash).toFixed(2)}</span>
+                </span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">Front Desk Till</span>
+              </div>
+
+              {/* Card 5: Total Liquid Cash */}
+              <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-3.5 sm:p-4 shadow-xs">
+                <span className="text-[10px] font-bold text-indigo-500 uppercase block">Total Liquid Cash</span>
+                <span className="text-xl font-black text-indigo-900 font-mono mt-0.5 flex items-center gap-0.5">
+                  <span className="font-sans">₹</span>
+                  <span className="font-mono">{Math.abs(totalLiquidCash).toFixed(2)}</span>
+                </span>
+                <span className="text-[10px] text-indigo-500 mt-0.5 block">Combined Pool</span>
               </div>
 
               {/* Card 4: Pages Printed (B/W) */}

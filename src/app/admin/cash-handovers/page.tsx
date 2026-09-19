@@ -185,7 +185,7 @@ export default function AdminInchargeManagementPage() {
         }).then((r) => r.json());
 
         if (res.success) {
-          setActionSuccess(`Workforce member account '${addName}' created successfully! Workforce members can now log in at /incharge/login.`);
+          setActionSuccess(`Workforce member account '${addName}' created successfully! Workforce members can now log in at the main login portal.`);
           setIsAddStaffModalOpen(false);
           setAddName('');
           setAddEmail('');
@@ -922,7 +922,7 @@ export default function AdminInchargeManagementPage() {
 
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">
-                Full Name <span className="text-red-500">*</span>
+                Full Name
               </label>
               <input
                 type="text"
@@ -936,7 +936,7 @@ export default function AdminInchargeManagementPage() {
 
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">
-                Workforce Email Address (Login ID) <span className="text-red-500">*</span>
+                Workforce Email Address (Login ID)
               </label>
               <input
                 type="email"
@@ -950,7 +950,7 @@ export default function AdminInchargeManagementPage() {
 
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">
-                Initial Password <span className="text-red-500">*</span>
+                Initial Password
               </label>
               <PasswordInput
                 required

@@ -102,7 +102,6 @@ export default function AdminLoginPage() {
               Admin Portal
             </span>
             <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Admin Login</h2>
-            <p className="text-xs text-slate-500 mt-1">Restricted to authorized administrators only.</p>
           </div>
 
           {error && (

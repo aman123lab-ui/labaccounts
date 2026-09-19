@@ -24,6 +24,7 @@ export default function IncomeExpensePage() {
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [studentSearch, setStudentSearch] = useState<string>('');
   const [selectedBatchFilter, setSelectedBatchFilter] = useState<string>('all');
+  const [showOnlySelected, setShowOnlySelected] = useState<boolean>(false);
   const [distributionMode, setDistributionMode] = useState<'equal_split' | 'each' | 'custom'>('equal_split');
   const [studentCustomAmounts, setStudentCustomAmounts] = useState<Record<string, string>>({});
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
@@ -189,6 +190,9 @@ export default function IncomeExpensePage() {
     if (selectedBatchFilter !== 'all') {
       list = list.filter((s) => s.batch_id === selectedBatchFilter);
     }
+    if (showOnlySelected) {
+      list = list.filter((s) => selectedStudentIds.includes(s.id));
+    }
     if (!studentSearch.trim()) return list;
     const term = studentSearch.toLowerCase();
     return list.filter(
@@ -197,7 +201,7 @@ export default function IncomeExpensePage() {
         s.phone.toLowerCase().includes(term) ||
         (s.batch_name && s.batch_name.toLowerCase().includes(term))
     );
-  }, [students, studentSearch, selectedBatchFilter]);
+  }, [students, studentSearch, selectedBatchFilter, showOnlySelected, selectedStudentIds]);
 
   const selectedStudent = useMemo(() => {
     return students.find((s) => s.id === selectedStudentId) || null;
@@ -657,40 +661,34 @@ export default function IncomeExpensePage() {
           {/* Main Entry Card (Compact & Balanced Container) */}
           <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* 1. TRANSACTION TYPE TOGGLE (Income vs Expense) */}
+              {/* 1. TRANSACTION TYPE TOGGLE */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  1. Transaction Type <span className="text-red-500">*</span>
+                  Type
                 </label>
                 <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-slate-100/90 border border-slate-200 rounded-xl">
                   <button
                     type="button"
                     onClick={() => setEntryType('expense')}
-                    className={`py-2.5 px-4 rounded-lg text-xs font-black tracking-wide uppercase transition-all flex items-center justify-center gap-2 ${
+                    className={`py-2 px-4 rounded-lg text-xs font-bold transition-all ${
                       entryType === 'expense'
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                        ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                        : 'text-slate-500 hover:text-slate-900'
                     }`}
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Expense Entry</span>
+                    Expense
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setEntryType('income')}
-                    className={`py-2.5 px-4 rounded-lg text-xs font-black tracking-wide uppercase transition-all flex items-center justify-center gap-2 ${
+                    className={`py-2 px-4 rounded-lg text-xs font-bold transition-all ${
                       entryType === 'income'
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                        ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                        : 'text-slate-500 hover:text-slate-900'
                     }`}
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Income Entry</span>
+                    Income
                   </button>
                 </div>
               </div>
@@ -699,7 +697,7 @@ export default function IncomeExpensePage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    2. Select {entryType === 'income' ? 'Revenue / Income' : 'Expense'} Account <span className="text-red-500">*</span>
+                    Account
                   </label>
                   <button
                     type="button"
@@ -727,53 +725,31 @@ export default function IncomeExpensePage() {
               {/* 3. PAYMENT METHOD TOGGLE (Cash vs Credit) */}
               <div className="space-y-2.5">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  3. Payment / Settlement Method <span className="text-red-500">*</span>
+                  Payment
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-slate-100/90 border border-slate-200 rounded-xl">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('cash')}
-                    className={`p-3.5 rounded-xl border text-left transition-all flex items-center gap-3 ${
+                    className={`py-2 px-4 rounded-lg text-xs font-bold transition-all ${
                       paymentMethod === 'cash'
-                        ? 'bg-white border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs'
-                        : 'bg-slate-50/80 border-slate-200 hover:border-slate-300 text-slate-600'
+                        ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                        : 'text-slate-500 hover:text-slate-900'
                     }`}
                   >
-                    <div
-                      className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-base ${
-                        paymentMethod === 'cash' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'
-                      }`}
-                    >
-                      💵
-                    </div>
-                    <div>
-                      <div className={`text-xs font-bold ${paymentMethod === 'cash' ? 'text-slate-900' : 'text-slate-700'}`}>
-                        Cash / Bank (Immediate)
-                      </div>
-                    </div>
+                    Cash
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('credit')}
-                    className={`p-3.5 rounded-xl border text-left transition-all flex items-center gap-3 ${
+                    className={`py-2 px-4 rounded-lg text-xs font-bold transition-all ${
                       paymentMethod === 'credit'
-                        ? 'bg-white border-indigo-500 ring-2 ring-indigo-500/20 shadow-xs'
-                        : 'bg-slate-50/80 border-slate-200 hover:border-slate-300 text-slate-600'
+                        ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                        : 'text-slate-500 hover:text-slate-900'
                     }`}
                   >
-                    <div
-                      className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-base ${
-                        paymentMethod === 'credit' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-500'
-                      }`}
-                    >
-                      💳
-                    </div>
-                    <div>
-                      <div className={`text-xs font-bold ${paymentMethod === 'credit' ? 'text-slate-900' : 'text-slate-700'}`}>
-                        Credit (On Account)
-                      </div>
-                    </div>
+                    Credit
                   </button>
                 </div>
 
@@ -782,7 +758,7 @@ export default function IncomeExpensePage() {
                   <div className="p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 sm:space-y-3.5 animate-fadeIn">
                     <div className="flex flex-col gap-2 border-b border-slate-200/80 pb-2.5">
                       <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
-                        Credit Counterparty <span className="text-red-500">*</span>
+                        Credit Target
                       </label>
                       {/* Segmented control for credit options */}
                       <div className="grid grid-cols-3 w-full rounded-xl bg-slate-200/80 p-1 text-[11px] font-bold gap-1">
@@ -795,9 +771,7 @@ export default function IncomeExpensePage() {
                               : 'text-slate-600 hover:text-slate-900'
                           }`}
                         >
-                          <span className="text-xs">🎓</span>
                           <span className="truncate">Single</span>
-                          <span className="hidden md:inline"> Student</span>
                         </button>
                         <button
                           type="button"
@@ -809,12 +783,11 @@ export default function IncomeExpensePage() {
                           }}
                           className={`py-2 px-1 rounded-lg text-center transition-all flex items-center justify-center gap-1 ${
                             creditType === 'multi_student'
-                              ? 'bg-white text-indigo-900 shadow-xs font-bold'
+                              ? 'bg-white text-slate-900 shadow-xs font-bold'
                               : 'text-slate-600 hover:text-slate-900'
                           }`}
                         >
-                          <span className="text-xs">👥</span>
-                          <span className="truncate">Multi / Batch</span>
+                          <span className="truncate">Multi</span>
                         </button>
                         <button
                           type="button"
@@ -825,9 +798,7 @@ export default function IncomeExpensePage() {
                               : 'text-slate-600 hover:text-slate-900'
                           }`}
                         >
-                          <span className="text-xs">🏢</span>
                           <span className="truncate">General</span>
-                          <span className="hidden md:inline"> / Other</span>
                         </button>
                       </div>
                     </div>
@@ -836,7 +807,7 @@ export default function IncomeExpensePage() {
                     {creditType === 'single_student' && (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-bold text-slate-700">Choose Registered Student</span>
+                          <span className="text-xs font-bold text-slate-700">Choose Student</span>
                           <div className="flex items-center gap-1.5">
                             <button
                               type="button"
@@ -1066,45 +1037,62 @@ export default function IncomeExpensePage() {
                           )}
                         </div>
 
-                        {/* Amount Distribution Mode */}
-                        <div className="p-2.5 bg-indigo-50/70 border border-indigo-100 rounded-xl flex flex-col gap-1.5 text-xs">
-                          <span className="font-bold text-indigo-900">Distribution Mode:</span>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 w-full bg-white p-1 border border-indigo-200 rounded-xl text-[11px] font-semibold">
-                            <button
-                              type="button"
-                              onClick={() => handleDistributionModeChange('equal_split')}
-                              className={`w-full py-1.5 px-2 rounded-lg text-center transition-all ${
-                                distributionMode === 'equal_split'
-                                  ? 'bg-indigo-600 text-white font-bold shadow-2xs'
-                                  : 'text-indigo-900 hover:bg-indigo-50'
-                              }`}
-                            >
-                              Split Total ₹{amount || '0'} Equally
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDistributionModeChange('each')}
-                              className={`w-full py-1.5 px-2 rounded-lg text-center transition-all ${
-                                distributionMode === 'each'
-                                  ? 'bg-indigo-600 text-white font-bold shadow-2xs'
-                                  : 'text-indigo-900 hover:bg-indigo-50'
-                              }`}
-                            >
-                              Apply ₹{amount || '0'} to Each
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDistributionModeChange('custom')}
-                              className={`w-full py-1.5 px-2 rounded-lg text-center transition-all ${
-                                distributionMode === 'custom'
-                                  ? 'bg-indigo-600 text-white font-bold shadow-2xs'
-                                  : 'text-indigo-900 hover:bg-indigo-50'
-                              }`}
-                            >
-                              ✏️ Separate Amount for Each
-                            </button>
+                        {/* Show Only Selected Toggle */}
+                        {selectedStudentIds.length > 0 && (
+                          <div className="flex items-center justify-end">
+                            <label className="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer hover:text-indigo-700 transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={showOnlySelected}
+                                onChange={(e) => setShowOnlySelected(e.target.checked)}
+                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                              />
+                              Show Selected Only ({selectedStudentIds.length})
+                            </label>
                           </div>
-                        </div>
+                        )}
+
+                        {/* Amount Distribution Mode */}
+                        {selectedStudentIds.length > 0 && (
+                          <div className="p-2.5 bg-indigo-50/70 border border-indigo-100 rounded-xl flex flex-col gap-1.5 text-xs">
+                            <span className="font-bold text-indigo-900">Distribution Mode:</span>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 w-full bg-white p-1 border border-indigo-200 rounded-xl text-[11px] font-semibold">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDistributionModeChange('equal_split')}
+                                  className={`w-full py-1.5 px-2 rounded-lg text-center transition-all ${
+                                    distributionMode === 'equal_split'
+                                      ? 'bg-indigo-600 text-white font-bold shadow-2xs'
+                                      : 'text-indigo-900 hover:bg-indigo-50'
+                                  }`}
+                                >
+                                  Split Equally
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDistributionModeChange('each')}
+                                  className={`w-full py-1.5 px-2 rounded-lg text-center transition-all ${
+                                    distributionMode === 'each'
+                                      ? 'bg-indigo-600 text-white font-bold shadow-2xs'
+                                      : 'text-indigo-900 hover:bg-indigo-50'
+                                  }`}
+                                >
+                                  Apply to Each
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDistributionModeChange('custom')}
+                                  className={`w-full py-1.5 px-2 rounded-lg text-center transition-all ${
+                                    distributionMode === 'custom'
+                                      ? 'bg-indigo-600 text-white font-bold shadow-2xs'
+                                      : 'text-indigo-900 hover:bg-indigo-50'
+                                  }`}
+                                >
+                                  Custom Amount
+                                </button>
+                            </div>
+                          </div>
+                        )}
 
                         {/* CONSOLIDATED STUDENT LEDGER SELECTION TABLE */}
                         <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-2xs">
@@ -1318,25 +1306,19 @@ export default function IncomeExpensePage() {
                     )}
 
                     {/* OPTION 3: GENERAL / OTHER CREDIT */}
-                    {creditType === 'general' && (
-                      <div className="p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-600 font-sans leading-relaxed">
-                        {entryType === 'income'
-                          ? 'Posts to general "Accounts Receivable (Other)" account.'
-                          : 'Posts to general "Accounts Payable" liability account.'}
-                      </div>
-                    )}
+                    {creditType === 'general' && null}
                   </div>
                 )}
               </div>
 
-              {/* 4. AMOUNT, DATE & DESCRIPTION */}
+              {/* AMOUNT & DETAILS */}
               <div className="space-y-3.5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                   {/* Amount */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
                       <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                        Amount (<span className="font-sans">₹</span>) <span className="text-red-500">*</span>
+                        Amount (<span className="font-sans">₹</span>)
                       </label>
                       {paymentMethod === 'credit' &&
                         creditType === 'multi_student' &&
@@ -1378,7 +1360,7 @@ export default function IncomeExpensePage() {
                   {/* Transaction Date */}
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                      Transaction Date <span className="text-red-500">*</span>
+                      Transaction Date
                     </label>
                     <CustomDateInput
                       value={date}
@@ -1391,7 +1373,7 @@ export default function IncomeExpensePage() {
                 {/* Description */}
                 <div className="space-y-1">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Description / Note <span className="text-red-500">*</span>
+                    Description / Note
                   </label>
                   <input
                     type="text"
@@ -1404,7 +1386,7 @@ export default function IncomeExpensePage() {
                 </div>
               </div>
 
-              {/* 5. LIVE DOUBLE-ENTRY JOURNAL LINE PREVIEW */}
+              {/* LIVE JOURNAL PREVIEW */}
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
@@ -1506,7 +1488,7 @@ export default function IncomeExpensePage() {
               <form onSubmit={handleCreateAccount} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Account Name <span className="text-red-500">*</span>
+                    Account Name
                   </label>
                   <input
                     type="text"

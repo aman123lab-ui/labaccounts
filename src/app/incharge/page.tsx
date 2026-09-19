@@ -6,6 +6,7 @@ import InchargeAuthGuard from '@/components/InchargeAuthGuard';
 import GuestModeBanner from '@/components/GuestModeBanner';
 import AddStudentModal from '@/components/AddStudentModal';
 import EditStudentModal from '@/components/EditStudentModal';
+import AdminSidebar from '@/components/AdminSidebar';
 import { getValidSessionUser, logoutUser, SessionUserInfo } from '@/services/authService';
 import { createClient } from '@/lib/supabase/client';
 import { isGuestMode, getDemoStudents, getDemoBatches } from '@/lib/demo/demoStore';
@@ -122,9 +123,10 @@ export default function InchargeDashboardPage() {
   const [handoverError, setHandoverError] = useState<string | null>(null);
   const [handoverSuccess, setHandoverSuccess] = useState<string | null>(null);
 
-  // Modal State for Log Print Job (Debit)
-  const [isDebitModalOpen, setIsDebitModalOpen] = useState(false);
-  const [targetStudentForDebit, setTargetStudentForDebit] = useState<(Student & { balance: number }) | null>(null);
+  // Unified Modal State for Transaction Entry (Debit / Credit)
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [transactionMode, setTransactionMode] = useState<'debit' | 'credit'>('debit');
+  const [targetStudentForTransaction, setTargetStudentForTransaction] = useState<(Student & { balance: number }) | null>(null);
   const [globalStudentSearchQuery, setGlobalStudentSearchQuery] = useState('');
 
   // Revenue Accounts State
@@ -140,9 +142,6 @@ export default function InchargeDashboardPage() {
   const [submittingDebit, setSubmittingDebit] = useState(false);
   const [debitError, setDebitError] = useState<string | null>(null);
 
-  // Modal State for Receive Cash (Credit)
-  const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
-  const [targetStudentForCredit, setTargetStudentForCredit] = useState<(Student & { balance: number }) | null>(null);
   const [creditAmount, setCreditAmount] = useState<string>('');
   const [creditDesc, setCreditDesc] = useState('');
   const [submittingCredit, setSubmittingCredit] = useState(false);
@@ -388,7 +387,7 @@ export default function InchargeDashboardPage() {
 
   const handleLogout = async () => {
     await logoutUser();
-    window.location.href = '/incharge/login';
+    window.location.href = '/';
   };
 
   // Filtered student roster
@@ -481,6 +480,7 @@ export default function InchargeDashboardPage() {
 
   // Helper to remove a single student from group selection
   const removeStudentFromGroupSelection = (studentId: string) => {
+    if (!studentId) return;
     setSelectedStudentIds((prev) => {
       const next = new Set(prev);
       next.delete(studentId);
@@ -674,13 +674,14 @@ export default function InchargeDashboardPage() {
 
 
   const openDebitModal = (student?: Student & { balance: number } | null) => {
-    setTargetStudentForDebit(student || null);
+    setTargetStudentForTransaction(student || null);
     setGlobalStudentSearchQuery('');
     setPrintItems([{ id: Date.now().toString(), type: 'bw', side: 'single', pages: 1, discount: 0 }]);
     setPaidImmediately(false);
     setDebitDesc('');
     setDebitError(null);
-    setIsDebitModalOpen(true);
+    setTransactionMode('debit');
+    setIsTransactionModalOpen(true);
   };
 
   const openGlobalDebitModal = () => {
@@ -704,7 +705,7 @@ export default function InchargeDashboardPage() {
   // Handle Log Print Job Submit
   const handleDebitSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!targetStudentForDebit) return;
+    if (!targetStudentForTransaction) return;
 
     setSubmittingDebit(true);
     setDebitError(null);
@@ -717,7 +718,7 @@ export default function InchargeDashboardPage() {
         discount: item.discount
       }));
       const res = await postDebitEntries({
-        studentIds: [targetStudentForDebit.id],
+        studentIds: [targetStudentForTransaction.id],
         items: mappedItems,
         description: debitDesc,
         paidImmediately,
@@ -726,7 +727,7 @@ export default function InchargeDashboardPage() {
       });
 
       if (res.success) {
-        setIsDebitModalOpen(false);
+        setIsTransactionModalOpen(false);
         await loadDashboardData();
       } else {
         setDebitError(res.error || 'Failed to post print job entry.');
@@ -742,12 +743,13 @@ export default function InchargeDashboardPage() {
   // Open Receive Cash Payment Modal
   const openCreditModal = (student?: Student & { balance: number } | null) => {
     const staffName = sessionUser?.userName || sessionUser?.inchargeEmail || 'Workforce Member';
-    setTargetStudentForCredit(student || null);
+    setTargetStudentForTransaction(student || null);
     setGlobalStudentSearchQuery('');
     setCreditAmount(student && student.balance > 0 ? student.balance.toFixed(2) : '');
     setCreditDesc(student ? `Cash payment received from ${student.name} — collected by ${staffName}` : `Cash payment received — collected by ${staffName}`);
     setCreditError(null);
-    setIsCreditModalOpen(true);
+    setTransactionMode('credit');
+    setIsTransactionModalOpen(true);
   };
 
   const openGlobalCreditModal = () => {
@@ -757,7 +759,7 @@ export default function InchargeDashboardPage() {
   // Handle Receive Cash Submit
   const handleCreditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!targetStudentForCredit) return;
+    if (!targetStudentForTransaction) return;
 
     const numAmt = Number(creditAmount);
     if (!numAmt || numAmt <= 0) {
@@ -775,14 +777,14 @@ export default function InchargeDashboardPage() {
 
     try {
       const res = await postCreditEntries({
-        studentIds: [targetStudentForCredit.id],
+        studentIds: [targetStudentForTransaction.id],
         amount: numAmt,
         description: finalDesc,
         useInchargeCashAccount: true,
       });
 
       if (res.success) {
-        setIsCreditModalOpen(false);
+        setIsTransactionModalOpen(false);
         await loadDashboardData();
       } else {
         setCreditError(res.error || 'Failed to record cash payment.');
@@ -808,65 +810,12 @@ export default function InchargeDashboardPage() {
   return (
     <InchargeAuthGuard>
       <GuestModeBanner />
-      <main className="min-h-screen bg-white text-slate-900 p-3 sm:p-6 lg:p-8 font-sans selection:bg-indigo-500 selection:text-slate-950">
-        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-          {/* HEADER BAR */}
-          <header className="bg-white border border-slate-200 rounded-2xl p-3 sm:p-6 shadow-xl space-y-3 sm:space-y-5">
-            {/* Top Row: User Profile Info & Logout */}
-            <div className="flex items-center justify-between gap-2 sm:gap-4 flex-nowrap">
-              <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black tracking-wider text-sm sm:text-base shadow-md shadow-indigo-500/20 border border-indigo-500 shrink-0">
-                  LAB
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="text-xl font-black text-slate-900 tracking-tight break-words">
-                      {sessionUser?.inchargeName || 'Workforce Member'}
-                    </h1>
-                    {sessionUser?.staffId && (
-                      <span className="bg-indigo-50 text-indigo-700 border border-indigo-200/80 font-mono text-xs font-bold px-2.5 py-0.5 rounded-md shadow-sm shrink-0">
-                        ID: #{sessionUser.staffId}
-                      </span>
-                    )}
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full shrink-0">
-                      Workforce Portal
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-0.5 font-mono flex items-center gap-2 flex-wrap">
-                    <span className="break-all">{sessionUser?.inchargeEmail || ''}</span>
-                    {sessionUser?.staffId ? (
-                      <span className="text-[11px] text-indigo-700/80 font-mono">
-                        (Workforce ID: #{sessionUser.staffId})
-                      </span>
-                    ) : sessionUser?.userId ? (
-                      <span className="text-[11px] text-slate-500 font-sans">
-                        (Auth ID: {sessionUser.userId.substring(0, 8)}...)
-                      </span>
-                    ) : null}
-                  </p>
-                </div>
-              </div>
+      <div className="flex flex-col min-h-screen">
+        <AdminSidebar />
+        <main className="flex-1 bg-slate-50 text-slate-900 p-3 sm:p-6 lg:p-8 font-sans selection:bg-indigo-500 selection:text-slate-950 overflow-y-auto">
+          <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
 
-              {/* Action Buttons: Logout */}
-              <div className="flex items-center shrink-0 self-center">
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="bg-slate-100/90 hover:bg-red-50/70 hover:border-red-200/80 text-slate-700 hover:text-red-700 border border-slate-200 p-2 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-2 group"
-                  title="Logout"
-                >
-                  <svg className="w-4 h-4 text-slate-500 group-hover:text-red-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Subtle Divider Line */}
-            <div className="border-t border-slate-200/90" />
-
-            {/* Bottom Row: Tab Navigation Bar */}
+            {/* Tab Navigation Bar */}
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0 scrollbar-none py-1 -mx-3 px-3 sm:mx-0 sm:px-0">
               {/* Tab 1: Student Debits & Cash */}
               <button
@@ -921,7 +870,6 @@ export default function InchargeDashboardPage() {
                 <span>My Cash Collection Summary</span>
               </button>
             </div>
-          </header>
 
           {/* TAB 1: STUDENT DEBIT & CASH COLLECTION MANAGEMENT */}
           {activeTab === 'students' && (
@@ -1133,11 +1081,11 @@ export default function InchargeDashboardPage() {
                       <table className="w-full text-left text-xs text-slate-700">
                         <thead className="bg-slate-50 text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
                           <tr>
-                            <th className="px-4 py-3.5 font-bold">Student Name</th>
+                            <th className="px-4 py-3.5 font-bold">Name</th>
                             <th className="px-4 py-3.5 font-bold">Batch</th>
                             <th className="px-4 py-3.5 font-bold">Phone</th>
-                            <th className="px-4 py-3.5 font-bold text-right">Current Balance</th>
-                            <th className="px-4 py-3.5 font-bold text-center">Workforce Actions</th>
+                            <th className="px-4 py-3.5 font-bold text-right">Balance</th>
+                            <th className="px-4 py-3.5 font-bold text-center">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200/80 bg-white">
@@ -1313,9 +1261,6 @@ export default function InchargeDashboardPage() {
                             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                               My Cash On Hand
                             </span>
-                            <span className="text-[10px] text-indigo-700 font-mono">
-                              Cash in Hand (Workforce clearing balance)
-                            </span>
                           </div>
                           <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1342,10 +1287,7 @@ export default function InchargeDashboardPage() {
                         )}
                       </div>
 
-                      <div className="pt-2 border-t border-slate-200 flex items-center justify-between gap-3">
-                        <p className="text-[11px] text-slate-500">
-                          Un-handed-over physical cash in your custody.
-                        </p>
+                      <div className="pt-2 border-t border-slate-200 flex items-center justify-end gap-3">
                         <button
                           type="button"
                           onClick={openHandoverModal}
@@ -1373,9 +1315,6 @@ export default function InchargeDashboardPage() {
                       <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                         Cash Transactions Count
                       </span>
-                      <span className="text-[10px] text-slate-500 font-mono">
-                        Personal cash collection entries
-                      </span>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1386,9 +1325,6 @@ export default function InchargeDashboardPage() {
                   <div className="text-3xl font-black text-slate-900 font-mono mt-2">
                     {cashSummary.totalTransactionsCount}
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-2">
-                    Individual receipts processed at the counter.
-                  </p>
                 </div>
               </div>
 
@@ -1420,8 +1356,8 @@ export default function InchargeDashboardPage() {
                       <thead className="bg-white text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
                           <th className="px-5 py-3.5 font-bold">Date & Time</th>
-                          <th className="px-5 py-3.5 font-bold">Student Name</th>
-                          <th className="px-5 py-3.5 font-bold">Entry Description</th>
+                          <th className="px-5 py-3.5 font-bold">Name</th>
+                          <th className="px-5 py-3.5 font-bold">Description</th>
                           <th className="px-5 py-3.5 font-bold text-right">Cash Received</th>
                         </tr>
                       </thead>
@@ -1451,8 +1387,7 @@ export default function InchargeDashboardPage() {
               <div className="bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden space-y-4 p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-base font-bold text-slate-900">My Cash Handover History</h2>
-                    <p className="text-xs text-slate-500">Past cash transfer claims submitted to admin for physical verification.</p>
+                    <h2 className="text-base font-bold text-slate-900">Handover History</h2>
                   </div>
                 </div>
 
@@ -1465,10 +1400,10 @@ export default function InchargeDashboardPage() {
                     <table className="w-full text-left text-xs text-slate-700">
                       <thead className="bg-white text-slate-500 uppercase font-mono text-[10px] tracking-wider border-b border-slate-200">
                         <tr>
-                          <th className="px-5 py-3.5 font-bold">Submission Date & Time</th>
-                          <th className="px-5 py-3.5 font-bold">Claimed Amount</th>
-                          <th className="px-5 py-3.5 font-bold">Handover Status</th>
-                          <th className="px-5 py-3.5 font-bold">Verification Details</th>
+                          <th className="px-5 py-3.5 font-bold">Date & Time</th>
+                          <th className="px-5 py-3.5 font-bold">Amount</th>
+                          <th className="px-5 py-3.5 font-bold">Status</th>
+                          <th className="px-5 py-3.5 font-bold">Details</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200">
@@ -1765,22 +1700,24 @@ export default function InchargeDashboardPage() {
               </div>
             </div>
           )}
-        </div>
+          </div>
+        </main>
+      </div>
 
-        {/* MODAL 1: LOG PRINT JOB (DEBIT ENTRY) */}
-        {isDebitModalOpen && (
+                {/* UNIFIED MODAL: DEBIT (Print Job) OR CREDIT (Cash Received) */}
+        {isTransactionModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
             <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center border-b border-slate-200 pb-3">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 font-mono block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono block">
                     Workforce Action
                   </span>
-                  <h3 className="text-lg font-bold text-slate-900">Log Print Job (Debit Entry)</h3>
+                  <h3 className="text-lg font-bold text-slate-900">Transaction Entry</h3>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setIsDebitModalOpen(false)}
+                  onClick={() => setIsTransactionModalOpen(false)}
                   className="text-slate-500 hover:text-slate-900 bg-slate-100 p-1.5 rounded-lg"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1789,21 +1726,51 @@ export default function InchargeDashboardPage() {
                 </button>
               </div>
 
+              {/* TWO-MODE TOGGLE */}
+              <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
+                <button
+                  type="button"
+                  onClick={() => setTransactionMode('debit')}
+                  className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all ${
+                    transactionMode === 'debit' 
+                      ? 'bg-white text-indigo-700 shadow-sm border border-slate-200' 
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  DEBIT (Print Job)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTransactionMode('credit')}
+                  className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all ${
+                    transactionMode === 'credit' 
+                      ? 'bg-white text-emerald-700 shadow-sm border border-slate-200' 
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  CREDIT (Cash Received)
+                </button>
+              </div>
+
               <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
-                {targetStudentForDebit ? (
+                {targetStudentForTransaction ? (
                   <>
                     <div className="flex justify-between items-start">
                       <div>
                         <span className="text-slate-500 block text-[10px] uppercase font-bold">Target Student</span>
-                        <span className="text-slate-900 font-bold text-sm">{targetStudentForDebit.name}</span>
+                        <span className="text-slate-900 font-bold text-sm">{targetStudentForTransaction.name}</span>
                         <span className="text-slate-500 font-mono block text-[11px] mt-0.5">
-                          Current Balance: <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Math.abs(targetStudentForDebit.balance).toFixed(2)}</span>
+                          Current Balance: <span className="font-sans font-bold mr-0.5">₹</span><span className={`font-mono font-bold ${targetStudentForTransaction.balance < 0 ? 'text-red-600' : targetStudentForTransaction.balance > 0 ? 'text-blue-600' : 'text-slate-500'}`}>{Math.abs(targetStudentForTransaction.balance).toFixed(2)}</span>
                         </span>
                       </div>
                       <button
                         type="button"
-                        onClick={() => setTargetStudentForDebit(null)}
-                        className="text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors"
+                        onClick={() => setTargetStudentForTransaction(null)}
+                        className={`text-[10px] font-bold px-2 py-1 rounded-md transition-colors ${
+                          transactionMode === 'debit' 
+                            ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100' 
+                            : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
+                        }`}
                       >
                         Change
                       </button>
@@ -1821,7 +1788,9 @@ export default function InchargeDashboardPage() {
                         value={globalStudentSearchQuery}
                         onChange={(e) => setGlobalStudentSearchQuery(e.target.value)}
                         autoFocus
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono h-9"
+                        className={`w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 text-xs text-slate-900 placeholder-slate-500 focus:outline-none font-mono h-9 ${
+                          transactionMode === 'debit' ? 'focus:border-indigo-500' : 'focus:border-emerald-500'
+                        }`}
                       />
                       <svg className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1832,26 +1801,35 @@ export default function InchargeDashboardPage() {
                           {students
                             .filter(
                               (s) =>
-                                s.name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase().trim()) ||
+                                (transactionMode === 'debit' || s.status === 'active') &&
+                                (s.name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase().trim()) ||
                                 (s.batch_name || '').toLowerCase().includes(globalStudentSearchQuery.toLowerCase().trim()) ||
-                                s.phone?.includes(globalStudentSearchQuery.trim())
+                                (s.phone && s.phone.includes(globalStudentSearchQuery.trim())))
                             )
-                            .slice(0, 10)
+                            .slice(0, transactionMode === 'debit' ? 10 : undefined)
                             .map((s) => (
                               <button
                                 type="button"
                                 key={s.id}
                                 onClick={() => {
-                                  setTargetStudentForDebit(s);
+                                  setTargetStudentForTransaction(s);
                                   setGlobalStudentSearchQuery('');
+                                  if (transactionMode === 'credit' && s.balance > 0) {
+                                    setCreditAmount(s.balance.toFixed(2));
+                                  }
                                 }}
-                                className="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors"
+                                className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors ${
+                                  transactionMode === 'debit' ? 'hover:bg-slate-50' : 'hover:bg-emerald-50'
+                                }`}
                               >
                                 <div>
                                   <span className="font-semibold text-slate-900">{s.name}</span>
                                   <span className="text-[10px] text-slate-500 font-mono ml-2">({s.batch_name || 'General'})</span>
                                 </div>
-                                <span className="text-[10px] font-mono font-bold text-indigo-700 whitespace-nowrap">
+                                <span className={`text-[10px] font-mono font-bold whitespace-nowrap ${
+                                  transactionMode === 'debit' ? 'text-indigo-700' : 
+                                  s.balance < 0 ? 'text-red-600' : s.balance > 0 ? 'text-blue-600' : 'text-slate-500'
+                                }`}>
                                   ₹{Math.abs(s.balance).toFixed(2)}
                                 </span>
                               </button>
@@ -1863,362 +1841,258 @@ export default function InchargeDashboardPage() {
                 )}
               </div>
 
-              {debitError && (
+              {(transactionMode === 'debit' && debitError) && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                   {debitError}
                 </div>
               )}
-
-              {targetStudentForDebit && (
-              <form onSubmit={handleDebitSubmit} className="space-y-4">
-                <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
-                  {printItems.map((item, index) => (
-                    <div key={item.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl relative space-y-3">
-                      <div className="absolute -top-2 -left-2 w-5 h-5 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-[10px] font-bold border border-indigo-200">
-                        {index + 1}
-                      </div>
-                      {printItems.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removePrintItem(item.id)}
-                          className="absolute -top-2 -right-2 w-5 h-5 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-[10px] hover:bg-red-200 border border-red-200 transition-colors"
-                        >
-                          ✕
-                        </button>
-                      )}
-                      
-                      <div className="grid grid-cols-2 gap-3 mt-1">
-                        <div>
-                          <label className="block text-[10px] font-semibold text-slate-700 mb-1">Print Type</label>
-                          <select
-                            value={item.type}
-                            onChange={(e) => updatePrintItem(item.id, 'type', e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                          >
-                            <option value="bw">B/W (₹1/page)</option>
-                            <option value="color">Color (₹5/page)</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-semibold text-slate-700 mb-1">Side</label>
-                          <select
-                            value={item.side}
-                            onChange={(e) => updatePrintItem(item.id, 'side', e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                          >
-                            <option value="single">Single Sided</option>
-                            <option value="double">Double Sided</option>
-                          </select>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[10px] font-semibold text-slate-700 mb-1">Num Pages</label>
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.pages}
-                            onChange={(e) => updatePrintItem(item.id, 'pages', Math.max(1, parseInt(e.target.value) || 1))}
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-semibold text-slate-700 mb-1">Discount (₹)</label>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.discount}
-                            onChange={(e) => updatePrintItem(item.id, 'discount', Math.max(0, parseFloat(e.target.value) || 0))}
-                            className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <button
-                    type="button"
-                    onClick={addPrintItem}
-                    className="w-full border-2 border-dashed border-indigo-200 text-indigo-600 hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50 bg-white font-semibold py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>Add Another Print Item</span>
-                  </button>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                    Overall Entry Description (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={debitDesc}
-                    onChange={(e) => setDebitDesc(e.target.value)}
-                    placeholder="e.g. Project report and charts"
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                    Revenue Account
-                  </label>
-                  <select
-                    value={selectedRevenueAccountId}
-                    onChange={(e) => setSelectedRevenueAccountId(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
-                  >
-                    {revenueAccounts.map((acc) => (
-                      <option key={acc.id} value={acc.id}>{acc.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Paid in Cash Immediately Toggle Card */}
-                <div
-                  onClick={() => setPaidImmediately(!paidImmediately)}
-                  className={`p-3.5 rounded-xl border transition-all cursor-pointer select-none flex items-center justify-between gap-3 ${
-                    paidImmediately
-                      ? 'bg-emerald-50 border-emerald-300 shadow-lg shadow-emerald-950/30'
-                      : 'bg-slate-50 border-slate-200 hover:border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 ${
-                        paidImmediately
-                          ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm shadow-emerald-500/50'
-                          : 'bg-white border-slate-300 text-transparent'
-                      }`}
-                    >
-                      <svg className="w-3.5 h-3.5 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div>
-                      <span className={`text-xs font-bold transition-colors ${paidImmediately ? 'text-emerald-800' : 'text-slate-600'}`}>
-                        Paid in Cash Immediately
-                      </span>
-                      <span className="text-[11px] text-slate-500 block font-mono">
-                        {paidImmediately
-                          ? 'Posts to Cash in Hand (Workforce). Balance unaffected.'
-                          : 'Posts as Accounts Receivable due from student.'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <span
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-lg font-mono uppercase tracking-wider shrink-0 transition-colors ${
-                      paidImmediately
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                        : 'bg-slate-900 text-slate-500 border border-slate-200'
-                    }`}
-                  >
-                    {paidImmediately ? 'Cash Sale' : 'On Credit'}
-                  </span>
-                </div>
-
-                {/* Computed Total Amount Display */}
-                <div className="bg-indigo-50 border border-indigo-200 p-3 rounded-xl flex items-center justify-between">
-                  <span className="text-xs font-semibold text-indigo-700">Total Debit Amount:</span>
-                  <span className="text-base font-black text-slate-900 font-mono">
-                    <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{computedPrintCalc.totalAmount.toFixed(2)}</span>
-                  </span>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsDebitModalOpen(false)}
-                    disabled={submittingDebit}
-                    className="bg-slate-100 hover:bg-slate-700 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submittingDebit}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-lg"
-                  >
-                    {submittingDebit ? 'Posting...' : 'Post Debit Entry'}
-                  </button>
-                </div>
-              </form>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* MODAL 2: RECEIVE CASH PAYMENT (CREDIT ENTRY) */}
-        {isCreditModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
-            <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 font-mono block">
-                    Counter Cash Entry
-                  </span>
-                  <h3 className="text-lg font-bold text-slate-900">Receive Cash Payment</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsCreditModalOpen(false)}
-                  className="text-slate-500 hover:text-slate-900 bg-slate-100 p-1.5 rounded-lg"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
-                {targetStudentForCredit ? (
-                  <>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="text-slate-500 block text-[10px] uppercase font-bold">Target Student</span>
-                        <span className="text-slate-900 font-bold text-sm">{targetStudentForCredit.name}</span>
-                        <span className="text-slate-500 font-mono block text-[11px] mt-0.5">
-                          Current Receivable Due: <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{Math.abs(targetStudentForCredit.balance).toFixed(2)}</span>
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setTargetStudentForCredit(null)}
-                        className="text-[10px] font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-md transition-colors"
-                      >
-                        Change
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-mono uppercase text-slate-500 font-bold tracking-wider">
-                      Search & Select Student
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Search name, batch, phone..."
-                        value={globalStudentSearchQuery}
-                        onChange={(e) => setGlobalStudentSearchQuery(e.target.value)}
-                        autoFocus
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono h-9"
-                      />
-                      <svg className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                      
-                      {globalStudentSearchQuery.trim() !== '' && (
-                        <div className="mt-1.5 z-30 bg-white border border-slate-300 rounded-xl max-h-48 overflow-y-auto divide-y divide-slate-200 shadow-xl">
-                          {students
-                            .filter(
-                              (s) =>
-                                s.status === 'active' &&
-                                (s.name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase()) ||
-                                  (s.phone && s.phone.includes(globalStudentSearchQuery)) ||
-                                  (s.batch_name && s.batch_name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase())))
-                            )
-                            .map((s) => (
-                              <button
-                                key={s.id}
-                                type="button"
-                                onClick={() => {
-                                  openCreditModal(s);
-                                }}
-                                className="w-full text-left px-3 py-2 hover:bg-emerald-50 transition-colors flex items-center justify-between"
-                              >
-                                <div>
-                                  <div className="font-bold text-slate-900">{s.name}</div>
-                                  <div className="text-[10px] font-mono text-slate-500">{s.batch_name}</div>
-                                </div>
-                                <div className="text-right">
-                                  <div className={`font-mono font-bold ${s.balance < 0 ? 'text-red-600' : s.balance > 0 ? 'text-blue-600' : 'text-slate-500'}`}>
-                                    ₹{Math.abs(s.balance).toFixed(2)}
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
-                          {students.filter(
-                            (s) =>
-                              s.status === 'active' &&
-                              (s.name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase()) ||
-                                (s.phone && s.phone.includes(globalStudentSearchQuery)) ||
-                                (s.batch_name && s.batch_name.toLowerCase().includes(globalStudentSearchQuery.toLowerCase())))
-                          ).length === 0 && (
-                            <div className="px-3 py-4 text-center text-slate-500 font-mono text-[10px]">
-                              No active students found.
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {creditError && (
+              {(transactionMode === 'credit' && creditError) && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
                   {creditError}
                 </div>
               )}
 
-              <form onSubmit={handleCreditSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                    Cash Amount Received (₹)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    required
-                    placeholder="0.00"
-                    value={creditAmount}
-                    onChange={(e) => setCreditAmount(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-base font-mono font-bold text-emerald-700 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
+              {/* FORMS */}
+              {targetStudentForTransaction && (
+                <>
+                  {/* DEBIT FORM */}
+                  {transactionMode === 'debit' && (
+                    <form onSubmit={handleDebitSubmit} className="space-y-4">
+                      <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
+                        {printItems.map((item, index) => (
+                          <div key={item.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl relative space-y-3">
+                            <div className="absolute -top-2 -left-2 w-5 h-5 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-[10px] font-bold border border-indigo-200">
+                              {index + 1}
+                            </div>
+                            {printItems.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removePrintItem(item.id)}
+                                className="absolute -top-2 -right-2 w-5 h-5 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-[10px] hover:bg-red-200 border border-red-200 transition-colors"
+                              >
+                                ✕
+                              </button>
+                            )}
+                            
+                            <div className="grid grid-cols-2 gap-3 mt-1">
+                              <div>
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">Print Type</label>
+                                <select
+                                  value={item.type}
+                                  onChange={(e) => updatePrintItem(item.id, 'type', e.target.value)}
+                                  className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                                >
+                                  <option value="bw">B/W (₹1/page)</option>
+                                  <option value="color">Color (₹5/page)</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">Side</label>
+                                <select
+                                  value={item.side}
+                                  onChange={(e) => updatePrintItem(item.id, 'side', e.target.value)}
+                                  className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                                >
+                                  <option value="single">Single Sided</option>
+                                  <option value="double">Double Sided</option>
+                                </select>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">Num Pages</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={item.pages}
+                                  onChange={(e) => updatePrintItem(item.id, 'pages', Math.max(1, parseInt(e.target.value) || 1))}
+                                  className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-semibold text-slate-700 mb-1">Discount (₹)</label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  value={item.discount}
+                                  onChange={(e) => updatePrintItem(item.id, 'discount', Math.max(0, parseFloat(e.target.value) || 0))}
+                                  className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        <button
+                          type="button"
+                          onClick={addPrintItem}
+                          className="w-full border-2 border-dashed border-indigo-200 text-indigo-600 hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50 bg-white font-semibold py-2 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span>Add Another Print Item</span>
+                        </button>
+                      </div>
 
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                    Description / Note
-                  </label>
-                  <input
-                    type="text"
-                    value={creditDesc}
-                    onChange={(e) => setCreditDesc(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Overall Entry Description (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={debitDesc}
+                          onChange={(e) => setDebitDesc(e.target.value)}
+                          placeholder="e.g. Project report and charts"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
 
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsCreditModalOpen(false)}
-                    disabled={submittingCredit}
-                    className="bg-slate-100 hover:bg-slate-700 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submittingCredit}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-lg"
-                  >
-                    {submittingCredit ? 'Processing...' : 'Record Cash Received'}
-                  </button>
-                </div>
-              </form>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Revenue Account
+                        </label>
+                        <select
+                          value={selectedRevenueAccountId}
+                          onChange={(e) => setSelectedRevenueAccountId(e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                        >
+                          {revenueAccounts.map((acc) => (
+                            <option key={acc.id} value={acc.id}>{acc.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Paid in Cash Immediately Toggle Card */}
+                      <div
+                        onClick={() => setPaidImmediately(!paidImmediately)}
+                        className={`p-3.5 rounded-xl border transition-all cursor-pointer select-none flex items-center justify-between gap-3 ${
+                          paidImmediately
+                            ? 'bg-emerald-50 border-emerald-300 shadow-lg shadow-emerald-950/30'
+                            : 'bg-slate-50 border-slate-200 hover:border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 ${
+                              paidImmediately
+                                ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm shadow-emerald-500/50'
+                                : 'bg-white border-slate-300 text-transparent'
+                            }`}
+                          >
+                            <svg className="w-3.5 h-3.5 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <div>
+                            <span className={`text-xs font-bold transition-colors ${paidImmediately ? 'text-emerald-800' : 'text-slate-600'}`}>
+                              Paid in Cash Immediately
+                            </span>
+                            <span className="text-[11px] text-slate-500 block font-mono">
+                              {paidImmediately
+                                ? 'Posts to Cash in Hand (Workforce). Balance unaffected.'
+                                : 'Posts as Accounts Receivable due from student.'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-lg font-mono uppercase tracking-wider shrink-0 transition-colors ${
+                            paidImmediately
+                              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                              : 'bg-slate-900 text-slate-500 border border-slate-200'
+                          }`}
+                        >
+                          {paidImmediately ? 'Cash Sale' : 'On Credit'}
+                        </span>
+                      </div>
+
+                      {/* Computed Total Amount Display */}
+                      <div className="bg-indigo-50 border border-indigo-200 p-3 rounded-xl flex items-center justify-between">
+                        <span className="text-xs font-semibold text-indigo-700">Total Debit Amount:</span>
+                        <span className="text-base font-black text-slate-900 font-mono">
+                          <span className="font-sans font-bold mr-0.5">₹</span><span className="font-mono font-bold">{computedPrintCalc.totalAmount.toFixed(2)}</span>
+                        </span>
+                      </div>
+
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsTransactionModalOpen(false)}
+                          disabled={submittingDebit}
+                          className="bg-slate-100 hover:bg-slate-700 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={submittingDebit}
+                          className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-lg"
+                        >
+                          {submittingDebit ? 'Posting...' : 'Post Debit Entry'}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* CREDIT FORM */}
+                  {transactionMode === 'credit' && (
+                    <form onSubmit={handleCreditSubmit} className="space-y-4">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Cash Amount Received (₹)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          required
+                          placeholder="0.00"
+                          value={creditAmount}
+                          onChange={(e) => setCreditAmount(e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-base font-mono font-bold text-emerald-700 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Description / Note
+                        </label>
+                        <input
+                          type="text"
+                          value={creditDesc}
+                          onChange={(e) => setCreditDesc(e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsTransactionModalOpen(false)}
+                          disabled={submittingCredit}
+                          className="bg-slate-100 hover:bg-slate-700 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={submittingCredit}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-lg"
+                        >
+                          {submittingCredit ? 'Processing...' : 'Record Cash Received'}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </>
+              )}
             </div>
           </div>
         )}
-
-        {/* MODAL 3: HAND OVER CASH TO ADMIN */}
+\n\n        {/* MODAL 3: HAND OVER CASH TO ADMIN */}
         {isHandoverModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm">
             <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
@@ -3050,7 +2924,6 @@ export default function InchargeDashboardPage() {
             </div>
           </div>
         )}
-      </main>
         {/* STATEMENT MODAL */}
         {statementStudent && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">

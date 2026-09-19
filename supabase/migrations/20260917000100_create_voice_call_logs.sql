@@ -16,3 +16,4 @@ CREATE POLICY "Enable insert for authenticated users" ON voice_call_logs
     FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 CREATE POLICY "Enable select for authenticated users" ON voice_call_logs
     FOR SELECT USING (auth.role() = 'authenticated');
+    

@@ -317,6 +317,187 @@ export async function getAdminDashboardMetrics(
   };
 }
 
+export interface AdvancedDashboardMetrics {
+  currentCash: number;
+  openingCash: number;
+  totalRevenue: number;
+  totalExpenses: number;
+  netProfit: number;
+  studentOutstanding: number;
+  expenseCategories: { category: string; amount: number; percentage: number }[];
+  revenueCategories: { category: string; amount: number; percentage: number }[];
+}
+
+/**
+ * Computes advanced metrics for the redesigned Minimalist Admin Dashboard.
+ */
+export async function getAdvancedDashboardMetrics(
+  startDateStr: string,
+  endDateStr: string
+): Promise<AdvancedDashboardMetrics> {
+  if (isGuestMode()) {
+    const fallback = getDemoAdminDashboardMetrics(startDateStr, endDateStr);
+    const totalRev = fallback.surplus + fallback.totalExpenses;
+    const totalExp = fallback.totalExpenses;
+
+    return {
+      currentCash: 54000,
+      openingCash: 50000,
+      totalRevenue: totalRev,
+      totalExpenses: totalExp,
+      netProfit: fallback.surplus,
+      studentOutstanding: 12500,
+      expenseCategories: totalExp > 0 ? [
+        { category: 'Paper Purchase', amount: totalExp * 0.5, percentage: 50 },
+        { category: 'Printer Ink', amount: totalExp * 0.375, percentage: 37.5 },
+        { category: 'Utilities', amount: totalExp * 0.125, percentage: 12.5 },
+      ] : [],
+      revenueCategories: totalRev > 0 ? [
+        { category: 'Color Printing', amount: totalRev * 0.4, percentage: 40 },
+        { category: 'Double-Sided Printing', amount: totalRev * 0.35, percentage: 35 },
+        { category: 'Single-Sided Printing', amount: totalRev * 0.25, percentage: 25 },
+      ] : []
+    };
+  }
+
+  const supabase = createClient();
+  const startDate = startDateStr.includes('T') ? startDateStr : `${startDateStr}T00:00:00.000Z`;
+  const endDate = endDateStr.includes('T') ? endDateStr : `${endDateStr}T23:59:59.999Z`;
+
+  // 1. Fetch ALL non-voided journal entries up to endDate (for cumulative balances)
+  let { data: entriesData, error: entriesError } = await supabase
+    .from('journal_entries')
+    .select('id, date, description, is_closing_entry')
+    .is('voided_at', null)
+    .lte('date', endDate);
+
+  if (entriesError && (entriesError as any).code === '42703') {
+    const fallback = await supabase
+      .from('journal_entries')
+      .select('id, date, description')
+      .lte('date', endDate);
+    entriesData = fallback.data as any;
+  }
+
+  const entries = entriesData || [];
+
+  // Filter out automated Financial Year closing entries (but keep Opening Balances)
+  const operationalEntries = entries.filter((e: any) => {
+    if (e.is_closing_entry === true) return false;
+    const desc = (e.description || '').toLowerCase();
+    return !desc.includes('closing entry');
+  });
+
+  const entryIds = operationalEntries.map((e: any) => e.id);
+
+  // If no entries, return 0s
+  if (entryIds.length === 0) {
+    return {
+      currentCash: 0, openingCash: 0, totalRevenue: 0, totalExpenses: 0, netProfit: 0, studentOutstanding: 0, expenseCategories: [], revenueCategories: []
+    };
+  }
+
+  // 2. Fetch all lines for these entries joined with account metadata
+  // We chunk the entryIds if there are too many (Supabase limit is usually fine up to a few thousand in an IN clause, but let's just do it directly)
+  const { data: lines, error: linesError } = await supabase
+    .from('journal_entry_lines')
+    .select('journal_entry_id, debit_amount, credit_amount, accounts(id, name, type, is_student_account)')
+    .in('journal_entry_id', entryIds);
+
+  if (linesError || !lines) {
+    return { currentCash: 0, openingCash: 0, totalRevenue: 0, totalExpenses: 0, netProfit: 0, studentOutstanding: 0, expenseCategories: [], revenueCategories: [] };
+  }
+
+  // Create a map of entry date and description for quick lookup
+  const entryMap = new Map(operationalEntries.map((e: any) => [e.id, { date: new Date(e.date).getTime(), desc: (e.description || '').toLowerCase() }]));
+  const startMs = new Date(startDate).getTime();
+
+  let currentCash = 0;
+  let openingCash = 0;
+  let studentOutstanding = 0;
+  let totalRevenue = 0;
+  let totalExpenses = 0;
+  const expenseMap: Record<string, number> = {};
+  const revenueMap: Record<string, number> = {};
+
+  lines.forEach((l: any) => {
+    const debit = Number(l.debit_amount || 0);
+    const credit = Number(l.credit_amount || 0);
+    const acc = l.accounts as any;
+    if (!acc) return;
+
+    const entryInfo = entryMap.get(l.journal_entry_id);
+    if (!entryInfo) return;
+
+    const isWithinPeriod = entryInfo.date >= startMs;
+    const isOpening = entryInfo.desc.includes('opening');
+
+    // Cumulative Cash
+    const isCashAccount = acc.type === 'asset' && !acc.is_student_account && (acc.name || '').toLowerCase().includes('cash');
+    if (isCashAccount) {
+      currentCash += (debit - credit);
+      if (entryInfo.date < startMs || isOpening) {
+        openingCash += (debit - credit);
+      }
+    }
+
+    // Cumulative Student Outstanding
+    if (acc.is_student_account) {
+      studentOutstanding += (debit - credit);
+    }
+
+    // Period Revenue & Expenses
+    if (isWithinPeriod) {
+      if (acc.type === 'revenue') {
+        const revAmount = (credit - debit);
+        totalRevenue += revAmount;
+        if (revAmount > 0) {
+          revenueMap[acc.name] = (revenueMap[acc.name] || 0) + revAmount;
+        }
+      }
+      if (acc.type === 'expense') {
+        const expAmount = (debit - credit);
+        totalExpenses += expAmount;
+        if (expAmount > 0) {
+          expenseMap[acc.name] = (expenseMap[acc.name] || 0) + expAmount;
+        }
+      }
+    }
+  });
+
+  const netProfit = totalRevenue - totalExpenses;
+
+  // Format expense categories for chart
+  const expenseCategories = Object.keys(expenseMap).map(name => {
+    const amt = expenseMap[name];
+    return {
+      category: name,
+      amount: amt,
+      percentage: totalExpenses > 0 ? (amt / totalExpenses) * 100 : 0
+    };
+  }).sort((a, b) => b.amount - a.amount);
+
+  const revenueCategories = Object.keys(revenueMap).map(name => {
+    const amt = revenueMap[name];
+    return {
+      category: name,
+      amount: amt,
+      percentage: totalRevenue > 0 ? (amt / totalRevenue) * 100 : 0
+    };
+  }).sort((a, b) => b.amount - a.amount);
+
+  return {
+    currentCash,
+    openingCash,
+    totalRevenue,
+    totalExpenses,
+    netProfit,
+    studentOutstanding,
+    expenseCategories,
+    revenueCategories,
+  };
+}
+
 /**
  * Updates/renames a ledger account's name in the database.
  */
